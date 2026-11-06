@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status, Tag } from "../ui/Tag";
 import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS, STAGES } from "../mock/data";
@@ -37,7 +38,8 @@ const HISTORY = [
 
 export function LeadPage() {
   const { id } = useParams();
-  const lead = ALL_LEADS.find((item) => item.id === Number(id));
+  const { leads, moveLead } = useLeads();
+  const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
 
@@ -132,7 +134,7 @@ export function LeadPage() {
 
       <div className="stage-strip" style={{ marginBottom: 16 }}>
         {STAGES.map((stage) => (
-          <button key={stage.id} type="button" aria-pressed={stageId === stage.id} onClick={() => setStageId(stage.id)}>
+          <button key={stage.id} type="button" aria-pressed={stageId === stage.id} onClick={() => { setStageId(stage.id); moveLead(lead.id, stage.id); }}>
             <span className="stage-strip__dot" style={{ background: stage.color }} />
             {stage.name}
           </button>
