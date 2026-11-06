@@ -198,6 +198,8 @@ assets\          → styles.css, app.js
 
 ### Способ Б (удобнее, нужен Git): обновление одной командой
 
+> Максимально подробно все шаги и ошибки разобраны в отдельном файле **[GIT-PULL.md](GIT-PULL.md)**.
+
 1. Установите Git: в PowerShell выполните
    ```powershell
    winget install Git.Git

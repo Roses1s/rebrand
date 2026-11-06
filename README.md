@@ -163,6 +163,7 @@ assets/ui.js                — общие утилиты: темы, тосты,
 assets/app.js               — данные лидов и логика воронки
 assets/requests.js          — данные заявок и логика реестра
 VSCODE-SETUP.md             — подробная инструкция по настройке в VS Code
+GIT-PULL.md                 — как обновлять проект через git pull в VS Code
 crm-standalone.html         — Лиды «всё в одном файле»
 requests-standalone.html    — Заявки «всё в одном файле»
 build.mjs                   — сборка автономных файлов из html + assets
