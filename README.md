@@ -16,6 +16,10 @@ HTML-прототип CRM для логистики. Главная страни
 
 ## Вариант 1. VS Code + Live Server (рекомендуется)
 
+> Подробная пошаговая инструкция с нуля (установка VS Code, скачивание проекта,
+> расширение, обновления, разбор проблем) — в файле **[VSCODE-SETUP.md](VSCODE-SETUP.md)**.
+
+
 1. Установите [VS Code](https://code.visualstudio.com/).
 2. Откройте папку проекта: **File → Open Folder…** → выберите папку, где лежит `index.html`.
    Важно открыть именно папку, а не отдельный файл.
@@ -138,6 +142,7 @@ Live Server вставляет в отдаваемую страницу WebSocke
 index.html                  — разметка приложения (со внешними assets)
 assets/styles.css           — стили, темы, адаптив
 assets/app.js               — данные лидов и логика воронки
+VSCODE-SETUP.md             — подробная инструкция по настройке в VS Code
 crm-standalone.html         — собранная версия «всё в одном файле»
 build.mjs                   — сборка crm-standalone.html из index.html + assets
 .vscode/settings.json       — настройки Live Server (порт 5500, автосохранение)
