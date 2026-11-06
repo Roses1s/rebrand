@@ -254,7 +254,11 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
           </div>
 
           <div className="topbar__actions">
-            <button type="button" className="counter-btn">
+            <button
+              type="button"
+              className="counter-btn"
+              title="Просроченные задачи: требуют звонка сегодня"
+            >
               Просрочено
               <b>{overdue}</b>
             </button>

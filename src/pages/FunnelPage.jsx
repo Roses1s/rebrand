@@ -68,7 +68,8 @@ function LeadCard({ lead }) {
       </div>
 
       <div className="lead-card__sub">
-        {lead.contact} · {lead.role}
+        {[lead.contact, lead.role].filter((part) => part && part !== "—").join(" · ") ||
+          "Контакт не указан"}
       </div>
 
       <span className="route">
@@ -79,7 +80,7 @@ function LeadCard({ lead }) {
       <div className="cargo">
         <Package size={12} strokeWidth={2} />
         <span className="cargo__type">{lead.cargo}</span>
-        <span className="cargo__weight">{lead.weight}</span>
+        {lead.weight && lead.weight !== "—" && <span className="cargo__weight">{lead.weight}</span>}
         <span className={`badge ${priority.cls}`}>{priority.label}</span>
       </div>
 
@@ -126,23 +127,25 @@ function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
         <span className="col__dot" style={{ background: stage.color }} />
         <span className="col__name">{stage.name}</span>
         <span className="col__count">{stageLeads.length}</span>
-        <button
-          type="button"
-          className="col__btn"
-          aria-label={`Добавить лид в «${stage.name}»`}
-          title="Добавить лид на этот этап"
-          onClick={onAdd}
-        >
-          <Plus size={15} strokeWidth={2} />
-        </button>
-        <Link
-          to="/settings"
-          className="col__btn"
-          aria-label={`Настроить этап «${stage.name}»`}
-          title="Настроить этапы воронки"
-        >
-          <MoreVertical size={15} strokeWidth={2} />
-        </Link>
+        <div className="col__actions">
+          <button
+            type="button"
+            className="col__btn"
+            aria-label={`Добавить лид в «${stage.name}»`}
+            title="Добавить лид на этот этап"
+            onClick={onAdd}
+          >
+            <Plus size={15} strokeWidth={2} />
+          </button>
+          <Link
+            to="/settings"
+            className="col__btn"
+            aria-label={`Настроить этап «${stage.name}»`}
+            title="Настроить этапы воронки"
+          >
+            <MoreVertical size={15} strokeWidth={2} />
+          </Link>
+        </div>
       </div>
 
       <div className="col__sub" title={`${shortMoney(sum)} · ${stage.hint}`}>
@@ -352,9 +355,9 @@ export function FunnelPage() {
         icon: "flame",
       },
       {
-        label: "Просрочено",
+        label: "Без движения",
         value: String(overdueTasks),
-        foot: "задач требуют звонка",
+        foot: "лидов ждут звонка",
         color: "var(--danger)",
         icon: "clock",
       },
