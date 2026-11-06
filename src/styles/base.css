@@ -1,5 +1,3 @@
-/* База: сброс, типографика, фокус, прокрутка */
-
 *,
 *::before,
 *::after {
@@ -12,19 +10,26 @@ body,
   height: 100%;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Мягкое свечение сверху — без него плоский фон выглядит «казённо» */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 420px;
+  background: var(--grad-glow);
+  pointer-events: none;
+  z-index: 0;
 }
 
 h1,
@@ -34,7 +39,7 @@ h4 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 p {
@@ -62,17 +67,16 @@ button {
 }
 
 ::selection {
-  background: var(--signal);
-  color: #fff;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+  color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 6px;
 }
 
-/* Скроллбар — тонкий, в цвет линий */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
@@ -94,7 +98,6 @@ button {
   background: transparent;
 }
 
-/* Служебные классы */
 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -106,9 +109,9 @@ button {
 }
 
 .micro {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -117,7 +120,7 @@ button {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 0.95;
+  line-height: 1;
 }
 
 .visually-hidden {

@@ -26,9 +26,12 @@ export function Chip({ active, count, children, ...props }) {
 }
 
 /** Круглый аватар с инициалами. */
-export function Avatar({ initials, title, size = "md" }) {
+export function Avatar({ initials, title, size = "md", color = "", className }) {
   return (
-    <span className={cn("avatar", size === "lg" && "avatar--lg")} title={title}>
+    <span
+      className={cn("avatar", size === "lg" && "avatar--lg", size === "xl" && "avatar--xl", color, className)}
+      title={title}
+    >
       {initials}
     </span>
   );

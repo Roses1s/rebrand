@@ -145,20 +145,20 @@ export function KitPage() {
 
       <Section title="Кнопки">
         <div className="kit-grid">
-          <Button variant="ink">Создать лид</Button>
-          <Button variant="signal">Начать обзвон</Button>
+          <Button variant="primary">Создать лид</Button>
+          <Button variant="primary">Начать обзвон</Button>
           <Button>Копировать</Button>
           <Button variant="quiet">Отмена</Button>
           <Button variant="danger">Удалить</Button>
-          <Button variant="ink" disabled>
+          <Button variant="primary" disabled>
             Недоступно
           </Button>
         </div>
         <div className="kit-grid" style={{ marginTop: 14 }}>
-          <Button size="sm" variant="ink" icon={ArrowUpRight}>
+          <Button size="sm" variant="primary" icon={ArrowUpRight}>
             Открыть
           </Button>
-          <Button size="lg" variant="ink">
+          <Button size="lg" variant="primary">
             Сохранить и выйти
           </Button>
           <Button icon={Phone}>Позвонить</Button>
@@ -244,7 +244,7 @@ export function KitPage() {
               title="Здесь пока никого"
               text="Как только появится первый лид, карточка займёт своё место в колонке."
               action={
-                <Button size="sm" variant="ink">
+                <Button size="sm" variant="primary">
                   Создать лид
                 </Button>
               }
@@ -319,7 +319,7 @@ export function KitPage() {
             <Button variant="quiet" onClick={() => setModal(false)}>
               Отмена
             </Button>
-            <Button variant="ink" onClick={() => setModal(false)}>
+            <Button variant="primary" onClick={() => setModal(false)}>
               Передать
             </Button>
           </>

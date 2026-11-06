@@ -1,40 +1,40 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
+  Bell,
   Gauge,
   KanbanSquare,
-  Package,
-  Users,
   Landmark,
+  Moon,
+  Package,
+  Plus,
   Settings2,
   Sun,
-  Moon,
-  Plus,
-  Rows3,
-  Rows4,
+  Users,
 } from "lucide-react";
 
 import { Button, IconButton } from "../ui/Button";
 import { SearchInput } from "../ui/Field";
 import { Avatar } from "../ui/Tag";
+import { ME } from "../mock/data";
 
 const MODULES = [
   { to: "/", label: "Обзор", icon: Gauge },
-  { to: "/crm", label: "Лиды", icon: KanbanSquare },
-  { to: "/shipments", label: "Заявки", icon: Package },
+  { to: "/crm", label: "Лиды", icon: KanbanSquare, badge: "13" },
+  { to: "/shipments", label: "Заявки", icon: Package, badge: "26" },
   { to: "/customers", label: "Клиенты", icon: Users },
   { to: "/accounting", label: "Финансы", icon: Landmark },
-  { to: "/admin", label: "Админ", icon: Settings2 },
+  { to: "/admin", label: "Администрирование", icon: Settings2 },
 ];
 
 const TITLES = {
-  "/": ["Обзор", "Пульт"],
-  "/crm": ["Лиды", "CRM / Воронка"],
-  "/shipments": ["Заявки", "Логистика / Перевозки"],
-  "/customers": ["Клиенты", "Справочник"],
-  "/accounting": ["Финансы", "Бухгалтерия"],
-  "/admin": ["Администрирование", "Настройки"],
-  "/kit": ["Дизайн-система", "Служебная витрина"],
+  "/": "Обзор",
+  "/crm": "Лиды",
+  "/shipments": "Заявки",
+  "/customers": "Клиенты",
+  "/accounting": "Финансы",
+  "/admin": "Администрирование",
+  "/kit": "Дизайн-система",
 };
 
 function useStoredFlag(key, initial) {
@@ -57,11 +57,10 @@ function useStoredFlag(key, initial) {
   return [value, setValue];
 }
 
-/** Оболочка: рельс модулей, командная строка, рабочая область. */
 export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const { pathname } = useLocation();
   const [theme, setTheme] = useStoredFlag("crm.theme", "light");
-  const [density, setDensity] = useStoredFlag("crm.density", "comfort");
+  const [accent, setAccent] = useStoredFlag("crm.accent", "indigo");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -69,74 +68,102 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   }, [theme]);
 
   useEffect(() => {
-    document.documentElement.dataset.density = density;
-  }, [density]);
+    document.documentElement.dataset.accent = accent;
+  }, [accent]);
 
-  const fallback = TITLES[pathname] ?? ["CRM", ""];
-  const pageTitle = title ?? fallback[0];
+  const pageTitle = title ?? TITLES[pathname] ?? "CRM";
+  const initials = `${ME.first_name[0]}${ME.last_name[0]}`;
 
   return (
     <div className="app">
-      <aside className="rail">
-        <NavLink to="/" className="rail__brand" aria-label="На главную">
-          Д
-        </NavLink>
+      <aside className="sidebar">
+        <div className="brand">
+          <span className="brand__mark">Д</span>
+          <div>
+            <div className="brand__name">Detroid</div>
+            <div className="brand__sub">Логистическая CRM</div>
+          </div>
+        </div>
 
-        <nav className="rail__nav" aria-label="Модули">
-          {MODULES.map(({ to, label, icon: Icon }) => (
+        <nav className="sidebar__nav" aria-label="Модули">
+          {MODULES.map(({ to, label, icon: Icon, badge }) => (
             <NavLink
               key={to}
               to={to}
               end={to === "/"}
-              className={({ isActive }) => `rail__link${isActive ? " is-active" : ""}`}
+              className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}
             >
               <Icon />
               <span>{label}</span>
+              {badge && <span className="nav-item__badge">{badge}</span>}
             </NavLink>
           ))}
         </nav>
 
-        <span className="rail__spacer" />
+        <span className="sidebar__spacer" />
 
-        <div className="rail__foot">
-          <IconButton
-            icon={density === "compact" ? Rows4 : Rows3}
-            label={density === "compact" ? "Просторный вид" : "Компактный вид"}
-            onClick={() => setDensity(density === "compact" ? "comfort" : "compact")}
-          />
-          <IconButton
-            icon={theme === "dark" ? Sun : Moon}
-            label={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          />
-          <Avatar initials="АК" title="Алексей Ковалёв · менеджер" />
+        <div className="sidebar__foot">
+          <div className="accent-row" role="group" aria-label="Цвет акцента">
+            {[
+              ["indigo", "#5b5bd6", "Индиго"],
+              ["violet", "#8b5cf6", "Фиолетовый"],
+              ["emerald", "#0d9488", "Изумрудный"],
+            ].map(([value, color, label]) => (
+              <button
+                key={value}
+                type="button"
+                className="accent-dot"
+                style={{ background: color, color }}
+                aria-label={label}
+                aria-pressed={accent === value}
+                onClick={() => setAccent(value)}
+              />
+            ))}
+          </div>
+          <div className="sidebar__actions">
+            <IconButton
+              icon={theme === "dark" ? Sun : Moon}
+              label={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            />
+            <IconButton icon={Bell} label="Уведомления" />
+          </div>
+          <button type="button" className="userchip">
+            <Avatar initials={initials} />
+            <span>
+              <span className="userchip__name">
+                {ME.first_name} {ME.last_name}
+              </span>
+              <span className="userchip__role">Менеджер</span>
+            </span>
+          </button>
         </div>
       </aside>
 
-      <div className="app__main">
-        <header className="cmdbar">
-          <div className="cmdbar__head">
-            <span className="cmdbar__title">{pageTitle}</span>
-            {crumb && <span className="cmdbar__crumb">{crumb}</span>}
+      <div className="content">
+        <header className="topbar">
+          <div>
+            <div className="topbar__title">{pageTitle}</div>
+            {crumb && <div className="topbar__crumb">{crumb}</div>}
           </div>
 
-          <div className="cmdbar__search">
+          <div className="topbar__search">
             <SearchInput
               value={search ?? query}
               onChange={onSearch ?? setQuery}
-              placeholder="Клиент, ИНН, номер заявки"
+              placeholder="Найти клиента, заявку или ИНН"
             />
           </div>
 
-          <div className="cmdbar__actions">
+          <div className="topbar__actions">
             {actions}
-            <Button variant="ink" icon={Plus}>
+            <Button variant="primary" icon={Plus}>
               Создать
             </Button>
           </div>
         </header>
 
-        <main className="page">{children}</main>
+        <main className="main">{children}</main>
       </div>
     </div>
   );

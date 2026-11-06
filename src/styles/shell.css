@@ -1,197 +1,240 @@
 /* ==========================================================================
-   Оболочка: рельс модулей + командная строка + рабочая область
+   Оболочка: плавающая панель, верхняя строка, рабочая область
    ========================================================================== */
 
 .app {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-height: 100vh;
-  background: var(--paper);
 }
 
-/* --- Рельс -------------------------------------------------------------- */
+/* --- Боковая панель ----------------------------------------------------- */
 
-.rail {
+.sidebar {
   position: sticky;
-  top: 0;
-  z-index: 20;
+  top: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: var(--rail-w);
-  height: 100vh;
-  padding: 14px 0 12px;
-  border-right: 1px solid var(--line);
-  background: var(--paper);
+  width: var(--sidebar-w);
+  height: calc(100vh - 32px);
+  margin: 16px 0 16px 16px;
+  padding: 18px 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   flex: none;
 }
 
-.rail__brand {
+.brand {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  margin-bottom: 22px;
-  border-radius: 9px;
-  background: var(--ink);
-  color: var(--paper);
+  gap: 11px;
+  padding: 2px 6px 20px;
+}
+
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--grad-accent);
+  box-shadow: var(--shadow-accent);
+  color: #fff;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  position: relative;
 }
 
-.rail__brand::after {
-  content: "";
-  position: absolute;
-  right: 5px;
-  bottom: 5px;
-  width: 5px;
-  height: 5px;
-  border-radius: 99px;
-  background: var(--signal);
+.brand__name {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.rail__nav {
+.brand__sub {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.sidebar__nav {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 100%;
-  padding: 0 8px;
 }
 
-.rail__link {
-  position: relative;
+.nav-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  height: 58px;
-  border-radius: var(--r-1);
-  color: var(--ink-3);
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  gap: 10px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
   transition:
-    background-color 120ms var(--ease),
-    color 120ms var(--ease);
+    background-color 140ms var(--ease),
+    color 140ms var(--ease);
 }
 
-.rail__link svg {
-  width: 19px;
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  color: var(--ink-3);
+}
+
+.nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.nav-item:hover svg {
+  color: var(--ink-2);
+}
+
+.nav-item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.nav-item.is-active svg {
+  color: var(--accent);
+}
+
+.nav-item__badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   height: 19px;
-  stroke-width: 1.7;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
 }
 
-.rail__link:hover {
-  background: var(--surface);
-  color: var(--ink);
+.nav-item__badge--soft {
+  background: var(--surface-3);
+  color: var(--ink-3);
 }
 
-.rail__link.is-active {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-
-.rail__link.is-active::before {
-  content: "";
-  position: absolute;
-  left: -8px;
-  top: 14px;
-  bottom: 14px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--signal);
-}
-
-.rail__spacer {
+.sidebar__spacer {
   flex: 1;
 }
 
-.rail__foot {
+.sidebar__foot {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 10px;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
-/* --- Основная колонка --------------------------------------------------- */
+.sidebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 
-.app__main {
+.userchip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  text-align: left;
+  transition: background-color 140ms var(--ease);
+}
+
+.userchip:hover {
+  background: var(--surface-3);
+}
+
+.userchip__name {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.userchip__role {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/* --- Правая колонка ----------------------------------------------------- */
+
+.content {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
 }
 
-/* --- Командная строка --------------------------------------------------- */
-
-.cmdbar {
+.topbar {
   position: sticky;
   top: 0;
-  z-index: 15;
+  z-index: 10;
   display: flex;
   align-items: center;
-  gap: 16px;
-  height: var(--cmdbar-h);
+  gap: 14px;
+  height: var(--topbar-h);
   padding: 0 var(--pad-page);
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(14px);
 }
 
-.cmdbar__head {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.cmdbar__title {
+.topbar__title {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
-.cmdbar__crumb {
-  font-size: 11px;
+.topbar__crumb {
+  font-size: 11.5px;
   color: var(--ink-3);
   white-space: nowrap;
 }
 
-.cmdbar__search {
+.topbar__search {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   margin: 0 auto;
 }
 
-.cmdbar__actions {
+.topbar__actions {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: auto;
 }
 
-/* --- Рабочая область ---------------------------------------------------- */
-
-.page {
+.main {
   flex: 1;
-  min-height: 0;
-  padding: var(--pad-page);
+  min-width: 0;
+  padding: 6px var(--pad-page) 44px;
 }
+
+/* --- Заголовок страницы ------------------------------------------------- */
 
 .page__head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 18px;
   margin-bottom: 22px;
 }
 
@@ -200,7 +243,7 @@
   font-size: 30px;
   font-weight: 600;
   letter-spacing: -0.035em;
-  line-height: 1.05;
+  line-height: 1.1;
 }
 
 .page__sub {
@@ -211,42 +254,74 @@
 
 /* --- KPI ---------------------------------------------------------------- */
 
-.kpi-row {
+.kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-2);
-  overflow: hidden;
-  background: var(--line);
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 14px;
 }
 
 .kpi {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px 20px 20px;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 160ms var(--ease),
+    box-shadow 160ms var(--ease);
+}
+
+.kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kpi__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .kpi__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--ink-3);
+}
+
+.kpi__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.kpi__icon--money {
+  background: var(--money-soft);
+  color: var(--money);
+}
+
+.kpi__icon--warn {
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 
 .kpi__value {
   font-family: var(--font-display);
-  font-size: 42px;
+  font-size: 32px;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
   line-height: 1;
 }
 
 .kpi__value small {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ink-3);
@@ -261,78 +336,294 @@
   color: var(--ink-3);
 }
 
-.kpi__delta {
+.delta {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-weight: 600;
+  gap: 2px;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--money-soft);
   color: var(--money);
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.kpi__delta--down {
+.delta--down {
+  background: var(--danger-soft);
   color: var(--danger);
+}
+
+/* --- Сетки -------------------------------------------------------------- */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- Воронка ------------------------------------------------------------ */
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 6px;
+}
+
+.funnel__row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnel__name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.funnel__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  flex: none;
+}
+
+.funnel__track {
+  height: 9px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.funnel__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--grad-accent);
+}
+
+.funnel__count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+/* --- Список «требует внимания» ------------------------------------------ */
+
+.attn {
+  display: flex;
+  flex-direction: column;
+}
+
+.attn__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.attn__row:last-child {
+  border-bottom: 0;
+}
+
+.attn__main {
+  min-width: 0;
+  flex: 1;
+}
+
+.attn__name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attn__meta {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Лента событий ------------------------------------------------------ */
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feed__item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 9px 0 9px 0;
+}
+
+.feed__dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 99px;
+  background: var(--accent);
+  flex: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.feed__dot--money {
+  background: var(--money);
+  box-shadow: 0 0 0 3px var(--money-soft);
+}
+
+.feed__dot--warn {
+  background: var(--warn);
+  box-shadow: 0 0 0 3px var(--warn-soft);
+}
+
+.feed__text {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.feed__text b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.feed__time {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+
+/* --- Быстрые действия --------------------------------------------------- */
+
+.quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.quick__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-align: left;
+  transition:
+    background-color 140ms var(--ease),
+    border-color 140ms var(--ease),
+    transform 140ms var(--ease);
+}
+
+.quick__item:hover {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.quick__item svg {
+  color: var(--accent);
 }
 
 /* --- Адаптив ------------------------------------------------------------ */
 
+@media (max-width: 1180px) {
+  .grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
-  .rail {
-    position: fixed;
-    bottom: 0;
-    top: auto;
-    left: 0;
-    right: 0;
-    flex-direction: row;
-    width: 100%;
-    height: 62px;
-    padding: 0 8px;
-    border-right: 0;
-    border-top: 1px solid var(--line);
-    background: var(--surface);
+  :root {
+    --sidebar-w: 0px;
   }
 
-  .rail__brand,
-  .rail__spacer,
-  .rail__foot {
+  .sidebar {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    width: auto;
+    height: 64px;
+    margin: 0;
+    padding: 0 8px;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+  }
+
+  .brand,
+  .sidebar__spacer,
+  .sidebar__foot,
+  .nav-item span:not(.nav-item__badge) {
     display: none;
   }
 
-  .rail__nav {
+  .sidebar__nav {
     flex-direction: row;
     justify-content: space-between;
-    padding: 0;
-  }
-
-  .rail__link {
-    height: 54px;
     flex: 1;
-    font-size: 9px;
   }
 
-  .rail__link.is-active::before {
-    left: 14px;
-    right: 14px;
-    top: auto;
-    bottom: 0;
-    width: auto;
-    height: 2px;
+  .nav-item {
+    justify-content: center;
+    height: 48px;
+    flex: 1;
+    border-radius: 12px;
   }
 
-  .app__main {
-    padding-bottom: 62px;
+  .nav-item svg {
+    width: 20px;
+    height: 20px;
   }
 
-  .cmdbar {
-    gap: 10px;
-    padding: 0 16px;
-  }
-
-  .cmdbar__search {
+  .nav-item__badge {
     display: none;
   }
 
-  .page {
-    padding: 20px 16px;
+  .content {
+    padding-bottom: 84px;
+  }
+
+  .topbar {
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  .topbar__search {
+    display: none;
+  }
+
+  .main {
+    padding: 4px 16px 32px;
   }
 
   .page__title {
@@ -340,6 +631,6 @@
   }
 
   .kpi__value {
-    font-size: 32px;
+    font-size: 27px;
   }
 }
