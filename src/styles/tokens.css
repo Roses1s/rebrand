@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Токены дизайн-системы «Терминал»
+   Светлая тема — основная, тёмная — отдельная «ночная смена».
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Основа */
+  --paper: #f5f3ef;
+  --paper-2: #eeebe4;
+  --surface: #ffffff;
+  --surface-2: #fbfaf7;
+  --surface-3: #f0ede6;
+
+  /* Чернила */
+  --ink: #111315;
+  --ink-2: #4a4f55;
+  --ink-3: #8a8f96;
+
+  /* Линии */
+  --line: #e6e2da;
+  --line-strong: #d6d0c4;
+
+  /* Смысловые цвета */
+  --signal: #ff5a1f;
+  --signal-ink: #c93f0a;
+  --signal-soft: #ffeee7;
+  --money: #0f9d6e;
+  --money-soft: #e7f6ef;
+  --warn: #c77a00;
+  --warn-soft: #fdf3e3;
+  --danger: #d93a3a;
+  --danger-soft: #fceaea;
+
+  /* Этапы воронки */
+  --stage-1: #8a8f96;
+  --stage-2: #e0813a;
+  --stage-3: #3d74d8;
+  --stage-4: #7a4fd1;
+  --stage-5: #0f9d6e;
+
+  /* Форма */
+  --r-1: 4px;
+  --r-2: 10px;
+  --r-3: 16px;
+
+  /* Типографика */
+  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter Tight", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  /* Ритм */
+  --rail-w: 76px;
+  --cmdbar-h: 64px;
+  --row-h: 44px;
+  --pad-page: 32px;
+
+  --shadow-pop: 0 24px 60px -24px rgba(17, 19, 21, 0.35);
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #0e1013;
+  --paper-2: #0b0d10;
+  --surface: #161a1f;
+  --surface-2: #12151a;
+  --surface-3: #1d2229;
+
+  --ink: #f2f3f4;
+  --ink-2: #b4bac1;
+  --ink-3: #7c848d;
+
+  --line: #262b31;
+  --line-strong: #333a42;
+
+  --signal: #ff6a33;
+  --signal-ink: #ff8a5c;
+  --signal-soft: #2a1a12;
+  --money: #35d39a;
+  --money-soft: #10241c;
+  --warn: #e4a33a;
+  --warn-soft: #2a2011;
+  --danger: #f06a6a;
+  --danger-soft: #2a1414;
+
+  --shadow-pop: 0 24px 60px -24px rgba(0, 0, 0, 0.75);
+}
+
+html[data-density="compact"] {
+  --row-h: 36px;
+  --pad-page: 24px;
+}

@@ -1,0 +1,567 @@
+/* ==========================================================================
+   Базовые элементы интерфейса
+   ========================================================================== */
+
+/* --- Кнопки ------------------------------------------------------------- */
+
+.btn {
+  --btn-bg: var(--surface);
+  --btn-fg: var(--ink);
+  --btn-line: var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--btn-line);
+  border-radius: var(--r-1);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 120ms var(--ease),
+    border-color 120ms var(--ease),
+    transform 120ms var(--ease);
+}
+
+.btn:hover {
+  background: color-mix(in srgb, var(--btn-bg) 92%, var(--ink));
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--ink {
+  --btn-bg: var(--ink);
+  --btn-fg: var(--paper);
+  --btn-line: var(--ink);
+}
+
+.btn--ink:hover {
+  background: color-mix(in srgb, var(--ink) 86%, var(--paper));
+}
+
+.btn--signal {
+  --btn-bg: var(--signal);
+  --btn-fg: #fff;
+  --btn-line: var(--signal);
+}
+
+.btn--signal:hover {
+  background: color-mix(in srgb, var(--signal) 90%, #000);
+}
+
+.btn--ghost {
+  --btn-bg: transparent;
+}
+
+.btn--quiet {
+  --btn-bg: transparent;
+  --btn-line: transparent;
+  --btn-fg: var(--ink-2);
+}
+
+.btn--quiet:hover {
+  --btn-bg: var(--surface-3);
+}
+
+.btn--danger {
+  --btn-bg: transparent;
+  --btn-fg: var(--danger);
+  --btn-line: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+.btn--sm {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.btn--lg {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-1);
+  color: var(--ink-2);
+  transition: background-color 120ms var(--ease);
+}
+
+.icon-btn:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+/* --- Поля --------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.field__hint {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  transition:
+    border-color 120ms var(--ease),
+    box-shadow 120ms var(--ease);
+}
+
+.textarea {
+  height: auto;
+  min-height: 88px;
+  padding: 9px 11px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--ink-3);
+}
+
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: var(--line-strong);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 18%, transparent);
+}
+
+.select {
+  appearance: none;
+  padding-right: 30px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
+    linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 15px,
+    calc(100% - 11px) 15px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink-3);
+  transition:
+    border-color 120ms var(--ease),
+    box-shadow 120ms var(--ease);
+}
+
+.search:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 18%, transparent);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.search kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+/* --- Теги и чипы -------------------------------------------------------- */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface-2);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.tag__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--tag-color, var(--ink-3));
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  transition:
+    background-color 120ms var(--ease),
+    border-color 120ms var(--ease),
+    color 120ms var(--ease);
+}
+
+.chip:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.chip[aria-pressed="true"],
+.chip--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.chip__count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status--new {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.status--progress {
+  background: color-mix(in srgb, var(--stage-3) 14%, transparent);
+  color: var(--stage-3);
+}
+
+.status--done {
+  background: var(--money-soft);
+  color: var(--money);
+}
+
+.status--lost {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* --- Сегментированный переключатель ------------------------------------- */
+
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface-2);
+}
+
+.seg button {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease);
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(17 19 21 / 8%);
+}
+
+/* --- Аватар ------------------------------------------------------------- */
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 99px;
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  flex: none;
+}
+
+.avatar--lg {
+  width: 38px;
+  height: 38px;
+  font-size: 13px;
+}
+
+/* --- Карточки ----------------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card__title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card__body {
+  padding: 16px;
+}
+
+/* --- Таблица ------------------------------------------------------------ */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  height: var(--row-h);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  transition: background-color 120ms var(--ease);
+}
+
+.table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.table .num,
+.table .mono {
+  text-align: right;
+}
+
+/* --- Состояния ---------------------------------------------------------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.empty__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 99px;
+  color: var(--ink-3);
+}
+
+.empty__title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.empty__text {
+  max-width: 320px;
+  font-size: 12.5px;
+}
+
+.skeleton {
+  border-radius: var(--r-1);
+  background: linear-gradient(90deg, var(--surface-3) 25%, var(--paper-2) 37%, var(--surface-3) 63%);
+  background-size: 400% 100%;
+  animation: skeleton 1.4s ease infinite;
+}
+
+@keyframes skeleton {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+/* --- Модалка ------------------------------------------------------------ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: color-mix(in srgb, #111315 45%, transparent);
+  backdrop-filter: blur(2px);
+  animation: fade 140ms var(--ease);
+}
+
+.modal {
+  width: 100%;
+  max-width: 460px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  animation: pop 160ms var(--ease);
+}
+
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 0;
+}
+
+.modal__title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.modal__body {
+  padding: 16px 20px 20px;
+}
+
+.modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 20px 20px;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

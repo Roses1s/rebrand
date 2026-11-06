@@ -1,0 +1,345 @@
+/* ==========================================================================
+   Оболочка: рельс модулей + командная строка + рабочая область
+   ========================================================================== */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+/* --- Рельс -------------------------------------------------------------- */
+
+.rail {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--rail-w);
+  height: 100vh;
+  padding: 14px 0 12px;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  flex: none;
+}
+
+.rail__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 22px;
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  position: relative;
+}
+
+.rail__brand::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--signal);
+}
+
+.rail__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.rail__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 58px;
+  border-radius: var(--r-1);
+  color: var(--ink-3);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition:
+    background-color 120ms var(--ease),
+    color 120ms var(--ease);
+}
+
+.rail__link svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.7;
+}
+
+.rail__link:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.rail__link.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.rail__link.is-active::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--signal);
+}
+
+.rail__spacer {
+  flex: 1;
+}
+
+.rail__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+/* --- Основная колонка --------------------------------------------------- */
+
+.app__main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Командная строка --------------------------------------------------- */
+
+.cmdbar {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--cmdbar-h);
+  padding: 0 var(--pad-page);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.cmdbar__head {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cmdbar__title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.cmdbar__crumb {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.cmdbar__search {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.cmdbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* --- Рабочая область ---------------------------------------------------- */
+
+.page {
+  flex: 1;
+  min-height: 0;
+  padding: var(--pad-page);
+}
+
+.page__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.page__title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.page__sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* --- KPI ---------------------------------------------------------------- */
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: var(--line);
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 20px;
+  background: var(--surface);
+}
+
+.kpi__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.kpi__value {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.kpi__value small {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+  margin-left: 4px;
+}
+
+.kpi__foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.kpi__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 600;
+  color: var(--money);
+}
+
+.kpi__delta--down {
+  color: var(--danger);
+}
+
+/* --- Адаптив ------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  .rail {
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    width: 100%;
+    height: 62px;
+    padding: 0 8px;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .rail__brand,
+  .rail__spacer,
+  .rail__foot {
+    display: none;
+  }
+
+  .rail__nav {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  .rail__link {
+    height: 54px;
+    flex: 1;
+    font-size: 9px;
+  }
+
+  .rail__link.is-active::before {
+    left: 14px;
+    right: 14px;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    height: 2px;
+  }
+
+  .app__main {
+    padding-bottom: 62px;
+  }
+
+  .cmdbar {
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .cmdbar__search {
+    display: none;
+  }
+
+  .page {
+    padding: 20px 16px;
+  }
+
+  .page__title {
+    font-size: 24px;
+  }
+
+  .kpi__value {
+    font-size: 32px;
+  }
+}
