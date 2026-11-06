@@ -112,10 +112,11 @@ function SortableLead({ lead }) {
 function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
   const sum = sumOf(stageLeads);
-  const showLine = dragging && dropIndex != null;
+  // В пустой колонке подсказкой служит слот, линия там лишняя.
+  const showLine = dragging && dropIndex != null && stageLeads.length > 0;
 
   return (
-    <section ref={setNodeRef} className={`col${isOver ? " is-over" : ""}`} aria-label={stage.name}>
+    <section ref={setNodeRef} className="col" aria-label={stage.name}>
       <div className="col__head">
         <span className="col__dot" style={{ background: stage.color }} />
         <span className="col__name">{stage.name}</span>
@@ -144,7 +145,7 @@ function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
       </div>
       <div className="col__rule" style={{ "--col-color": stage.color }} />
 
-      <div className="col__cards">
+      <div className={`col__cards${isOver ? " is-over" : ""}`}>
         <SortableContext items={stageLeads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
           {stageLeads.map((lead, index) => (
             <Fragment key={lead.id}>
@@ -157,7 +158,7 @@ function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
         </SortableContext>
 
         {stageLeads.length === 0 &&
-          (dragging && showLine ? (
+          (dragging && dropIndex != null ? (
             <div className="col__drop-slot" aria-hidden="true">
               Отпустите здесь
             </div>

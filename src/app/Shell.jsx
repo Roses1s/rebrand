@@ -146,12 +146,10 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
 
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand__mark">
-            <LayoutGrid size={20} strokeWidth={2} />
-          </span>
+          <span className="brand__logo" role="img" aria-label="CRM Детроид" title="CRM Детроид" />
           <div>
-            <div className="brand__name">ТрансЛайн CRM</div>
-            <div className="brand__sub">Грузоперевозки · Отдел продаж</div>
+            <div className="brand__name">CRM Детроид</div>
+            <div className="brand__sub">Детроид · транспортная компания</div>
           </div>
           <button
             type="button"

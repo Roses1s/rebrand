@@ -19,15 +19,9 @@ body {
   padding: 2px 6px 8px;
 }
 
-.brand__mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-}
-
-.brand__mark svg {
-  width: 17px;
-  height: 17px;
+.brand__logo {
+  width: 30px;
+  height: 30px;
 }
 
 .brand__name {
