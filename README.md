@@ -7,6 +7,7 @@
 - Дизайн-план и принятые решения: [`PLAN.md`](PLAN.md)
 - Матрица паритета «ничего не теряем»: [`PARITY.md`](PARITY.md)
 - Паспорт проекта для следующего агента: [`docs/HANDOVER.md`](docs/HANDOVER.md)
+- Текущий статус и журнал решений: [`docs/STATUS.md`](docs/STATUS.md)
 - Готовый промт для передачи: [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md)
 
 ## Что это
@@ -137,8 +138,9 @@ React 19 · React Router 7 · Vite 8 · lucide-react · @dnd-kit/core, sortable,
 
 Новому агенту отправьте первым сообщением блок из
 [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md). Он задаёт стиль работы и порядок
-чтения; факты о коде — в [`docs/HANDOVER.md`](docs/HANDOVER.md): устройство,
-механика воронки, правила оформления, грабли, проверки и бэклог.
+чтения; факты о коде — в [`docs/HANDOVER.md`](docs/HANDOVER.md) (устройство,
+механика воронки, правила оформления, грабли, проверки), текущее состояние
+и решения — в [`docs/STATUS.md`](docs/STATUS.md).
 
 ## Git
 
