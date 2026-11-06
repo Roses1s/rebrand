@@ -1164,3 +1164,281 @@ kbd {
   .nav-label { margin: 6px 0 3px; }
   .user-row { padding-top: 8px; }
 }
+
+/* ============================================================
+   Заявки: табы, таблица, статусы, карточка перевозчика
+   ============================================================ */
+
+/* ---------- Табы статусов ---------- */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.tab:hover { background: var(--surface-soft); }
+.tab.is-active {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.tab-count {
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.tab.is-active .tab-count { background: var(--primary-soft); color: var(--primary); }
+.tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* ---------- Таблица ---------- */
+.table-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-wrap { flex: 1; min-height: 0; overflow: auto; }
+
+.data-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.data-table th.num, .data-table td.num { text-align: right; }
+
+.data-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: 0; }
+
+.req-row {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  outline: none;
+}
+.req-row:hover { background: var(--surface-soft); }
+.req-row:focus-visible { background: var(--surface-soft); box-shadow: inset 3px 0 0 var(--primary); }
+.req-row.is-flash { animation: rowFlash 1.2s ease; }
+
+@keyframes rowFlash {
+  0% { background: var(--primary-soft); }
+  100% { background: transparent; }
+}
+
+.cell-id {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.client-name { font-weight: 600; letter-spacing: -0.01em; }
+.client-sub { margin-top: 2px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.cargo-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.muted { color: var(--muted); font-size: 11.5px; }
+
+.route-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.route-mini .ico { width: 13px; height: 13px; color: var(--muted); flex: none; }
+.route-mini span { max-width: 118px; overflow: hidden; text-overflow: ellipsis; }
+
+.margin {
+  font-weight: 600;
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.row-manager { display: inline-flex; align-items: center; gap: 6px; }
+.row-manager .avatar { width: 24px; height: 24px; font-size: 10px; }
+.row-manager-name { font-size: 12px; color: var(--text-soft); white-space: nowrap; }
+
+.table-empty {
+  padding: 48px 16px !important;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.table-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--surface);
+}
+
+/* ---------- Статусы ---------- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--st, var(--primary));
+  background: color-mix(in srgb, var(--st, var(--primary)) 13%, transparent);
+}
+.status-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status--new { --st: #4f7cff; }
+.status--work { --st: #f5a524; }
+.status--assigned { --st: #a855f7; }
+.status--transit { --st: #06b6d4; }
+.status--done { --st: #10b981; }
+.status--canceled { --st: #f43f5e; }
+
+/* ---------- Карточка заявки (drawer) ---------- */
+.drawer-kicker {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.drawer-km { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.fact-value.is-pos { color: var(--success); }
+.fact-value.is-zero { color: var(--muted); }
+
+.carrier-card {
+  display: flex;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+.carrier-ico {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.carrier-ico .ico { width: 18px; height: 18px; }
+.carrier-info { min-width: 0; }
+.carrier-name { font-size: 13px; font-weight: 600; }
+.carrier-sub { margin-top: 2px; font-size: 11.5px; color: var(--muted); }
+.carrier-phone {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.carrier-phone:hover { text-decoration: underline; }
+
+.carrier-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--muted);
+}
+.carrier-empty .btn { height: 32px; font-size: 12px; }
+
+/* ---------- Адаптив таблицы ---------- */
+@media (max-width: 1420px) {
+  .col-cargo { display: none; }
+  .data-table { min-width: 820px; }
+}
+@media (max-width: 1200px) {
+  .col-carrier { display: none; }
+  .data-table { min-width: 740px; }
+}
+@media (max-width: 1000px) {
+  .col-manager { display: none; }
+  .data-table { min-width: 640px; }
+}
+@media (max-width: 900px) {
+  .table-card { flex: none; min-height: 52vh; }
+  .tabs { margin: 0 -2px; }
+  .table-foot { font-size: 11px; }
+}
+@media (max-width: 760px) {
+  .col-date { display: none; }
+  .data-table { min-width: 560px; }
+  .data-table thead th, .data-table td { padding: 10px; }
+}

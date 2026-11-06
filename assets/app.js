@@ -15,14 +15,9 @@
     { id: 'waiting',   name: 'Ждем заявку',    color: '#f43f5e' },
   ];
 
-  const MANAGERS = [
-    { id: 'as', name: 'Анна Смирнова',  short: 'АС', color: '#4560f0' },
-    { id: 'dk', name: 'Дмитрий Ковалёв', short: 'ДК', color: '#8b5cf6' },
-    { id: 'iv', name: 'Ирина Волкова',   short: 'ИВ', color: '#0ea47a' },
-  ];
 
   const stageById = (id) => STAGES.find((s) => s.id === id) || STAGES[0];
-  const managerById = (id) => MANAGERS.find((m) => m.id === id) || MANAGERS[0];
+  const managerById = (id) => window.TL.managerById(id);
 
   /* ---------------- Данные лидов ---------------- */
   let leads = [
@@ -53,33 +48,8 @@
     { id: 'l20', stage: 'waiting',   company: 'ООО «ПромСнаб Урал»',   contact: 'Кирилл Абрамов',  phone: '+7 922 340-55-87', from: 'Пермь',           to: 'Тюмень',          cargo: 'Трубы',        weight: '21 т',          price: 158000, manager: 'dk', date: '2026-10-25', tags: ['фура'], hot: false },
   ];
 
-  /* ---------------- Хелперы ---------------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-
-  function formatDate(iso) {
-    const d = new Date(iso + 'T00:00:00');
-    if (Number.isNaN(d.getTime())) return iso;
-    return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-  }
-
-  const moneyFmt = new Intl.NumberFormat('ru-RU');
-  function money(n) {
-    return `${moneyFmt.format(Math.round(n || 0))} \u20BD`;
-  }
-  function moneyShort(n) {
-    if (n >= 1e6) return `${(n / 1e6).toFixed(2).replace('.', ',').replace(/,?0+$/, '')} млн ₽`;
-    if (n >= 1e3) return `${Math.round(n / 1e3)} тыс ₽`;
-    return money(n);
-  }
-  function escapeHtml(str = '') {
-    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  }
-  const normalize = (str = '') => String(str).toLowerCase().replace(/[«»"'`]/g, '').replace(/\s+/g, ' ').trim();
-
-  const icon = (id, cls = 'ico') => `<svg viewBox="0 0 24 24" class="${cls}"><use href="#${id}"/></svg>`;
+  /* ---------------- Общие утилиты (assets/ui.js) ---------------- */
+  const { $, $$, icon, money, moneyShort, formatDate, escapeHtml, normalize, toast, MANAGERS } = window.TL;
 
   /* ---------------- DOM ---------------- */
   const board = $('#board');
@@ -90,28 +60,13 @@
   const kpiAvg = $('#kpiAvg');
   const kpiConv = $('#kpiConv');
   const navLeadsCount = $('#navLeadsCount');
-  const toasts = $('#toasts');
   const scrim = $('#scrim');
   const drawer = $('#drawer');
   const modal = $('#modal');
-  const sidebar = $('#sidebar');
-  const sidebarScrim = $('#sidebarScrim');
 
   let draggedId = null;
   let overBody = null;
   let openLeadId = null;
-
-  /* ---------------- Тосты ---------------- */
-  function toast(message, type = 'info') {
-    const el = document.createElement('div');
-    el.className = `toast toast--${type}`;
-    el.innerHTML = `${icon(type === 'success' ? 'i-check' : 'i-help')}<span>${escapeHtml(message)}</span>`;
-    toasts.appendChild(el);
-    setTimeout(() => {
-      el.classList.add('is-out');
-      el.addEventListener('animationend', () => el.remove(), { once: true });
-    }, 2600);
-  }
 
   /* ---------------- Рендер карточки ---------------- */
   function cardMarkup(lead) {
@@ -451,7 +406,6 @@
     if (e.key === 'Escape') {
       if (modal.classList.contains('is-open')) closeModal();
       else if (drawer.classList.contains('is-open')) closeDrawer();
-      else closeSidebar();
     }
     if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
       e.preventDefault();
@@ -467,44 +421,7 @@
   searchInput.addEventListener('input', () => renderBoard());
   managerFilter.addEventListener('change', () => renderBoard());
 
-  /* ---------------- Тема ---------------- */
-  const themeToggle = $('#themeToggle');
-  function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
-    try { localStorage.setItem('tl-theme', theme); } catch (e) {}
-  }
-  themeToggle.addEventListener('click', () => {
-    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    toast(next === 'dark' ? 'Тёмная тема включена' : 'Светлая тема включена');
-  });
-  applyTheme(document.documentElement.dataset.theme || 'light');
-
-  /* ---------------- Мобильный сайдбар ---------------- */
-  const menuBtn = $('#menuBtn');
-  function openSidebar() {
-    sidebar.classList.add('is-open');
-    sidebarScrim.classList.add('is-on');
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('is-open');
-    sidebarScrim.classList.remove('is-on');
-  }
-  menuBtn.addEventListener('click', openSidebar);
-  $('#sidebarClose').addEventListener('click', closeSidebar);
-  sidebarScrim.addEventListener('click', closeSidebar);
-
-  /* ---------------- Заглушки переходов ---------------- */
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-placeholder]');
-    if (!target) return;
-    e.preventDefault();
-    const label = target.dataset.placeholder;
-    toast(`«${label}» — раздел в разработке`, 'info');
-    if (sidebar.contains(target)) closeSidebar();
-  });
-
   /* ---------------- Инициализация ---------------- */
+  TL.init();
   renderAll();
 })();

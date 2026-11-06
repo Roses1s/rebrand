@@ -1174,6 +1174,284 @@ kbd {
   .user-row { padding-top: 8px; }
 }
 
+/* ============================================================
+   Заявки: табы, таблица, статусы, карточка перевозчика
+   ============================================================ */
+
+/* ---------- Табы статусов ---------- */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.tab:hover { background: var(--surface-soft); }
+.tab.is-active {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.tab-count {
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.tab.is-active .tab-count { background: var(--primary-soft); color: var(--primary); }
+.tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* ---------- Таблица ---------- */
+.table-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-wrap { flex: 1; min-height: 0; overflow: auto; }
+
+.data-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.data-table th.num, .data-table td.num { text-align: right; }
+
+.data-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td { border-bottom: 0; }
+
+.req-row {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+  outline: none;
+}
+.req-row:hover { background: var(--surface-soft); }
+.req-row:focus-visible { background: var(--surface-soft); box-shadow: inset 3px 0 0 var(--primary); }
+.req-row.is-flash { animation: rowFlash 1.2s ease; }
+
+@keyframes rowFlash {
+  0% { background: var(--primary-soft); }
+  100% { background: transparent; }
+}
+
+.cell-id {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.client-name { font-weight: 600; letter-spacing: -0.01em; }
+.client-sub { margin-top: 2px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.cargo-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.muted { color: var(--muted); font-size: 11.5px; }
+
+.route-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.route-mini .ico { width: 13px; height: 13px; color: var(--muted); flex: none; }
+.route-mini span { max-width: 118px; overflow: hidden; text-overflow: ellipsis; }
+
+.margin {
+  font-weight: 600;
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.row-manager { display: inline-flex; align-items: center; gap: 6px; }
+.row-manager .avatar { width: 24px; height: 24px; font-size: 10px; }
+.row-manager-name { font-size: 12px; color: var(--text-soft); white-space: nowrap; }
+
+.table-empty {
+  padding: 48px 16px !important;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.table-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--surface);
+}
+
+/* ---------- Статусы ---------- */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--st, var(--primary));
+  background: color-mix(in srgb, var(--st, var(--primary)) 13%, transparent);
+}
+.status-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status--new { --st: #4f7cff; }
+.status--work { --st: #f5a524; }
+.status--assigned { --st: #a855f7; }
+.status--transit { --st: #06b6d4; }
+.status--done { --st: #10b981; }
+.status--canceled { --st: #f43f5e; }
+
+/* ---------- Карточка заявки (drawer) ---------- */
+.drawer-kicker {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.drawer-km { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.fact-value.is-pos { color: var(--success); }
+.fact-value.is-zero { color: var(--muted); }
+
+.carrier-card {
+  display: flex;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+.carrier-ico {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.carrier-ico .ico { width: 18px; height: 18px; }
+.carrier-info { min-width: 0; }
+.carrier-name { font-size: 13px; font-weight: 600; }
+.carrier-sub { margin-top: 2px; font-size: 11.5px; color: var(--muted); }
+.carrier-phone {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.carrier-phone:hover { text-decoration: underline; }
+
+.carrier-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--muted);
+}
+.carrier-empty .btn { height: 32px; font-size: 12px; }
+
+/* ---------- Адаптив таблицы ---------- */
+@media (max-width: 1420px) {
+  .col-cargo { display: none; }
+  .data-table { min-width: 820px; }
+}
+@media (max-width: 1200px) {
+  .col-carrier { display: none; }
+  .data-table { min-width: 740px; }
+}
+@media (max-width: 1000px) {
+  .col-manager { display: none; }
+  .data-table { min-width: 640px; }
+}
+@media (max-width: 900px) {
+  .table-card { flex: none; min-height: 52vh; }
+  .tabs { margin: 0 -2px; }
+  .table-foot { font-size: 11px; }
+}
+@media (max-width: 760px) {
+  .col-date { display: none; }
+  .data-table { min-width: 560px; }
+  .data-table thead th, .data-table td { padding: 10px; }
+}
+
 </style>
   <script>
     // Тема применяется до отрисовки, чтобы не было вспышки
@@ -1256,10 +1534,9 @@ kbd {
           <span>Лиды</span>
           <span class="nav-badge" id="navLeadsCount">20</span>
         </a>
-        <a class="nav-item" href="#" data-placeholder="Заявки">
+        <a class="nav-item" href="requests-standalone.html">
           <svg viewBox="0 0 24 24" class="ico"><use href="#i-file"/></svg>
           <span>Заявки</span>
-          <span class="nav-badge nav-badge--soft">7</span>
         </a>
 
         <p class="nav-label">Операции</p>
@@ -1557,6 +1834,153 @@ kbd {
 
   <script>
 /* ============================================================
+   ТрансЛайн CRM — общие утилиты для всех страниц
+   (темы, тосты, сайдбар, заглушки, форматирование)
+   ============================================================ */
+
+window.TL = (function () {
+  'use strict';
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  const MONTHS_FULL = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
+  const MANAGERS = [
+    { id: 'as', name: 'Анна Смирнова',  short: 'АС', color: '#4560f0' },
+    { id: 'dk', name: 'Дмитрий Ковалёв', short: 'ДК', color: '#8b5cf6' },
+    { id: 'iv', name: 'Ирина Волкова',   short: 'ИВ', color: '#0ea47a' },
+  ];
+  const managerById = (id) => MANAGERS.find((m) => m.id === id) || MANAGERS[0];
+
+  const moneyFmt = new Intl.NumberFormat('ru-RU');
+
+  function money(n) {
+    return `${moneyFmt.format(Math.round(n || 0))} \u20BD`;
+  }
+
+  function moneyShort(n) {
+    if (n >= 1e6) return `${(n / 1e6).toFixed(2).replace('.', ',').replace(/,?0+$/, '')} млн ₽`;
+    if (n >= 1e3) return `${Math.round(n / 1e3)} тыс ₽`;
+    return money(n);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(`${iso}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return iso;
+    return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  }
+
+  function formatDateFull(iso) {
+    if (!iso) return '—';
+    const d = new Date(`${iso}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return iso;
+    return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function escapeHtml(str = '') {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  const normalize = (str = '') =>
+    String(str).toLowerCase().replace(/[«»"'`]/g, '').replace(/\s+/g, ' ').trim();
+
+  const icon = (id, cls = 'ico') => `<svg viewBox="0 0 24 24" class="${cls}"><use href="#${id}"/></svg>`;
+
+  /* ---------------- Тосты ---------------- */
+  function toast(message, type = 'info') {
+    const box = $('#toasts');
+    if (!box) return;
+    const el = document.createElement('div');
+    el.className = `toast toast--${type}`;
+    el.innerHTML = `${icon(type === 'success' ? 'i-check' : 'i-help')}<span>${escapeHtml(message)}</span>`;
+    box.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('is-out');
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+    }, 2600);
+  }
+
+  /* ---------------- Тема ---------------- */
+  function initTheme() {
+    const toggle = $('#themeToggle');
+    if (!toggle) return;
+
+    function apply(theme) {
+      document.documentElement.dataset.theme = theme;
+      toggle.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
+      try { localStorage.setItem('tl-theme', theme); } catch (e) {}
+    }
+
+    apply(document.documentElement.dataset.theme || 'light');
+
+    toggle.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      apply(next);
+      toast(next === 'dark' ? 'Тёмная тема включена' : 'Светлая тема включена');
+    });
+  }
+
+  /* ---------------- Мобильный сайдбар ---------------- */
+  function initSidebar() {
+    const sidebar = $('#sidebar');
+    const scrim = $('#sidebarScrim');
+    const menuBtn = $('#menuBtn');
+    const closeBtn = $('#sidebarClose');
+    if (!sidebar || !scrim) return;
+
+    function open() {
+      sidebar.classList.add('is-open');
+      scrim.classList.add('is-on');
+    }
+    function close() {
+      sidebar.classList.remove('is-open');
+      scrim.classList.remove('is-on');
+    }
+
+    if (menuBtn) menuBtn.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    scrim.addEventListener('click', close);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) close();
+    });
+
+    sidebar.addEventListener('click', (e) => {
+      if (e.target.closest('.nav-item')) close();
+    });
+  }
+
+  /* ---------------- Заглушки переходов ---------------- */
+  function initPlaceholders() {
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-placeholder]');
+      if (!target) return;
+      e.preventDefault();
+      toast(`«${target.dataset.placeholder}» — раздел в разработке`, 'info');
+    });
+  }
+
+  /* ---------------- Инициализация ---------------- */
+  function init() {
+    initTheme();
+    initSidebar();
+    initPlaceholders();
+  }
+
+  return {
+    MANAGERS, managerById,
+    $, $$, money, moneyShort, formatDate, formatDateFull,
+    escapeHtml, normalize, icon, toast,
+    initTheme, initSidebar, initPlaceholders, init,
+  };
+})();
+
+</script>
+  <script>
+/* ============================================================
    ТрансЛайн CRM — логика главной страницы (воронка лидов)
    ============================================================ */
 
@@ -1573,14 +1997,9 @@ kbd {
     { id: 'waiting',   name: 'Ждем заявку',    color: '#f43f5e' },
   ];
 
-  const MANAGERS = [
-    { id: 'as', name: 'Анна Смирнова',  short: 'АС', color: '#4560f0' },
-    { id: 'dk', name: 'Дмитрий Ковалёв', short: 'ДК', color: '#8b5cf6' },
-    { id: 'iv', name: 'Ирина Волкова',   short: 'ИВ', color: '#0ea47a' },
-  ];
 
   const stageById = (id) => STAGES.find((s) => s.id === id) || STAGES[0];
-  const managerById = (id) => MANAGERS.find((m) => m.id === id) || MANAGERS[0];
+  const managerById = (id) => window.TL.managerById(id);
 
   /* ---------------- Данные лидов ---------------- */
   let leads = [
@@ -1611,33 +2030,8 @@ kbd {
     { id: 'l20', stage: 'waiting',   company: 'ООО «ПромСнаб Урал»',   contact: 'Кирилл Абрамов',  phone: '+7 922 340-55-87', from: 'Пермь',           to: 'Тюмень',          cargo: 'Трубы',        weight: '21 т',          price: 158000, manager: 'dk', date: '2026-10-25', tags: ['фура'], hot: false },
   ];
 
-  /* ---------------- Хелперы ---------------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-
-  function formatDate(iso) {
-    const d = new Date(iso + 'T00:00:00');
-    if (Number.isNaN(d.getTime())) return iso;
-    return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-  }
-
-  const moneyFmt = new Intl.NumberFormat('ru-RU');
-  function money(n) {
-    return `${moneyFmt.format(Math.round(n || 0))} \u20BD`;
-  }
-  function moneyShort(n) {
-    if (n >= 1e6) return `${(n / 1e6).toFixed(2).replace('.', ',').replace(/,?0+$/, '')} млн ₽`;
-    if (n >= 1e3) return `${Math.round(n / 1e3)} тыс ₽`;
-    return money(n);
-  }
-  function escapeHtml(str = '') {
-    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  }
-  const normalize = (str = '') => String(str).toLowerCase().replace(/[«»"'`]/g, '').replace(/\s+/g, ' ').trim();
-
-  const icon = (id, cls = 'ico') => `<svg viewBox="0 0 24 24" class="${cls}"><use href="#${id}"/></svg>`;
+  /* ---------------- Общие утилиты (assets/ui.js) ---------------- */
+  const { $, $$, icon, money, moneyShort, formatDate, escapeHtml, normalize, toast, MANAGERS } = window.TL;
 
   /* ---------------- DOM ---------------- */
   const board = $('#board');
@@ -1648,28 +2042,13 @@ kbd {
   const kpiAvg = $('#kpiAvg');
   const kpiConv = $('#kpiConv');
   const navLeadsCount = $('#navLeadsCount');
-  const toasts = $('#toasts');
   const scrim = $('#scrim');
   const drawer = $('#drawer');
   const modal = $('#modal');
-  const sidebar = $('#sidebar');
-  const sidebarScrim = $('#sidebarScrim');
 
   let draggedId = null;
   let overBody = null;
   let openLeadId = null;
-
-  /* ---------------- Тосты ---------------- */
-  function toast(message, type = 'info') {
-    const el = document.createElement('div');
-    el.className = `toast toast--${type}`;
-    el.innerHTML = `${icon(type === 'success' ? 'i-check' : 'i-help')}<span>${escapeHtml(message)}</span>`;
-    toasts.appendChild(el);
-    setTimeout(() => {
-      el.classList.add('is-out');
-      el.addEventListener('animationend', () => el.remove(), { once: true });
-    }, 2600);
-  }
 
   /* ---------------- Рендер карточки ---------------- */
   function cardMarkup(lead) {
@@ -2009,7 +2388,6 @@ kbd {
     if (e.key === 'Escape') {
       if (modal.classList.contains('is-open')) closeModal();
       else if (drawer.classList.contains('is-open')) closeDrawer();
-      else closeSidebar();
     }
     if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
       e.preventDefault();
@@ -2025,45 +2403,8 @@ kbd {
   searchInput.addEventListener('input', () => renderBoard());
   managerFilter.addEventListener('change', () => renderBoard());
 
-  /* ---------------- Тема ---------------- */
-  const themeToggle = $('#themeToggle');
-  function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
-    try { localStorage.setItem('tl-theme', theme); } catch (e) {}
-  }
-  themeToggle.addEventListener('click', () => {
-    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    toast(next === 'dark' ? 'Тёмная тема включена' : 'Светлая тема включена');
-  });
-  applyTheme(document.documentElement.dataset.theme || 'light');
-
-  /* ---------------- Мобильный сайдбар ---------------- */
-  const menuBtn = $('#menuBtn');
-  function openSidebar() {
-    sidebar.classList.add('is-open');
-    sidebarScrim.classList.add('is-on');
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('is-open');
-    sidebarScrim.classList.remove('is-on');
-  }
-  menuBtn.addEventListener('click', openSidebar);
-  $('#sidebarClose').addEventListener('click', closeSidebar);
-  sidebarScrim.addEventListener('click', closeSidebar);
-
-  /* ---------------- Заглушки переходов ---------------- */
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-placeholder]');
-    if (!target) return;
-    e.preventDefault();
-    const label = target.dataset.placeholder;
-    toast(`«${label}» — раздел в разработке`, 'info');
-    if (sidebar.contains(target)) closeSidebar();
-  });
-
   /* ---------------- Инициализация ---------------- */
+  TL.init();
   renderAll();
 })();
 
