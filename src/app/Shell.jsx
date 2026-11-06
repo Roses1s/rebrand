@@ -8,14 +8,14 @@ import {
   BarChart3,
   Bell,
   CheckSquare,
+  ChevronsLeft,
+  ChevronsRight,
   KanbanSquare,
   Landmark,
   LayoutGrid,
   LogOut,
   Menu,
   Moon,
-  PanelLeftClose,
-  PanelLeftOpen,
   Plus,
   Settings,
   ShieldCheck,
@@ -217,6 +217,19 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
               <LogOut size={15} strokeWidth={1.9} style={{ color: "var(--ink-3)" }} />
             </button>
           </div>
+
+          <button
+            type="button"
+            className="side-collapse"
+            aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
+            aria-expanded={!collapsed}
+            aria-controls="app-sidebar"
+            title={collapsed ? "Развернуть меню" : "Свернуть меню"}
+            onClick={() => setSidebar(collapsed ? "open" : "collapsed")}
+          >
+            {collapsed ? <ChevronsRight size={16} strokeWidth={2} /> : <ChevronsLeft size={16} strokeWidth={2} />}
+            <span className="side-collapse__label">Свернуть меню</span>
+          </button>
         </div>
       </aside>
 
@@ -226,17 +239,6 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
             <Menu size={18} strokeWidth={2} />
           </button>
 
-          <button
-            type="button"
-            className="collapse-btn"
-            aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
-            aria-expanded={!collapsed}
-            aria-controls="app-sidebar"
-            title={collapsed ? "Развернуть меню" : "Свернуть меню"}
-            onClick={() => setSidebar(collapsed ? "open" : "collapsed")}
-          >
-            {collapsed ? <PanelLeftOpen size={17} strokeWidth={1.9} /> : <PanelLeftClose size={17} strokeWidth={1.9} />}
-          </button>
 
           <div className="topbar__head">
             <div className="topbar__title">{title ?? pageTitle}</div>

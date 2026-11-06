@@ -658,26 +658,39 @@ html[data-theme="dark"] .plan {
   background: var(--surface-hover);
 }
 
-/* Свернуть / развернуть панель: только на десктопе. */
+/* Свернуть / развернуть панель: пункт внизу панели, только на десктопе. */
 
-.collapse-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-1);
-  background: var(--surface);
+.side-collapse {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0 9px;
+  border-radius: 9px;
   color: var(--ink-3);
-  flex: none;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
   transition:
     color 140ms var(--ease),
     background-color 140ms var(--ease);
 }
 
-.collapse-btn:hover {
-  color: var(--ink);
+.side-collapse svg {
+  flex: none;
+  color: var(--ink-4);
+  transition: color 140ms var(--ease);
+}
+
+.side-collapse:hover {
   background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.side-collapse:hover svg {
+  color: var(--ink-2);
 }
 
 .sidebar__close {
@@ -702,7 +715,7 @@ html[data-theme="dark"] .plan {
 /* --- Свёрнутая панель: только иконки ------------------------------------ */
 
 @media (max-width: 900px) {
-  .collapse-btn {
+  .side-collapse {
     display: none;
   }
 }
@@ -779,6 +792,15 @@ html[data-theme="dark"] .plan {
   .app--collapsed .team__text,
   .app--collapsed .team__dot,
   .app--collapsed .team__exit {
+    display: none;
+  }
+
+  .app--collapsed .side-collapse {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .app--collapsed .side-collapse__label {
     display: none;
   }
 }

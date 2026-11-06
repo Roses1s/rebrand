@@ -32,9 +32,9 @@ body {
   font-size: 9.5px;
 }
 
-.collapse-btn {
-  width: 30px;
+.side-collapse {
   height: 30px;
+  font-size: 11.5px;
 }
 
 .side-label {
