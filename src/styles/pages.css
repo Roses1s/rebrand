@@ -717,3 +717,68 @@
     grid-template-columns: 96px minmax(0, 1fr) 70px;
   }
 }
+
+/* --- Переключатель «канбан / список» и сортировка ------------------------ */
+
+.view-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+}
+
+.view-switch button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  color: var(--ink-3);
+  transition: color 140ms var(--ease), background-color 140ms var(--ease);
+}
+
+.view-switch button:hover {
+  color: var(--ink);
+}
+
+.view-switch button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-xs);
+}
+
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  transition: color 140ms var(--ease);
+}
+
+.th-sort:hover,
+.th-sort.is-active,
+.th-sort.is-active:hover {
+  color: var(--ink);
+}
+
+.leads-table td {
+  white-space: nowrap;
+}
+
+.leads-table .cell-company__name {
+  display: block;
+  max-width: 240px;
+}
+
+.stage-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  white-space: nowrap;
+}
