@@ -9,6 +9,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 const PAGES = [
   { src: 'index.html', out: 'crm-standalone.html' },
   { src: 'requests.html', out: 'requests-standalone.html' },
+  { src: 'trips.html', out: 'trips-standalone.html' },
 ];
 
 const css = await readFile('assets/styles.css', 'utf8');
@@ -17,6 +18,7 @@ const css = await readFile('assets/styles.css', 'utf8');
 const LINK_MAP = {
   'index.html': 'crm-standalone.html',
   'requests.html': 'requests-standalone.html',
+  'trips.html': 'trips-standalone.html',
 };
 
 const SCRIPT_RE = /<script src="(assets\/[^"]+\.js)"><\/script>/g;

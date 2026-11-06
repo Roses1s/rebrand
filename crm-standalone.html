@@ -1452,6 +1452,125 @@ kbd {
   .data-table thead th, .data-table td { padding: 10px; }
 }
 
+/* ============================================================
+   Грузы: прогресс рейса, этапы, предупреждения
+   ============================================================ */
+.status--planned { --st: #4f7cff; }
+.status--loading { --st: #f5a524; }
+.status--unloading { --st: #a855f7; }
+.status--problem { --st: #f43f5e; }
+
+.progress-mini {
+  width: 140px;
+  max-width: 100%;
+  height: 4px;
+  margin: 5px 0 3px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+.progress-mini span { display: block; height: 100%; border-radius: inherit; }
+
+.driver-name { font-size: 12.5px; font-weight: 500; }
+
+.trip-progress {
+  margin: 16px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.progress-head span:last-child { text-align: right; }
+.progress-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+}
+.progress-fill { height: 100%; border-radius: inherit; transition: width 0.3s ease; }
+.progress-truck {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.progress-truck .ico { width: 13px; height: 13px; stroke-width: 1.9; }
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.progress-eta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  font-size: 11.5px;
+  color: var(--text-soft);
+}
+.progress-eta .ico { width: 13px; height: 13px; color: var(--muted); }
+
+.checkpoints { list-style: none; margin: 0; padding: 0; }
+.checkpoint { position: relative; padding: 0 0 16px 24px; font-size: 12.5px; }
+.checkpoint::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.checkpoint::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.checkpoint:last-child::after { display: none; }
+.checkpoint.is-done::before { background: var(--success); border-color: var(--success); }
+.checkpoint.is-current::before { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.checkpoint-title { display: block; font-weight: 600; }
+.checkpoint.is-done .checkpoint-title { color: var(--text-soft); font-weight: 500; }
+.checkpoint-time { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); }
+
+.note-box.is-warn {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  color: var(--text-soft);
+}
+.note-box.is-warn .ico { color: var(--danger); }
+.kpi-delta.is-warn { color: var(--warning); }
+
+@media (max-width: 1420px) { .col-weight { display: none; } }
+@media (max-width: 1220px) { .col-dates { display: none; } }
+@media (max-width: 1120px) { .col-driver { display: none; } }
+@media (max-width: 860px) { .col-eta { display: none; } }
+
 </style>
   <script>
     // Тема применяется до отрисовки, чтобы не было вспышки
@@ -1540,7 +1659,7 @@ kbd {
         </a>
 
         <p class="nav-label">Операции</p>
-        <a class="nav-item" href="#" data-placeholder="Грузы">
+        <a class="nav-item" href="trips-standalone.html">
           <svg viewBox="0 0 24 24" class="ico"><use href="#i-truck"/></svg>
           <span>Грузы</span>
         </a>
