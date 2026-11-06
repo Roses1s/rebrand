@@ -15,6 +15,13 @@ const PERIODS = [
 
 const myLeads = STAGES.flatMap((stage) => stage.leads).filter((lead) => lead.ownerId === ME.id);
 
+/** Как период влияет на цифры: доля месяца. */
+const PERIOD_FACTOR = {
+  week: { factor: 0.27, label: "за неделю", conversion: 19 },
+  month: { factor: 1, label: "за месяц", conversion: 24 },
+  quarter: { factor: 2.86, label: "за квартал", conversion: 27 },
+};
+
 function InflowChart({ data }) {
   const width = 640;
   const height = 170;
@@ -93,16 +100,25 @@ export function AnalyticsPage() {
   const inflow = ANALYTICS[period].inflow;
   const sources = ANALYTICS[period].sources;
 
+  const periodInfo = PERIOD_FACTOR[period] ?? PERIOD_FACTOR.month;
+  const periodSum = Math.round(stats.sum * periodInfo.factor);
+  const margin = Math.round(periodSum * 0.26);
+
   const kpi = [
-    { label: "Сумма воронки", value: shortMoney(stats.sum), foot: `${myLeads.length} лидов`, color: "var(--stage-4)" },
+    {
+      label: "Сумма воронки",
+      value: shortMoney(periodSum),
+      foot: `${Math.round(myLeads.length * periodInfo.factor)} лидов ${periodInfo.label}`,
+      color: "var(--stage-4)",
+    },
     {
       label: "Конверсия",
-      value: `${Math.round((stats.potential / myLeads.length) * 100)}%`,
-      foot: "в потенциальных",
+      value: `${periodInfo.conversion}%`,
+      foot: `в потенциальных ${periodInfo.label}`,
       color: "var(--stage-5)",
     },
     { label: "Средний чек", value: shortMoney(stats.avg), foot: "по моим лидам", color: "var(--stage-1)" },
-    { label: "План месяца", value: "68%", foot: "490 из 720 тыс ₽", color: "var(--stage-2)" },
+    { label: "Маржа", value: shortMoney(margin), foot: `план ${shortMoney(Math.round(periodSum * 0.3))}`, color: "var(--stage-2)" },
   ];
 
   return (
