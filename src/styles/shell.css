@@ -620,12 +620,22 @@ html[data-theme="dark"] .plan {
     border-radius: var(--r-2);
   }
 
-  .topbar__actions .btn--primary span {
+  .new-lead-btn .btn__label {
     display: none;
   }
 
-  .topbar__actions .btn--primary {
-    padding: 0 12px;
+  .new-lead-btn {
+    padding: 0 11px;
+  }
+
+  .hide-sm {
+    display: none;
+  }
+
+  .topbar__actions .avatar--lg {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
   }
 }
 

@@ -225,15 +225,16 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
               Просрочено
               <b>{overdue}</b>
             </button>
-            <IconButton icon={Bell} label="Уведомления" />
+            <IconButton icon={Bell} label="Уведомления" className="hide-sm" />
             <IconButton
+              className="hide-sm"
               icon={theme === "dark" ? Sun : Moon}
               label={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             />
             {actions}
-            <Button variant="primary" icon={Plus} onClick={() => setLeadOpen(true)}>
-              Новый лид
+            <Button variant="primary" icon={Plus} className="new-lead-btn" onClick={() => setLeadOpen(true)}>
+              <span className="btn__label">Новый лид</span>
             </Button>
             <Avatar initials={ME.initials} size="lg" title={`${ME.name} · ${ME.role}`} />
           </div>
