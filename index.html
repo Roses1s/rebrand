@@ -1,23 +1,21 @@
 <!doctype html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ТрансЛайн CRM</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234560f0'/%3E%3Cpath d='M7 12h11v9H7z' fill='none' stroke='white' stroke-width='1.8'/%3E%3Cpath d='M18 15h4l3 3v3h-7z' fill='none' stroke='white' stroke-width='1.8'/%3E%3Ccircle cx='11' cy='23' r='2' fill='white'/%3E%3Ccircle cx='21' cy='23' r='2' fill='white'/%3E%3C/svg%3E"
-    />
-    <script>
-      // тема применяется до первой отрисовки, чтобы не было вспышки
-      (function () {
-        try {
-          var saved = localStorage.getItem('tl-theme');
-          var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.dataset.theme = saved || (dark ? 'dark' : 'light');
-        } catch (e) {}
-      })();
-    </script>
+    <title>CRM</title>
+    <style>
+      html,
+      body,
+      #root {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: #ffffff;
+        color: #111111;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
