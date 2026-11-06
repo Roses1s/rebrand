@@ -4,8 +4,8 @@ import { ME, STAGES } from "../mock/data";
 
 const LeadsContext = createContext(null);
 
-const STAGES_KEY = "crm.stages.v1";
-const LEADS_KEY = "crm.leads.v1";
+const STAGES_KEY = `crm.stages.${ME.id}.v1`;
+const LEADS_KEY = `crm.leads.${ME.id}.v1`;
 
 export const STAGE_COLORS = [
   "#3b82f6",
@@ -40,6 +40,16 @@ function save(key, value) {
   }
 }
 
+/** Этапы и лиды одного менеджера: лиды без своего этапа падают на первый. */
+function loadState() {
+  const stages = load(STAGES_KEY, DEFAULT_STAGES);
+  const known = new Set(stages.map((stage) => stage.id));
+  const leads = load(LEADS_KEY, DEFAULT_LEADS).map((lead) =>
+    known.has(lead.stageId) ? lead : { ...lead, stageId: stages[0].id },
+  );
+  return { stages, leads };
+}
+
 function nextStageId(stages) {
   return stages.reduce((max, stage) => Math.max(max, stage.id), 0) + 1;
 }
@@ -49,8 +59,9 @@ function nextStageId(stages) {
  * Каждый менеджер правит свою воронку — данные лежат под его ключом.
  */
 export function LeadsProvider({ children }) {
-  const [stages, setStages] = useState(() => load(STAGES_KEY, DEFAULT_STAGES));
-  const [leads, setLeads] = useState(() => load(LEADS_KEY, DEFAULT_LEADS));
+  const [initial] = useState(loadState);
+  const [stages, setStages] = useState(initial.stages);
+  const [leads, setLeads] = useState(initial.leads);
 
   useEffect(() => {
     save(STAGES_KEY, stages);
