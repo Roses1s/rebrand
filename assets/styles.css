@@ -1149,3 +1149,18 @@ kbd {
 .column-body.is-empty.is-filtered-empty::after { content: "Ничего не найдено"; }
 .card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .column { scroll-margin-left: 4px; }
+
+/* ---------- Низкие окна: не даём сайдбару «съесть» профиль ---------- */
+@media (max-height: 900px) and (min-width: 901px) {
+  .sidebar { gap: 10px; padding-top: 14px; }
+  .plan-card { display: none; }
+  .nav-label { margin: 8px 0 4px; }
+  .sidebar-foot { padding-top: 8px; }
+}
+
+@media (max-height: 760px) and (min-width: 901px) {
+  .workspace { display: none; }
+  .nav-item { padding: 6px 10px; }
+  .nav-label { margin: 6px 0 3px; }
+  .user-row { padding-top: 8px; }
+}
