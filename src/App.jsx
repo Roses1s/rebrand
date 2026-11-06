@@ -1,48 +1,33 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import { OverviewPage } from "./pages/OverviewPage";
-import { KanbanPage } from "./pages/KanbanPage";
+import { FunnelPage } from "./pages/FunnelPage";
+import { LeadPage } from "./pages/LeadPage";
+import { ClientsPage } from "./pages/ClientsPage";
+import { ShipmentsPage } from "./pages/ShipmentsPage";
+import { ShipmentPage } from "./pages/ShipmentPage";
+import { TasksPage } from "./pages/TasksPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { AccountingPage } from "./pages/AccountingPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { KitPage } from "./pages/KitPage";
-import { PlaceholderPage } from "./pages/PlaceholderPage";
 
-/**
- * Макет новой CRM. Вход и авторизация намеренно не рисуются:
- * приложение открывается сразу внутри системы.
- */
+/** Макет CRM. Вход и авторизация намеренно не рисуются. */
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<OverviewPage />} />
+        <Route path="/" element={<Navigate to="/crm" replace />} />
+        <Route path="/crm" element={<FunnelPage />} />
+        <Route path="/crm/leads/:id" element={<LeadPage />} />
+        <Route path="/customers" element={<ClientsPage />} />
+        <Route path="/shipments" element={<ShipmentsPage />} />
+        <Route path="/shipments/:id" element={<ShipmentPage />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/accounting" element={<AccountingPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/kit" element={<KitPage />} />
-
-        <Route path="/crm" element={<KanbanPage />} />
-        <Route
-          path="/crm/leads/:id"
-          element={<PlaceholderPage title="Карточка лида" crumb="CRM / Лиды / Карточка" step="4" />}
-        />
-        <Route
-          path="/shipments"
-          element={<PlaceholderPage title="Заявки" crumb="Логистика / Перевозки" step="5" />}
-        />
-        <Route
-          path="/shipments/:id"
-          element={<PlaceholderPage title="Карточка заявки" crumb="Логистика / Заявки / Карточка" step="5" />}
-        />
-        <Route
-          path="/customers"
-          element={<PlaceholderPage title="Клиенты" crumb="Справочник" step="6" />}
-        />
-        <Route
-          path="/accounting"
-          element={<PlaceholderPage title="Финансы" crumb="Бухгалтерия" step="6" />}
-        />
-        <Route
-          path="/admin"
-          element={<PlaceholderPage title="Администрирование" crumb="Настройки" step="6" />}
-        />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/crm" replace />} />
       </Routes>
     </BrowserRouter>
   );

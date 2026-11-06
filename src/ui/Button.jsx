@@ -5,7 +5,7 @@ import { cn } from "./cn";
  * ghost — второстепенное, quiet — «почти ссылка», danger — удаление.
  */
 export function Button({
-  variant = "ghost",
+  variant = "default",
   size = "md",
   icon: Icon,
   iconRight: IconRight,
@@ -16,7 +16,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={cn("btn", variant !== "ghost" && `btn--${variant}`, size !== "md" && `btn--${size}`, className)}
+      className={cn("btn", variant !== "default" && `btn--${variant}`, size !== "md" && `btn--${size}`, className)}
       {...props}
     >
       {Icon && <Icon size={size === "sm" ? 14 : 16} strokeWidth={1.9} />}

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Базовые элементы
+   Элементы интерфейса
    ========================================================================== */
 
 /* --- Кнопки ------------------------------------------------------------- */
@@ -9,10 +9,10 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  height: 38px;
-  padding: 0 15px;
+  height: 40px;
+  padding: 0 16px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-pill, 999px);
   background: var(--surface);
   color: var(--ink);
   font-size: 13px;
@@ -37,15 +37,15 @@
 }
 
 .btn--primary {
-  background: var(--grad-accent);
+  background: var(--grad);
   border-color: transparent;
   color: #fff;
   box-shadow: var(--shadow-accent);
 }
 
 .btn--primary:hover {
-  filter: brightness(1.05);
-  background: var(--grad-accent);
+  filter: brightness(1.04);
+  background: var(--grad);
   border-color: transparent;
 }
 
@@ -62,6 +62,32 @@
   color: var(--ink);
 }
 
+.btn--soft {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+
+.btn--soft:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: transparent;
+}
+
+.btn--success {
+  background: var(--money-soft);
+  border-color: transparent;
+  color: var(--money);
+  box-shadow: none;
+}
+
+.btn--info {
+  background: var(--info-soft);
+  border-color: transparent;
+  color: var(--info);
+  box-shadow: none;
+}
+
 .btn--danger {
   background: var(--danger-soft);
   border-color: transparent;
@@ -69,23 +95,21 @@
   box-shadow: none;
 }
 
-.btn--danger:hover {
-  background: color-mix(in srgb, var(--danger) 16%, transparent);
-  border-color: transparent;
-}
-
 .btn--sm {
   height: 32px;
-  padding: 0 11px;
+  padding: 0 12px;
   font-size: 12px;
-  border-radius: 9px;
 }
 
 .btn--lg {
   height: 44px;
-  padding: 0 20px;
+  padding: 0 22px;
   font-size: 14px;
-  border-radius: 12px;
+}
+
+.btn--icon {
+  width: 40px;
+  padding: 0;
 }
 
 .btn:disabled {
@@ -102,9 +126,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
   color: var(--ink-2);
   transition:
     background-color 140ms var(--ease),
@@ -112,7 +139,7 @@
 }
 
 .icon-btn:hover {
-  background: var(--surface-3);
+  background: var(--surface-hover);
   color: var(--ink);
 }
 
@@ -126,9 +153,9 @@
 }
 
 .field__label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -142,10 +169,10 @@
 .select,
 .textarea {
   width: 100%;
-  height: 40px;
-  padding: 0 12px;
+  height: 42px;
+  padding: 0 13px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   color: var(--ink);
   font-size: 13px;
@@ -157,7 +184,7 @@
 .textarea {
   height: auto;
   min-height: 92px;
-  padding: 10px 12px;
+  padding: 11px 13px;
   line-height: 1.55;
   resize: vertical;
 }
@@ -178,17 +205,17 @@
 .textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .select {
   appearance: none;
-  padding-right: 32px;
+  padding-right: 34px;
   background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
     linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
   background-position:
-    calc(100% - 16px) 17px,
-    calc(100% - 12px) 17px;
+    calc(100% - 17px) 18px,
+    calc(100% - 13px) 18px;
   background-size: 4px 4px;
   background-repeat: no-repeat;
 }
@@ -197,27 +224,21 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid transparent;
-  border-radius: var(--r-pill);
-  background: var(--surface-3);
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill, 999px);
+  background: var(--surface);
   color: var(--ink-3);
+  box-shadow: var(--shadow-xs);
   transition:
-    background-color 140ms var(--ease),
     border-color 140ms var(--ease),
     box-shadow 140ms var(--ease);
 }
 
-.search:hover {
-  background: var(--surface-2);
-  border-color: var(--line);
-}
-
 .search:focus-within {
-  background: var(--surface);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .search input {
@@ -237,28 +258,28 @@
 .search kbd {
   display: inline-flex;
   align-items: center;
-  height: 21px;
+  height: 22px;
   padding: 0 7px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: var(--surface);
+  background: var(--surface-2);
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--ink-3);
 }
 
-/* --- Метки и статусы ---------------------------------------------------- */
+/* --- Метки, статусы, бейджи --------------------------------------------- */
 
 .tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 24px;
-  padding: 0 9px;
-  border-radius: var(--r-pill);
+  padding: 0 10px;
+  border-radius: var(--r-pill, 999px);
   background: var(--surface-3);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 550;
   color: var(--ink-2);
   white-space: nowrap;
 }
@@ -273,10 +294,10 @@
 .status {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 24px;
-  padding: 0 9px;
-  border-radius: var(--r-pill);
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--r-pill, 999px);
   font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
@@ -310,14 +331,43 @@
   color: var(--danger);
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 7px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.badge--high {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge--mid {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.badge--low {
+  background: var(--surface-3);
+  color: var(--ink-3);
+}
+
+/* --- Чипы и сегменты ---------------------------------------------------- */
+
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   height: 34px;
-  padding: 0 13px;
+  padding: 0 14px;
   border: 1px solid var(--line);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-pill, 999px);
   background: var(--surface);
   font-size: 12.5px;
   font-weight: 600;
@@ -335,32 +385,29 @@
 
 .chip[aria-pressed="true"],
 .chip--active {
-  background: var(--accent);
-  border-color: transparent;
-  color: #fff;
-  box-shadow: var(--shadow-accent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent-ink);
 }
 
 .chip__count {
   font-family: var(--font-mono);
   font-size: 11px;
-  opacity: 0.7;
+  opacity: 0.75;
 }
-
-/* --- Сегменты ----------------------------------------------------------- */
 
 .seg {
   display: inline-flex;
   gap: 2px;
   padding: 3px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-pill, 999px);
   background: var(--surface-3);
 }
 
 .seg button {
   height: 30px;
-  padding: 0 13px;
-  border-radius: var(--r-pill);
+  padding: 0 14px;
+  border-radius: var(--r-pill, 999px);
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ink-3);
@@ -380,50 +427,97 @@
   box-shadow: var(--shadow-xs);
 }
 
-/* --- Аватар ------------------------------------------------------------- */
+/* --- Аватары ------------------------------------------------------------ */
 
 .avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-pill);
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  width: 30px;
+  height: 30px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #6c5ce7, #a78bfa);
   color: #fff;
   font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-weight: 650;
   flex: none;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .avatar--teal {
-  background: linear-gradient(135deg, #14b8a6, #0ea5e9);
+  background: linear-gradient(135deg, #14b8a6, #22d3ee);
 }
 
 .avatar--amber {
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  background: linear-gradient(135deg, #f59e0b, #f97316);
 }
 
 .avatar--pink {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+}
+
+.avatar--green {
+  background: linear-gradient(135deg, #10b981, #34d399);
 }
 
 .avatar--slate {
-  background: linear-gradient(135deg, #64748b, #334155);
+  background: linear-gradient(135deg, #64748b, #475569);
+}
+
+.avatar--sm {
+  width: 24px;
+  height: 24px;
+  font-size: 9px;
 }
 
 .avatar--lg {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   font-size: 13px;
 }
 
 .avatar--xl {
-  width: 52px;
-  height: 52px;
-  font-size: 16px;
+  width: 56px;
+  height: 56px;
+  font-size: 17px;
+}
+
+/* --- Иконочные плитки --------------------------------------------------- */
+
+.tile {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex: none;
+}
+
+.tile--green {
+  background: var(--money-soft);
+  color: var(--money);
+}
+
+.tile--amber {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.tile--rose {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.tile--blue {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.tile--slate {
+  background: var(--surface-3);
+  color: var(--ink-3);
 }
 
 /* --- Карточки ----------------------------------------------------------- */
@@ -432,7 +526,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-2);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .card__head {
@@ -444,16 +538,15 @@
 }
 
 .card__title {
-  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.015em;
 }
 
 .card__sub {
+  margin-top: 2px;
   font-size: 12px;
   color: var(--ink-3);
-  margin-top: 2px;
 }
 
 .card__body {
@@ -472,13 +565,13 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  height: 40px;
-  padding: 0 14px;
+  height: 46px;
+  padding: 0 18px;
   background: var(--surface-2);
   border-bottom: 1px solid var(--line);
   font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 650;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink-3);
   text-align: left;
@@ -487,9 +580,9 @@
 
 .table td {
   height: var(--row-h);
-  padding: 0 14px;
+  padding: 10px 18px;
   border-bottom: 1px solid var(--line);
-  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .table tbody tr {
@@ -500,12 +593,11 @@
   background: var(--surface-2);
 }
 
-.table .num,
-.table .mono {
-  text-align: right;
+.table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
-/* --- Состояния ---------------------------------------------------------- */
+/* --- Пустые состояния и скелетоны --------------------------------------- */
 
 .empty {
   display: flex;
@@ -519,9 +611,8 @@
 }
 
 .empty__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   width: 48px;
   height: 48px;
   margin-bottom: 2px;
@@ -531,9 +622,8 @@
 }
 
 .empty__title {
-  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
 }
 
@@ -569,14 +659,14 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: color-mix(in srgb, #0b0d12 40%, transparent);
+  background: color-mix(in srgb, #17162c 42%, transparent);
   backdrop-filter: blur(4px);
   animation: fade 150ms var(--ease);
 }
 
 .modal {
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   border: 1px solid var(--line);
   border-radius: var(--r-3);
   background: var(--surface);
@@ -588,28 +678,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 22px 0;
+  padding: 22px 24px 0;
 }
 
 .modal__title {
-  font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 650;
 }
 
 .modal__body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 18px 22px 22px;
+  padding: 18px 24px 22px;
 }
 
 .modal__foot {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 0 22px 22px;
+  padding: 0 24px 22px;
 }
 
 @keyframes fade {
@@ -622,14 +710,5 @@
   from {
     opacity: 0;
     transform: translateY(8px) scale(0.985);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
   }
 }

@@ -21,24 +21,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Мягкое свечение сверху — без него плоский фон выглядит «казённо» */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 420px;
-  background: var(--grad-glow);
-  pointer-events: none;
-  z-index: 0;
-}
-
 h1,
 h2,
 h3,
 h4 {
   margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.025em;
 }
 
@@ -67,8 +55,7 @@ button {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 25%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 :focus-visible {
@@ -110,17 +97,14 @@ button {
 
 .micro {
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
-.display {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1;
+.muted {
+  color: var(--ink-3);
 }
 
 .visually-hidden {
@@ -130,4 +114,13 @@ button {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

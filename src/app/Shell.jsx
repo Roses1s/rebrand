@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
+  BarChart3,
   Bell,
-  Gauge,
+  CheckSquare,
+  ChevronDown,
   KanbanSquare,
   Landmark,
+  LayoutGrid,
   Moon,
-  Package,
   Plus,
-  Settings2,
+  Settings,
   Sun,
   Users,
 } from "lucide-react";
@@ -16,28 +18,32 @@ import {
 import { Button, IconButton } from "../ui/Button";
 import { SearchInput } from "../ui/Field";
 import { Avatar } from "../ui/Tag";
-import { ME } from "../mock/data";
+import { ME, TEAM } from "../mock/data";
 
-const MODULES = [
-  { to: "/", label: "Обзор", icon: Gauge },
-  { to: "/crm", label: "Лиды", icon: KanbanSquare, badge: "13" },
-  { to: "/shipments", label: "Заявки", icon: Package, badge: "26" },
-  { to: "/customers", label: "Клиенты", icon: Users },
-  { to: "/accounting", label: "Финансы", icon: Landmark },
-  { to: "/admin", label: "Администрирование", icon: Settings2 },
+const SALES = [
+  { to: "/crm", label: "Воронка лидов", icon: KanbanSquare, count: "20" },
+  { to: "/customers", label: "Клиенты", icon: Users, count: "20" },
+  { to: "/shipments", label: "Заявки", icon: LayoutGrid, count: "26" },
+  { to: "/tasks", label: "Задачи", icon: CheckSquare, count: "5" },
+  { to: "/analytics", label: "Аналитика", icon: BarChart3 },
+  { to: "/accounting", label: "Бухгалтерия", icon: Landmark },
 ];
 
+const OTHER = [{ to: "/settings", label: "Настройки", icon: Settings }];
+
 const TITLES = {
-  "/": "Обзор",
-  "/crm": "Лиды",
-  "/shipments": "Заявки",
-  "/customers": "Клиенты",
-  "/accounting": "Финансы",
-  "/admin": "Администрирование",
-  "/kit": "Дизайн-система",
+  "/": ["Воронка лидов", "Перетаскивайте карточки между этапами — изменения сохраняются автоматически"],
+  "/crm": ["Воронка лидов", "Перетаскивайте карточки между этапами — изменения сохраняются автоматически"],
+  "/customers": ["Клиенты", "База компаний-грузоотправителей и контактов"],
+  "/shipments": ["Заявки", "Перевозки, маршруты и статусы отгрузок"],
+  "/tasks": ["Задачи", "Звонки, письма и напоминания по лидам"],
+  "/analytics": ["Аналитика", "Конверсия воронки, источники и результаты команды"],
+  "/accounting": ["Бухгалтерия", "Счета, банк и кассовые операции"],
+  "/settings": ["Настройки", "Тема оформления и структура воронки продаж"],
+  "/kit": ["Дизайн-система", "Служебная витрина компонентов"],
 };
 
-function useStoredFlag(key, initial) {
+function useStored(key, initial) {
   const [value, setValue] = useState(() => {
     try {
       return window.localStorage.getItem(key) ?? initial;
@@ -50,7 +56,7 @@ function useStoredFlag(key, initial) {
     try {
       window.localStorage.setItem(key, value);
     } catch {
-      /* приватный режим — просто не запоминаем */
+      /* приватный режим */
     }
   }, [key, value]);
 
@@ -59,107 +65,107 @@ function useStoredFlag(key, initial) {
 
 export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const { pathname } = useLocation();
-  const [theme, setTheme] = useStoredFlag("crm.theme", "light");
-  const [accent, setAccent] = useStoredFlag("crm.accent", "indigo");
+  const [theme, setTheme] = useStored("crm.theme", "light");
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.dataset.accent = accent;
-  }, [accent]);
-
-  const pageTitle = title ?? TITLES[pathname] ?? "CRM";
-  const initials = `${ME.first_name[0]}${ME.last_name[0]}`;
+  const [pageTitle, pageSub] = TITLES[pathname] ?? [title ?? "CRM", ""];
 
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand__mark">Д</span>
+          <span className="brand__mark">
+            <LayoutGrid size={20} strokeWidth={2} />
+          </span>
           <div>
-            <div className="brand__name">Detroid</div>
-            <div className="brand__sub">Логистическая CRM</div>
+            <div className="brand__name">ТрансЛайн CRM</div>
+            <div className="brand__sub">Грузоперевозки · Отдел продаж</div>
           </div>
         </div>
 
-        <nav className="sidebar__nav" aria-label="Модули">
-          {MODULES.map(({ to, label, icon: Icon, badge }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}
-            >
+        <div className="side-label">Продажи</div>
+        <nav className="side-nav" aria-label="Разделы">
+          {SALES.map(({ to, label, icon: Icon, count }) => (
+            <NavLink key={to} to={to} className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}>
               <Icon />
               <span>{label}</span>
-              {badge && <span className="nav-item__badge">{badge}</span>}
+              {count && <span className="nav-count">{count}</span>}
             </NavLink>
           ))}
         </nav>
 
-        <span className="sidebar__spacer" />
+        <div className="side-label">Настройки</div>
+        <nav className="side-nav" aria-label="Настройки">
+          {OTHER.map(({ to, label, icon: Icon }) => (
+            <NavLink key={to} to={to} className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}>
+              <Icon />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
 
-        <div className="sidebar__foot">
-          <div className="accent-row" role="group" aria-label="Цвет акцента">
-            {[
-              ["indigo", "#5b5bd6", "Индиго"],
-              ["violet", "#8b5cf6", "Фиолетовый"],
-              ["emerald", "#0d9488", "Изумрудный"],
-            ].map(([value, color, label]) => (
-              <button
-                key={value}
-                type="button"
-                className="accent-dot"
-                style={{ background: color, color }}
-                aria-label={label}
-                aria-pressed={accent === value}
-                onClick={() => setAccent(value)}
-              />
-            ))}
+        <div className="side-label">Команда</div>
+        <div className="team">
+          {TEAM.map((user) => (
+            <div key={user.id} className="team__row">
+              <Avatar initials={user.initials} color={user.color} />
+              <div style={{ minWidth: 0 }}>
+                <span className="team__name">{user.name}</span>
+                <span className="team__role">{user.role}</span>
+              </div>
+              <span className={`team__dot${user.online ? "" : " team__dot--off"}`} />
+            </div>
+          ))}
+        </div>
+
+        <div className="plan">
+          <div className="plan__title">План на месяц</div>
+          <div className="plan__sub">Закрыто 68% от 4,5 млн ₽</div>
+          <div className="plan__track">
+            <div className="plan__fill" style={{ width: "68%" }} />
           </div>
-          <div className="sidebar__actions">
-            <IconButton
-              icon={theme === "dark" ? Sun : Moon}
-              label={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            />
-            <IconButton icon={Bell} label="Уведомления" />
-          </div>
-          <button type="button" className="userchip">
-            <Avatar initials={initials} />
-            <span>
-              <span className="userchip__name">
-                {ME.first_name} {ME.last_name}
-              </span>
-              <span className="userchip__role">Менеджер</span>
-            </span>
-          </button>
         </div>
       </aside>
 
       <div className="content">
         <header className="topbar">
-          <div>
-            <div className="topbar__title">{pageTitle}</div>
-            {crumb && <div className="topbar__crumb">{crumb}</div>}
+          <div className="topbar__head">
+            <div className="topbar__title">{title ?? pageTitle}</div>
+            <div className="topbar__sub">{crumb ?? pageSub}</div>
           </div>
 
           <div className="topbar__search">
             <SearchInput
               value={search ?? query}
               onChange={onSearch ?? setQuery}
-              placeholder="Найти клиента, заявку или ИНН"
+              placeholder="Поиск: компания, груз, маршрут"
             />
           </div>
 
           <div className="topbar__actions">
+            <button type="button" className="counter-btn">
+              Все менеджеры
+              <ChevronDown size={14} strokeWidth={2} />
+            </button>
+            <button type="button" className="counter-btn">
+              Просрочено
+              <b>1</b>
+            </button>
+            <IconButton icon={Bell} label="Уведомления" />
+            <IconButton
+              icon={theme === "dark" ? Sun : Moon}
+              label={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            />
             {actions}
             <Button variant="primary" icon={Plus}>
-              Создать
+              Новый лид
             </Button>
+            <Avatar initials="АГ" size="lg" title={ME.name} />
           </div>
         </header>
 
