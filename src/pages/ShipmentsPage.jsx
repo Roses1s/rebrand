@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 
 import { Shell } from "../app/Shell";
-import { Avatar } from "../ui/Tag";
-import { OWNER, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
+import { ME, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
 import { money } from "../lib/format";
 
 const FILTERS = [
@@ -17,18 +16,21 @@ const FILTERS = [
 
 const TONE = { new: "new", checked: "progress", loaded: "done", unloaded: "done" };
 
+const myShipments = SHIPMENTS.filter((item) => item.ownerId === ME.id);
+
 export function ShipmentsPage() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
 
-  const rows = SHIPMENTS.filter((item) => filter === "all" || item.status === filter);
+  const rows = myShipments.filter((item) => filter === "all" || item.status === filter);
   const marginOf = (item) => item.customerPrice - item.carrierPrice;
 
   return (
     <Shell>
       <div className="toolbar">
         {FILTERS.map((item) => {
-          const count = item.value === "all" ? SHIPMENTS.length : SHIPMENTS.filter((s) => s.status === item.value).length;
+          const count =
+            item.value === "all" ? myShipments.length : myShipments.filter((s) => s.status === item.value).length;
           return (
             <button
               key={item.value}
@@ -42,6 +44,12 @@ export function ShipmentsPage() {
             </button>
           );
         })}
+
+        <div className="toolbar__right">
+          <span className="muted" style={{ fontSize: 11.5 }}>
+            Только мои заявки
+          </span>
+        </div>
       </div>
 
       <div className="table-wrap">
@@ -55,13 +63,11 @@ export function ShipmentsPage() {
               <th style={{ textAlign: "right" }}>Клиент</th>
               <th style={{ textAlign: "right" }}>Перевозчик</th>
               <th style={{ textAlign: "right" }}>Маржа</th>
-              <th>Менеджер</th>
               <th>Создан</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((item) => {
-              const owner = OWNER(item.ownerId);
               const margin = marginOf(item);
               return (
                 <tr key={item.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/shipments/${item.id}`)}>
@@ -71,7 +77,7 @@ export function ShipmentsPage() {
                   <td className="cell-main">{item.client}</td>
                   <td>
                     <div className="cell-main">{item.route}</div>
-                    <div className="cell-sub">{SHIPMENT_STATUS[item.status].label}</div>
+                    <div className="cell-sub">{item.cargo.type}</div>
                   </td>
                   <td>
                     <span className={`status status--${TONE[item.status]}`}>{SHIPMENT_STATUS[item.status].label}</span>
@@ -80,12 +86,6 @@ export function ShipmentsPage() {
                   <td className="cell-money muted">{money(item.carrierPrice)}</td>
                   <td className={`cell-money ${margin >= 0 ? "cell-money--plus" : "cell-money--minus"}`}>
                     {margin >= 0 ? "+" : "−"} {money(Math.abs(margin))}
-                  </td>
-                  <td>
-                    <div className="row" style={{ gap: 8 }}>
-                      <Avatar initials={owner.initials} color={owner.color} size="sm" />
-                      <span style={{ fontSize: 12.5 }}>{owner.name.split(" ")[0]}</span>
-                    </div>
                   </td>
                   <td className="cell-sub">{item.created}</td>
                 </tr>

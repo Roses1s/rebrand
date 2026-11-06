@@ -19,7 +19,7 @@ import {
 import { Shell } from "../app/Shell";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status, Tag } from "../ui/Tag";
-import { ALL_LEADS, OWNER, PRIORITY, SHIPMENTS, STAGES } from "../mock/data";
+import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS, STAGES } from "../mock/data";
 import { money } from "../lib/format";
 
 const FILES = [
@@ -52,6 +52,41 @@ export function LeadPage() {
           <Link to="/crm" className="btn">
             Вернуться к воронке
           </Link>
+        </div>
+      </Shell>
+    );
+  }
+
+  if (lead.ownerId !== ME.id) {
+    const colleague = OWNER(lead.ownerId);
+    return (
+      <Shell title="Карточка лида" crumb={`Воронка · ${lead.name}`}>
+        <Link to="/crm" className="back-link">
+          <ArrowLeft size={14} strokeWidth={2} />К воронке
+        </Link>
+
+        <div className="lead-head">
+          <span className="lead-head__logo">
+            <Building2 size={24} strokeWidth={1.8} />
+          </span>
+          <div className="grow">
+            <h1 className="lead-head__name">{lead.name}</h1>
+            <div className="lead-head__meta">
+              <span className="mono">ИНН {lead.inn}</span>
+              <span>{lead.city}</span>
+            </div>
+          </div>
+          <div className="lead-head__actions">
+            <Avatar initials={colleague.initials} color={colleague.color} size="lg" title={colleague.name} />
+            <span style={{ fontSize: 12, color: "var(--ink-2)" }}>{colleague.name}</span>
+          </div>
+        </div>
+
+        <div className="stub">
+          <div>
+            <b>Лид коллеги.</b> Активный лид другого менеджера открыт только для просмотра: название, ИНН и продавец.
+            Заявки, контакты и деньги доступны владельцу лида и администратору.
+          </div>
         </div>
       </Shell>
     );

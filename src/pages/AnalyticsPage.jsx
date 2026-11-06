@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { Segmented } from "../ui/Segmented";
 import { Avatar } from "../ui/Tag";
-import { ANALYTICS, TEAM } from "../mock/data";
+import { ANALYTICS, ME, STAGES } from "../mock/data";
+import { shortMoney } from "../lib/format";
 
 const PERIODS = [
   { value: "week", label: "Неделя" },
@@ -12,9 +13,11 @@ const PERIODS = [
   { value: "quarter", label: "Квартал" },
 ];
 
+const myLeads = STAGES.flatMap((stage) => stage.leads).filter((lead) => lead.ownerId === ME.id);
+
 function InflowChart({ data }) {
   const width = 640;
-  const height = 180;
+  const height = 170;
   const pad = 8;
   const max = Math.max(...data) || 1;
   const stepX = (width - pad * 2) / (data.length - 1);
@@ -29,7 +32,7 @@ function InflowChart({ data }) {
   const area = `${line} L${width - pad},${height - pad} L${pad},${height - pad} Z`;
 
   return (
-    <svg className="chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Поступление лидов">
+    <svg className="chart" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Поступление моих лидов">
       <defs>
         <linearGradient id="inflow" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.28" />
@@ -62,21 +65,59 @@ function InflowChart({ data }) {
 
 export function AnalyticsPage() {
   const [period, setPeriod] = useState("month");
-  const data = ANALYTICS[period];
+
+  const stats = useMemo(() => {
+    const sum = myLeads.reduce((total, lead) => total + lead.price, 0);
+    const potential = myLeads.filter((lead) => lead.stageId === 4).length;
+    const avg = Math.round(sum / myLeads.length);
+    return { sum, potential, avg };
+  }, []);
+
+  const funnel = useMemo(() => {
+    const max = Math.max(...STAGES.map((stage) => stage.leads.filter((l) => l.ownerId === ME.id).length)) || 1;
+    return STAGES.map((stage) => {
+      const leads = stage.leads.filter((lead) => lead.ownerId === ME.id);
+      return {
+        name: stage.name,
+        color: stage.color,
+        count: leads.length,
+        sum: leads.reduce((total, lead) => total + lead.price, 0),
+        width: Math.round((leads.length / max) * 92) + 8,
+      };
+    });
+  }, []);
+
+  const topDeals = useMemo(() => [...myLeads].sort((a, b) => b.price - a.price).slice(0, 4), []);
+  const maxDeal = topDeals[0]?.price ?? 1;
+
+  const inflow = ANALYTICS[period].inflow;
+  const sources = ANALYTICS[period].sources;
+
+  const kpi = [
+    { label: "Сумма воронки", value: shortMoney(stats.sum), foot: `${myLeads.length} лидов`, color: "var(--stage-4)" },
+    {
+      label: "Конверсия",
+      value: `${Math.round((stats.potential / myLeads.length) * 100)}%`,
+      foot: "в потенциальных",
+      color: "var(--stage-5)",
+    },
+    { label: "Средний чек", value: shortMoney(stats.avg), foot: "по моим лидам", color: "var(--stage-1)" },
+    { label: "План месяца", value: "68%", foot: "490 из 720 тыс ₽", color: "var(--stage-2)" },
+  ];
 
   return (
     <Shell>
       <div className="toolbar">
         <Segmented label="Период" value={period} onChange={setPeriod} options={PERIODS} />
         <div className="toolbar__right">
-          <button type="button" className="btn btn--sm">
-            Экспорт
-          </button>
+          <span className="muted" style={{ fontSize: 11.5 }}>
+            Только мои лиды
+          </span>
         </div>
       </div>
 
       <div className="kpi-grid" style={{ marginBottom: 14 }}>
-        {data.kpi.map((item) => (
+        {kpi.map((item) => (
           <div key={item.label} className="kpi" style={{ "--kpi": item.color }}>
             <span className="kpi__label">{item.label}</span>
             <span className="kpi__value">{item.value}</span>
@@ -93,12 +134,12 @@ export function AnalyticsPage() {
           <div className="card">
             <div className="card__head">
               <div>
-                <div className="card__title">Воронка продаж</div>
-                <div className="card__sub">Распределение лидов и сумма по этапам</div>
+                <div className="card__title">Моя воронка</div>
+                <div className="card__sub">Лиды и сумма по этапам</div>
               </div>
             </div>
             <div className="card__body">
-              {data.funnel.map((stage) => (
+              {funnel.map((stage) => (
                 <div key={stage.name} className="bar-row">
                   <span className="bar-row__name">
                     <span className="bar-row__dot" style={{ background: stage.color }} />
@@ -108,7 +149,7 @@ export function AnalyticsPage() {
                     <span className="bar-row__fill" style={{ width: `${stage.width}%`, background: stage.color }} />
                   </span>
                   <span className="bar-row__value">
-                    {stage.count} · {stage.sum}
+                    {stage.count} · {shortMoney(stage.sum)}
                   </span>
                 </div>
               ))}
@@ -123,14 +164,14 @@ export function AnalyticsPage() {
               </div>
             </div>
             <div className="card__body">
-              <InflowChart data={data.inflow} />
+              <InflowChart data={inflow} />
               <div className="chart-legend">
                 <span>
                   <span className="bar-row__dot" style={{ background: "var(--accent)" }} />
-                  Новые лиды
+                  Мои новые лиды
                 </span>
                 <span style={{ marginLeft: "auto" }}>
-                  Всего: <b style={{ color: "var(--ink)" }}>{data.inflow.reduce((a, b) => a + b, 0)}</b>
+                  Всего: <b style={{ color: "var(--ink)" }}>{inflow.reduce((a, b) => a + b, 0)}</b>
                 </span>
               </div>
             </div>
@@ -141,39 +182,36 @@ export function AnalyticsPage() {
           <div className="card">
             <div className="card__head">
               <div>
-                <div className="card__title">Рейтинг менеджеров</div>
-                <div className="card__sub">По сумме сделок</div>
+                <div className="card__title">Крупные сделки</div>
+                <div className="card__sub">Мои лиды по сумме</div>
               </div>
             </div>
             <div className="card__body" style={{ paddingTop: 6 }}>
-              {data.managers.map((manager, index) => {
-                const person = TEAM[index] ?? TEAM[0];
-                return (
-                  <div key={manager.name} className="mgr-row">
-                    <Avatar initials={person.initials} color={person.color} />
-                    <div style={{ minWidth: 0 }}>
-                      <div className="mgr-row__name">{manager.name}</div>
-                      <div className="mgr-row__sub">{manager.leads} лидов в работе</div>
-                    </div>
-                    <span className="mgr-bar">
-                      <span className="mgr-bar__fill" style={{ width: `${manager.width}%`, background: manager.color }} />
-                    </span>
-                    <span className="mgr-row__sum">{manager.sum}</span>
+              {topDeals.map((deal) => (
+                <div key={deal.id} className="mgr-row">
+                  <Avatar initials={deal.name.replace(/[^А-Яа-яA-Za-z]/g, "").slice(0, 2)} size="sm" />
+                  <div style={{ minWidth: 0 }}>
+                    <div className="mgr-row__name truncate">{deal.name}</div>
+                    <div className="mgr-row__sub truncate">{deal.route}</div>
                   </div>
-                );
-              })}
+                  <span className="mgr-bar">
+                    <span className="mgr-bar__fill" style={{ width: `${Math.round((deal.price / maxDeal) * 100)}%` }} />
+                  </span>
+                  <span className="mgr-row__sum">{shortMoney(deal.price)}</span>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="card">
             <div className="card__head">
               <div>
-                <div className="card__title">Источники лидов</div>
+                <div className="card__title">Мои источники</div>
                 <div className="card__sub">Откуда приходят клиенты</div>
               </div>
             </div>
             <div className="card__body" style={{ paddingTop: 8 }}>
-              {data.sources.map((source) => (
+              {sources.map((source) => (
                 <div key={source.name} className="bar-row">
                   <span className="bar-row__name">{source.name}</span>
                   <span className="bar-row__track">

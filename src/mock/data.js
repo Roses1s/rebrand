@@ -4,10 +4,10 @@
  * lead.inn, shipment.customer_price и т.д.
  */
 
-export const ME = { id: 1, name: "Алексей Громов", role: "Руководитель отдела" };
+export const ME = { id: 1, name: "Алексей Громов", role: "Менеджер по продажам", initials: "АГ" };
 
 export const TEAM = [
-  { id: 1, initials: "АГ", name: "Алексей Громов", role: "Руководитель отдела", color: "", online: true },
+  { id: 1, initials: "АГ", name: "Алексей Громов", role: "Менеджер по продажам", color: "", online: true },
   { id: 2, initials: "МС", name: "Мария Соколова", role: "Менеджер по продажам", color: "avatar--pink", online: true },
   { id: 3, initials: "ИЛ", name: "Игорь Левченко", role: "Логист-менеджер", color: "avatar--green", online: true },
   { id: 4, initials: "ДК", name: "Дарья Ким", role: "Менеджер по продажам", color: "avatar--amber", online: false },
@@ -22,11 +22,11 @@ export const PRIORITY = {
 };
 
 const STAGE_META = [
-  { id: 1, name: "Новый", color: "var(--stage-1)", summary: "741 тыс ₽ · Необработанные лиды" },
-  { id: 2, name: "Перезвонить", color: "var(--stage-2)", summary: "451 тыс ₽ · Назначен повторный звонок" },
-  { id: 3, name: "Вышел на ЛПР", color: "var(--stage-3)", summary: "725 тыс ₽ · Контакт с лицом, принимающим решение" },
-  { id: 4, name: "Потенциальный", color: "var(--stage-4)", summary: "659 тыс ₽ · Высокая вероятность заявки" },
-  { id: 5, name: "Уехали, ждём заявку", color: "var(--stage-5)", summary: "339 тыс ₽ · Согласовали условия" },
+  { id: 1, name: "Новый", color: "var(--stage-1)", hint: "Необработанные лиды" },
+  { id: 2, name: "Перезвонить", color: "var(--stage-2)", hint: "Назначен повторный звонок" },
+  { id: 3, name: "Вышел на ЛПР", color: "var(--stage-3)", hint: "Контакт с ЛПР" },
+  { id: 4, name: "Потенциальный", color: "var(--stage-4)", hint: "Высокая вероятность заявки" },
+  { id: 5, name: "Уехали, ждём заявку", color: "var(--stage-5)", hint: "Согласовали условия" },
 ];
 
 function lead(partial) {
@@ -69,7 +69,7 @@ export const STAGES = [
         priority: "high",
         hot: true,
         due: "завтра 00:02",
-        ownerId: 2,
+        ownerId: 1,
         days: 1,
         stageId: 1,
       }),
@@ -86,7 +86,7 @@ export const STAGES = [
         price: 94000,
         priority: "mid",
         due: "завтра 22:02",
-        ownerId: 4,
+        ownerId: 1,
         days: 2,
         stageId: 1,
       }),
@@ -179,7 +179,7 @@ export const STAGES = [
         price: 128000,
         priority: "mid",
         due: "11 нояб.",
-        ownerId: 2,
+        ownerId: 1,
         days: 11,
         stageId: 2,
       }),
@@ -219,7 +219,7 @@ export const STAGES = [
         price: 310000,
         priority: "high",
         due: "08 нояб.",
-        ownerId: 3,
+        ownerId: 1,
         days: 9,
         stageId: 3,
       }),
@@ -292,7 +292,7 @@ export const STAGES = [
         price: 97000,
         priority: "mid",
         due: "08 нояб.",
-        ownerId: 4,
+        ownerId: 1,
         days: 8,
         stageId: 4,
       }),
@@ -366,7 +366,7 @@ export const STAGES = [
         price: 74000,
         priority: "mid",
         due: "сегодня 20:00",
-        ownerId: 2,
+        ownerId: 1,
         days: 4,
         stageId: 5,
       }),
@@ -521,9 +521,9 @@ export const SHIPMENTS = [
 
 export const TASKS = [
   { id: 1, type: "call", title: "Повторный звонок", company: "ООО «МебельГрад»", leadId: 6, time: "04 нояб., 10:00", phone: "+7 950 332-80-44", amount: 68000, ownerId: 2, status: "overdue" },
-  { id: 2, type: "call", title: "Квалифицировать лид", company: "ООО «ГлассТрейд»", leadId: 3, time: "сегодня 23:02", phone: "+7 977 015-83-49", amount: 320000, ownerId: 1, status: "today" },
+  { id: 2, type: "call", title: "Квалифицировать лид", company: "АО «Агро-Поволжье»", leadId: 3, time: "сегодня 23:02", phone: "+7 977 015-83-49", amount: 320000, ownerId: 1, status: "today" },
   { id: 3, type: "call", title: "Первичный звонок", company: "ООО «СтройТрансСервис»", leadId: 1, time: "завтра 00:02", phone: "+7 915 204-18-73", amount: 185000, ownerId: 2, status: "upcoming" },
-  { id: 4, type: "email", title: "Звонок: подтвердить условия", company: "ООО «Фарма-Склад»", leadId: 10, time: "завтра 01:02", phone: "+7 926 773-50-18", amount: 149000, ownerId: 1, status: "upcoming" },
+  { id: 4, type: "email", title: "Звонок: подтвердить условия", company: "ООО «ПолимерПак»", leadId: 10, time: "завтра 01:02", phone: "+7 926 773-50-18", amount: 149000, ownerId: 1, status: "upcoming" },
   { id: 5, type: "call", title: "Перезвонить после 16:00", company: "ООО «ХимПром Логистика»", leadId: 5, time: "завтра 03:02", phone: "+7 912 440-71-15", amount: 76000, ownerId: 1, status: "upcoming" },
   { id: 6, type: "quote", title: "Финальная ставка по маршруту", company: "АО «УралМеталлСнаб»", leadId: 12, time: "завтра 04:02", phone: "+7 922 811-09-54", amount: 268000, ownerId: 1, status: "upcoming" },
   { id: 7, type: "quote", title: "Отправить расчёт ставки", company: "ИП Кузнецов А. В.", leadId: 2, time: "завтра 09:00", phone: "+7 903 771-22-09", amount: 94000, ownerId: 4, status: "upcoming" },

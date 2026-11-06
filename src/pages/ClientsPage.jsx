@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Search } from "lucide-react";
+import { Building2, Lock, Search } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { Avatar } from "../ui/Tag";
-import { CLIENTS, OWNER } from "../mock/data";
+import { CLIENTS, ME, OWNER } from "../mock/data";
 import { money } from "../lib/format";
+
+const MY_COUNT = CLIENTS.filter((client) => client.ownerId === ME.id).length;
 
 const SEGMENTS = [
   { value: "all", label: "Все", count: CLIENTS.length },
-  { value: "active", label: "Активные", count: CLIENTS.length },
+  { value: "mine", label: "Мои", count: MY_COUNT },
   { value: "lost", label: "Проигранные", count: 0 },
 ];
 
@@ -22,6 +24,7 @@ export function ClientsPage() {
     const query = search.trim().toLowerCase();
     return CLIENTS.filter((client) => {
       if (segment === "lost") return false;
+      if (segment === "mine" && client.ownerId !== ME.id) return false;
       if (!query) return true;
       return [client.name, client.contact, client.city, client.route, client.cargo]
         .join(" ")
@@ -75,16 +78,25 @@ export function ClientsPage() {
           <tbody>
             {rows.map((client) => {
               const owner = OWNER(client.ownerId);
+              const locked = client.ownerId !== ME.id;
               return (
-                <tr key={client.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/crm/leads/${client.id}`)}>
+                <tr
+                  key={client.id}
+                  style={{ cursor: locked ? "default" : "pointer", opacity: locked ? 0.72 : 1 }}
+                  title={locked ? "Активный лид коллеги — доступны только название, ИНН и продавец" : undefined}
+                  onClick={() => !locked && navigate(`/crm/leads/${client.id}`)}
+                >
                   <td>
                     <div className="cell-company">
                       <span className="cell-logo">
-                        <Building2 size={16} strokeWidth={1.9} />
+                        {locked ? <Lock size={14} strokeWidth={1.9} /> : <Building2 size={16} strokeWidth={1.9} />}
                       </span>
                       <div style={{ minWidth: 0 }}>
                         <div className="cell-company__name">{client.name}</div>
-                        <div className="cell-company__sub">{client.city}</div>
+                        <div className="cell-company__sub">
+                          {client.city}
+                          {locked ? " · лид коллеги" : ""}
+                        </div>
                       </div>
                     </div>
                   </td>

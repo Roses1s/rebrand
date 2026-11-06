@@ -142,12 +142,12 @@ export function SettingsPage() {
             <div className="card__head">
               <div>
                 <div className="card__title">Демо-данные</div>
-                <div className="card__sub">Вернуть исходные лиды и этапы воронки</div>
+                <div className="card__sub">Вернуть стандартные этапы моей доски</div>
               </div>
             </div>
             <div className="card__body">
               <Button variant="danger" icon={Trash2}>
-                Сбросить CRM к демо-данным
+                Сбросить мою воронку
               </Button>
             </div>
           </div>
@@ -157,8 +157,8 @@ export function SettingsPage() {
           <div className="card">
             <div className="card__head">
               <div>
-                <div className="card__title">Этапы воронки</div>
-                <div className="card__sub">Название, цвет и порядок колонок</div>
+                <div className="card__title">Моя воронка</div>
+                <div className="card__sub">Название, цвет и порядок колонок — как у меня</div>
               </div>
               <Button size="sm" onClick={save} icon={saved ? Check : undefined}>
                 {saved ? "Сохранено" : "Сохранить"}
@@ -222,8 +222,8 @@ export function SettingsPage() {
 
           <div className="stub">
             <div>
-              <b>Как это работает в рабочей CRM.</b> Этапы принадлежат сотруднику: у каждого своя воронка. Переименование,
-              цвет и порядок уже поддерживаются API — в макете это те же действия на макетных данных.
+              <b>Почему так.</b> В рабочей CRM этапы принадлежат сотруднику: у каждого менеджера своя воронка, и её правки
+              не затрагивают доски коллег. Переименование, цвет и порядок уже поддерживаются API.
             </div>
           </div>
         </div>
