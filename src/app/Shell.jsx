@@ -14,6 +14,8 @@ import {
   LogOut,
   Menu,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Settings,
   ShieldCheck,
@@ -81,13 +83,19 @@ function useStored(key, initial) {
   return [value, setValue];
 }
 
-function NavGroup({ items }) {
+function NavGroup({ items, collapsed }) {
   return (
     <nav className="side-nav">
       {items.map(({ to, label, icon: Icon, count }) => (
-        <NavLink key={to} to={to} className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}>
+        <NavLink
+          key={to}
+          to={to}
+          title={collapsed ? label : undefined}
+          aria-label={collapsed ? label : undefined}
+          className={({ isActive }) => `nav-item${isActive ? " is-active" : ""}`}
+        >
           <Icon />
-          <span>{label}</span>
+          <span className="nav-item__label">{label}</span>
           {count && <span className="nav-count">{count}</span>}
         </NavLink>
       ))}
@@ -100,6 +108,9 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const navigate = useNavigate();
   const { leads, addLead } = useLeads();
   const [theme, setTheme] = useStored("crm.theme", "light");
+  // Свёрнутая панель: остаются только иконки. Выбор запоминается.
+  const [sidebar, setSidebar] = useStored("crm.sidebar", "open");
+  const collapsed = sidebar === "collapsed";
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
@@ -145,13 +156,13 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   }
 
   return (
-    <div className={menuOpen ? "app app--menu" : "app"}>
+    <div className={`app${menuOpen ? " app--menu" : ""}${collapsed ? " app--collapsed" : ""}`}>
       {menuOpen && <div className="scrim" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
 
-      <aside className="sidebar">
+      <aside className="sidebar" id="app-sidebar">
         <div className="brand">
           <span className="brand__logo" role="img" aria-label="CRM Детроид" title="CRM Детроид" />
-          <div>
+          <div className="brand__text">
             <div className="brand__name">CRM Детроид</div>
             <div className="brand__sub">Детроид · транспортная компания</div>
           </div>
@@ -165,19 +176,19 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
           </button>
         </div>
 
-        <div className="side-label">Продажи</div>
-        <NavGroup items={sales} />
+        <div className="side-label" title={collapsed ? "Продажи" : undefined}>Продажи</div>
+        <NavGroup items={sales} collapsed={collapsed} />
 
-        <div className="side-label">Отчёты</div>
-        <NavGroup items={REPORTS} />
+        <div className="side-label" title={collapsed ? "Отчёты" : undefined}>Отчёты</div>
+        <NavGroup items={REPORTS} collapsed={collapsed} />
 
-        <div className="side-label">Настройки</div>
-        <NavGroup items={SETTINGS} />
+        <div className="side-label" title={collapsed ? "Настройки" : undefined}>Настройки</div>
+        <NavGroup items={SETTINGS} collapsed={collapsed} />
 
         {ME.isAdmin && (
           <>
-            <div className="side-label">Администратор</div>
-            <NavGroup items={ADMIN} />
+            <div className="side-label" title={collapsed ? "Администратор" : undefined}>Администратор</div>
+            <NavGroup items={ADMIN} collapsed={collapsed} />
           </>
         )}
 
@@ -192,11 +203,17 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
 
           <div className="team__row" style={{ marginTop: 8 }}>
             <Avatar initials={ME.initials} />
-            <div style={{ minWidth: 0 }}>
+            <div className="team__text" style={{ minWidth: 0 }}>
               <span className="team__name">{ME.name}</span>
               <span className="team__role">{ME.role}</span>
             </div>
-            <button type="button" className="col__btn" aria-label="Выйти" title="Выйти" style={{ marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="col__btn team__exit"
+              aria-label="Выйти"
+              title="Выйти"
+              style={{ marginLeft: "auto" }}
+            >
               <LogOut size={15} strokeWidth={1.9} style={{ color: "var(--ink-3)" }} />
             </button>
           </div>
@@ -207,6 +224,18 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
         <header className="topbar">
           <button type="button" className="menu-btn" aria-label="Открыть меню" onClick={() => setMenuOpen(true)}>
             <Menu size={18} strokeWidth={2} />
+          </button>
+
+          <button
+            type="button"
+            className="collapse-btn"
+            aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
+            aria-expanded={!collapsed}
+            aria-controls="app-sidebar"
+            title={collapsed ? "Развернуть меню" : "Свернуть меню"}
+            onClick={() => setSidebar(collapsed ? "open" : "collapsed")}
+          >
+            {collapsed ? <PanelLeftOpen size={17} strokeWidth={1.9} /> : <PanelLeftClose size={17} strokeWidth={1.9} />}
           </button>
 
           <div className="topbar__head">

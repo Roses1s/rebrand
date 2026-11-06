@@ -22,6 +22,7 @@
   background: var(--surface);
   flex: none;
   overflow-y: auto;
+  transition: width 180ms var(--ease);
 }
 
 .brand {
@@ -657,6 +658,28 @@ html[data-theme="dark"] .plan {
   background: var(--surface-hover);
 }
 
+/* Свернуть / развернуть панель: только на десктопе. */
+
+.collapse-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink-3);
+  flex: none;
+  transition:
+    color 140ms var(--ease),
+    background-color 140ms var(--ease);
+}
+
+.collapse-btn:hover {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+
 .sidebar__close {
   display: none;
   place-items: center;
@@ -674,4 +697,88 @@ html[data-theme="dark"] .plan {
 
 .scrim {
   display: none;
+}
+
+/* --- Свёрнутая панель: только иконки ------------------------------------ */
+
+@media (max-width: 900px) {
+  .collapse-btn {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) {
+  .app--collapsed .sidebar {
+    width: 68px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .app--collapsed .brand {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .app--collapsed .brand__text {
+    display: none;
+  }
+
+  /* Подпись раздела превращается в тонкую линию-разделитель. */
+  .app--collapsed .side-label {
+    height: 1px;
+    margin: 10px 4px;
+    padding: 0;
+    background: var(--line);
+    font-size: 0;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .app--collapsed .nav-item {
+    position: relative;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+  }
+
+  .app--collapsed .nav-item__label {
+    display: none;
+  }
+
+  /* Счётчик остаётся точкой: видно, что в разделе есть новые записи. */
+  .app--collapsed .nav-count {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    display: block;
+    width: 6px;
+    height: 6px;
+    min-width: 0;
+    padding: 0;
+    border-radius: 99px;
+    background: var(--accent);
+    color: transparent;
+    font-size: 0;
+    overflow: hidden;
+  }
+
+  .app--collapsed .nav-item.is-active .nav-count {
+    background: var(--accent);
+  }
+
+  .app--collapsed .plan {
+    display: none;
+  }
+
+  .app--collapsed .team__row {
+    justify-content: center;
+    padding: 6px 0;
+  }
+
+  .app--collapsed .team__text,
+  .app--collapsed .team__dot,
+  .app--collapsed .team__exit {
+    display: none;
+  }
 }
