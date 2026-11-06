@@ -1,0 +1,2057 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ТрансЛайн CRM — Лиды</title>
+  <meta name="description" content="CRM для логистики: воронка лидов, заявки и перевозки в одном окне." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234560f0'/%3E%3Cpath d='M7 12h11v9H7z' fill='none' stroke='white' stroke-width='1.8'/%3E%3Cpath d='M18 15h4l3 3v3h-7z' fill='none' stroke='white' stroke-width='1.8'/%3E%3Ccircle cx='11' cy='23' r='2' fill='white'/%3E%3Ccircle cx='21' cy='23' r='2' fill='white'/%3E%3C/svg%3E" />
+  <style>
+/* ============================================================
+   ТрансЛайн CRM — стили
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  color-scheme: light;
+  --bg: #f4f6fb;
+  --column-bg: #eef1f8;
+  --surface: #ffffff;
+  --surface-soft: #f5f7fc;
+  --surface-hover: #edf1fa;
+  --surface-glass: rgba(255, 255, 255, 0.82);
+  --border: #e5e9f2;
+  --border-strong: #d7dce9;
+  --text: #131a2b;
+  --text-soft: #404a61;
+  --muted: #79839a;
+  --primary: #4560f0;
+  --primary-hover: #3450e2;
+  --primary-soft: rgba(69, 96, 240, 0.10);
+  --primary-text: #ffffff;
+  --success: #12b981;
+  --success-soft: rgba(18, 185, 129, 0.12);
+  --warning: #f5a524;
+  --danger: #ef4444;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 6px 18px -6px rgba(16, 24, 40, 0.14);
+  --shadow-lg: 0 28px 56px -18px rgba(16, 24, 40, 0.28);
+  --radius-lg: 16px;
+  --radius: 12px;
+  --radius-sm: 9px;
+  --sidebar-w: 264px;
+  --grid-grad: radial-gradient(900px 340px at 15% -10%, rgba(69, 96, 240, 0.07), transparent 70%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b0f16;
+  --column-bg: #10161f;
+  --surface: #151c26;
+  --surface-soft: #1b232f;
+  --surface-hover: #212b39;
+  --surface-glass: rgba(21, 28, 38, 0.82);
+  --border: #242e3c;
+  --border-strong: #334052;
+  --text: #e9eef7;
+  --text-soft: #c2ccdb;
+  --muted: #8793a8;
+  --primary: #6d88ff;
+  --primary-hover: #839aff;
+  --primary-soft: rgba(109, 136, 255, 0.16);
+  --primary-text: #0b1020;
+  --success: #2dd4a0;
+  --success-soft: rgba(45, 212, 160, 0.14);
+  --warning: #fbbf4b;
+  --danger: #f87171;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 22px -8px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 30px 60px -20px rgba(0, 0, 0, 0.75);
+  --grid-grad: radial-gradient(900px 340px at 15% -10%, rgba(109, 136, 255, 0.12), transparent 70%);
+}
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  background-image: var(--grid-grad);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+::selection { background: var(--primary); color: #fff; }
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.ico {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Скроллбары ---------- */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; }
+
+/* ============================================================
+   Каркас
+   ============================================================ */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main {
+ display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ============================================================
+   Сайдбар
+   ============================================================ */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 14px 14px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 60;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 0; }
+
+.brand-mark {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(140deg, #5b74ff, #3a4fe0 65%, #3143c9);
+  box-shadow: 0 6px 16px -6px rgba(69, 96, 240, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.brand-mark .ico { width: 21px; height: 21px; stroke-width: 1.6; }
+
+.brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+.brand-text strong { font-size: 15px; letter-spacing: -0.01em; }
+.brand-text span { font-size: 11.5px; color: var(--muted); }
+
+.sidebar-close { display: none; margin-left: auto; }
+
+.workspace {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  text-align: left;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+.workspace:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+
+.ws-avatar {
+  width: 30px; height: 30px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 9px;
+  font-size: 11.5px; font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.ws-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.ws-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-role { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-chev { margin-left: auto; width: 15px; height: 15px; color: var(--muted); }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-label {
+  margin: 12px 0 6px;
+  padding-left: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.nav-item .ico { width: 17.5px; height: 17.5px; color: var(--muted); transition: color 0.14s ease; }
+.nav-item:hover { background: var(--surface-soft); color: var(--text); }
+.nav-item:hover .ico { color: var(--text-soft); }
+
+.nav-item.is-active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+  position: relative;
+}
+.nav-item.is-active .ico { color: var(--primary); }
+.nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: -14px; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 18px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+}
+
+.nav-badge {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--primary);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.nav-badge--soft { color: var(--muted); background: var(--surface-soft); box-shadow: none; font-weight: 500; }
+
+.sidebar-foot { margin-top: auto; padding-top: 14px; display: flex; flex-direction: column; gap: 2px; }
+
+.plan-card {
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-soft);
+}
+.plan-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 11.5px; }
+.plan-name { color: var(--muted); }
+.plan-val { font-weight: 700; color: var(--text); }
+.plan-bar { height: 6px; margin: 8px 0 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.plan-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #6d88ff, #12b981); }
+.plan-hint { font-size: 10.5px; color: var(--muted); }
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  cursor: pointer;
+}
+.user-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.user-info strong { font-size: 12.5px; font-weight: 600; }
+.user-info span { font-size: 11px; color: var(--muted); }
+.user-row .icon-btn { margin-left: auto; }
+
+.sidebar-scrim { display: none; }
+
+.avatar {
+  --av: #4560f0;
+  width: 30px; height: 30px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--av);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+.avatar--lg { width: 34px; height: 34px; font-size: 11.5px; }
+
+/* ============================================================
+   Верхняя панель
+   ============================================================ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--surface-glass);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  flex: none;
+  z-index: 30;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.page-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.page-title h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; }
+
+.tag-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-soft);
+  white-space: nowrap;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  position: relative;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+.icon-btn:hover { background: var(--surface-soft); border-color: var(--border); color: var(--text); }
+.icon-btn .ico { width: 19px; height: 19px; }
+
+.dot-badge {
+  position: absolute; top: 8px; right: 9px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.theme-toggle {
+  position: relative;
+  width: 62px; height: 34px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.theme-toggle:hover { border-color: var(--border-strong); }
+.tt-ico {
+  position: absolute; top: 50%;
+  transform: translateY(-50%);
+  display: grid; place-items: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  transition: opacity 0.2s ease, transform 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.tt-ico .ico { width: 15px; height: 15px; }
+.tt-ico--sun { left: 3px; color: #f0a020; background: var(--surface); box-shadow: var(--shadow-sm); }
+.tt-ico--moon { right: 3px; color: var(--muted); opacity: 0.55; }
+[data-theme="dark"] .tt-ico--sun { opacity: 0.55; color: var(--muted); background: transparent; box-shadow: none; transform: translateY(-50%) rotate(-40deg); }
+[data-theme="dark"] .tt-ico--moon { opacity: 1; color: #a9bcff; background: rgba(109, 136, 255, 0.14); box-shadow: var(--shadow-sm); }
+
+.topbar-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+.user-chip:hover { border-color: var(--border-strong); background: var(--surface-soft); }
+.user-chip-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.user-chip .ico { width: 14px; height: 14px; color: var(--muted); }
+
+.only-mobile { display: none; }
+
+/* ============================================================
+   Контент
+   ============================================================ */
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 24px 14px;
+  overflow: hidden;
+}
+
+/* ---------- Тулбар ---------- */
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: none; }
+
+.search {
+  position: relative;
+  flex: 1 1 300px;
+  max-width: 440px;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.search .ico { width: 17px; height: 17px; color: var(--muted); }
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+}
+.search input::placeholder { color: var(--muted); }
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+kbd {
+  display: grid; place-items: center;
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding-left: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.select-wrap:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.select-wrap > .ico { width: 16px; height: 16px; color: var(--muted); }
+.select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 100%;
+  padding: 0 30px 0 8px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+.select-wrap .chev { position: absolute; right: 9px; width: 14px; height: 14px; pointer-events: none; }
+.select-wrap--wide { width: 100%; height: 40px; background: var(--surface); }
+.select-wrap--wide select { width: 100%; }
+
+.toolbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+.btn .ico { width: 16px; height: 16px; stroke-width: 1.9; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #5a72f7, var(--primary) 70%);
+  box-shadow: 0 6px 14px -6px rgba(69, 96, 240, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.btn-primary:hover { background: linear-gradient(180deg, #6a81ff, var(--primary-hover) 70%); }
+
+.btn-ghost {
+  color: var(--text-soft);
+  background: var(--surface);
+  border-color: var(--border);
+}
+.btn-ghost:hover { background: var(--surface-soft); border-color: var(--border-strong); color: var(--text); }
+
+/* ---------- KPI ---------- */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; flex: none; }
+
+.kpi {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+.kpi:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.kpi-ico {
+  width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px;
+}
+.kpi-ico .ico { width: 19px; height: 19px; }
+.kpi-ico--blue { color: #4560f0; background: rgba(69, 96, 240, 0.11); }
+.kpi-ico--violet { color: #8b5cf6; background: rgba(139, 92, 246, 0.12); }
+.kpi-ico--green { color: #0ea47a; background: rgba(16, 185, 129, 0.12); }
+.kpi-ico--orange { color: #e8871e; background: rgba(245, 165, 36, 0.15); }
+[data-theme="dark"] .kpi-ico--blue { color: #8ea2ff; }
+[data-theme="dark"] .kpi-ico--violet { color: #b79bff; }
+[data-theme="dark"] .kpi-ico--green { color: #4ade9f; }
+[data-theme="dark"] .kpi-ico--orange { color: #ffc465; }
+
+.kpi-body { min-width: 0; }
+.kpi-label { font-size: 11.5px; font-weight: 500; color: var(--muted); letter-spacing: 0.01em; }
+.kpi-value {
+  margin: 2px 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-delta {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-delta .ico { width: 13px; height: 13px; }
+.kpi-delta.is-up { color: var(--success); }
+
+/* ---------- Канбан ---------- */
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+}
+
+.board {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  height: 100%;
+  min-width: max-content;
+}
+
+.column {
+  --stage: #4560f0;
+  width: 292px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  background: var(--column-bg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  scroll-snap-align: start;
+  transition: background-color 0.2s ease;
+}
+
+.column-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 10px 9px 12px;
+  flex: none;
+}
+
+.stage-dot {
+  width: 8px; height: 8px; flex: none;
+  border-radius: 50%;
+  background: var(--stage);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--stage) 16%, transparent);
+}
+
+.column-title {
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.column-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-soft);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.column-sum {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.add-btn {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.add-btn:hover { background: var(--surface); color: var(--text); }
+.add-btn .ico { width: 15px; height: 15px; stroke-width: 2; }
+
+.column-body {
+  flex: 1;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 8px 8px;
+  overflow-y: auto;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: background-color 0.16s ease, box-shadow 0.16s ease;
+}
+.column-body.is-over {
+  background: color-mix(in srgb, var(--stage) 9%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--stage) 45%, transparent);
+}
+.column-body.is-empty::after {
+  content: "Перетащите лид сюда";
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  color: var(--muted);
+  border: 1px dashed var(--border-strong);
+}
+
+.column-footer { padding: 0 8px 9px; flex: none; }
+.column-add {
+  width: 100%;
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+.column-add:hover { background: var(--surface); color: var(--text); }
+.column-add .ico { width: 15px; height: 15px; }
+
+/* ---------- Карточка лида ---------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 11px 11px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: grab;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+.card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card:active { cursor: grabbing; }
+.card.is-dragging { opacity: 0.4; transform: rotate(-1.2deg) scale(0.99); }
+.card.is-flash { animation: cardFlash 1.1s ease; }
+
+@keyframes cardFlash {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); border-color: var(--primary); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+
+.card-top { display: flex; align-items: flex-start; gap: 6px; }
+.card-company {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-flag {
+  display: inline-flex; align-items: center; gap: 3px;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #e8871e;
+  background: rgba(245, 165, 36, 0.16);
+}
+.card-flag .ico { width: 11px; height: 11px; stroke-width: 2; }
+
+.card-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+  min-width: 0;
+}
+.card-contact .name { color: var(--text-soft); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-contact .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--border-strong); flex: none; }
+.card-contact .phone { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.card-route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  font-size: 11.5px;
+  font-weight: 500;
+  min-width: 0;
+}
+.route-point { display: flex; align-items: center; gap: 5px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.route-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); flex: none; }
+.route-dot.end { background: var(--stage, var(--primary)); }
+.route-line {
+  flex: 1;
+  min-width: 12px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 3px, transparent 3px 5px);
+}
+
+.card-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); min-width: 0; }
+.card-meta .ico { width: 13px; height: 13px; flex: none; }
+.card-meta span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 550;
+  color: var(--text-soft);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.card-price {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.card-date { margin-left: auto; font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.card-foot .avatar { width: 22px; height: 22px; font-size: 9.5px; }
+
+.board-hint {
+  display: flex; align-items: center; gap: 6px;
+  flex: none;
+  font-size: 11.5px;
+  color: var(--muted);
+  padding-left: 2px;
+}
+.board-hint .ico { width: 14px; height: 14px; }
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  padding: 40px;
+  color: var(--muted);
+}
+
+/* ============================================================
+   Drawer
+   ============================================================ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.45);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  z-index: 90;
+}
+.scrim.is-on { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed;
+  top: 0; right: 0;
+  width: min(420px, 100%);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(102%);
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 100;
+}
+.drawer.is-open { transform: none; }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.drawer-head-actions { display: flex; gap: 4px; }
+
+.stage-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--stage, var(--primary));
+  background: color-mix(in srgb, var(--stage, var(--primary)) 13%, transparent);
+}
+.stage-pill::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+}
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 18px 16px 26px; }
+.drawer-body h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
+.drawer-sub { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.drawer-sub a { color: var(--text-soft); font-variant-numeric: tabular-nums; }
+.drawer-sub a:hover { color: var(--primary); }
+
+.drawer-route {
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.drawer-route .route-point { font-size: 13px; font-weight: 600; }
+.drawer-route .route-line { min-width: 24px; }
+.drawer-route .ico { width: 15px; height: 15px; color: var(--muted); }
+
+.drawer-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.fact {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.fact-label { display: block; font-size: 10.5px; color: var(--muted); margin-bottom: 3px; }
+.fact-value { font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field > span { font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.field > span b { color: var(--danger); font-weight: 600; }
+.field input, .field select, .field textarea {
+  height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+.field input::placeholder { color: var(--muted); }
+.field input:focus, .field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.field .select-wrap { border: 0; padding: 0; height: 40px; background: transparent; }
+.field .select-wrap select { height: 40px; padding: 0 34px 0 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.field .select-wrap select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.field .select-wrap:focus-within { box-shadow: none; }
+.field .select-wrap .chev { right: 11px; }
+
+.drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.drawer-actions .btn { height: 40px; }
+
+.note-box {
+  display: flex;
+  gap: 9px;
+  margin-top: 16px;
+  padding: 11px 12px;
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  border: 1px dashed var(--border-strong);
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.note-box .ico { width: 15px; height: 15px; margin-top: 1px; flex: none; }
+
+.drawer-label {
+  margin: 22px 0 10px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.timeline li {
+  position: relative;
+  padding: 0 0 14px 18px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.timeline li::before {
+  content: "";
+  position: absolute; left: 0; top: 5px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+.timeline li::after {
+  content: "";
+  position: absolute; left: 3px; top: 14px; bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+.timeline li:last-child::after { display: none; }
+.timeline time { display: block; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* ============================================================
+   Модальное окно
+   ============================================================ */
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -46%) scale(0.97);
+  width: min(600px, calc(100% - 28px));
+  max-height: min(760px, calc(100dvh - 40px));
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 110;
+}
+.modal.is-open { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+.modal-head h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+.modal-head p { margin-top: 3px; font-size: 12px; color: var(--muted); }
+
+.modal-body { padding: 16px 20px 0; overflow-y: auto; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field--full { grid-column: 1 / -1; }
+
+.form-grid .field .select-wrap { height: 40px; padding: 0; border: 0; box-shadow: none; }
+.form-grid .field .select-wrap select { border: 1px solid var(--border); }
+
+.modal-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 18px -20px 0;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 18px 18px;
+}
+
+/* ============================================================
+   Тосты
+   ============================================================ */
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 200;
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100% - 24px);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.toast.is-out { animation: toastOut 0.2s ease forwards; }
+.toast .ico { width: 15px; height: 15px; }
+.toast--success .ico { color: var(--success); }
+.toast--info .ico { color: var(--primary); }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(6px) scale(0.97); } }
+
+/* ============================================================
+   Адаптив
+   ============================================================ */
+@media (max-width: 1100px) {
+  :root { --sidebar-w: 240px; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-value { font-size: 20px; }
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 100dvh; overflow: visible; }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 280px;
+    transform: translateX(-102%);
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.is-open { transform: none; }
+  .sidebar-close { display: grid; }
+
+  .sidebar-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 13, 22, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+    z-index: 50;
+  }
+  .sidebar-scrim.is-on { opacity: 1; pointer-events: auto; }
+
+  .only-mobile { display: grid; }
+
+  .main { min-height: 100dvh; }
+  .topbar { padding: 12px 16px; }
+  .content { padding: 14px 16px 12px; overflow: visible; height: auto; }
+  .board-wrap { overflow-x: auto; overflow-y: visible; padding-bottom: 8px; }
+  .board { height: auto; min-height: 64vh; }
+  .column { max-height: none; height: auto; }
+  .column-body { overflow-y: visible; max-height: none; }
+  .user-chip-name, .search kbd { display: none; }
+  .hide-sm { display: none; }
+  .btn { padding: 0 12px; }
+  .board-hint { display: none; }
+}
+
+@media (max-width: 620px) {
+  .kpis { grid-template-columns: 1fr; gap: 8px; }
+  .kpi { padding: 12px; }
+  .kpi-value { font-size: 19px; }
+  .search { order: 1; flex: 1 1 100%; max-width: none; }
+  .select-wrap { order: 2; }
+  .toolbar-actions { order: 3; margin-left: auto; }
+  .page-title h1 { font-size: 18px; }
+  .tag-pill { display: none; }
+  .theme-toggle { width: 56px; height: 32px; }
+  .column { width: 84vw; }
+  .form-grid { grid-template-columns: 1fr; }
+  .drawer-actions { grid-template-columns: 1fr; }
+  .user-chip .avatar { width: 26px; height: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Дополнения ---------- */
+.column-body.is-empty.is-filtered-empty::after { content: "Ничего не найдено"; }
+.card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.column { scroll-margin-left: 4px; }
+
+</style>
+  <script>
+    // Тема применяется до отрисовки, чтобы не было вспышки
+    (function () {
+      try {
+        var saved = localStorage.getItem('tl-theme');
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = saved || (dark ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <!-- Иконки -->
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></symbol>
+    <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.6"/><rect x="9.5" y="4" width="5" height="10" rx="1.6"/><rect x="16" y="4" width="5" height="13" rx="1.6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3v5h5"/><path d="M19.5 21H4.5A1.5 1.5 0 0 1 3 19.5v-15A1.5 1.5 0 0 1 4.5 3H14l6 6v10.5A1.5 1.5 0 0 1 19.5 21z"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6.5h11v10h-11z"/><path d="M13.5 10h4l3.5 3.5v3h-7.5z"/><circle cx="6.5" cy="18.5" r="2"/><circle cx="17.5" cy="18.5" r="2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.6"/><path d="M2.6 20c0-3.6 2.9-6 6.4-6s6.4 2.4 6.4 6"/><path d="M17 4.9a3.6 3.6 0 0 1 0 6.9"/><path d="M18.6 14.4c1.9.8 3 2.4 3 4.6"/></symbol>
+    <symbol id="i-warehouse" viewBox="0 0 24 24"><path d="M2.5 9.5 12 4l9.5 5.5V21H2.5z"/><path d="M7 21v-6.5h10V21"/><path d="M7 17.5h10"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V11"/><path d="M10 20V4.5"/><path d="M16 20v-6"/><path d="M22 20H2"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13.5" rx="2.6"/><path d="M3 10h18"/><circle cx="17" cy="14.6" r="1.1"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.2a2.7 2.7 0 1 1 4 2.4c-.8.5-1.3 1.1-1.3 2v.4"/><circle cx="12" cy="17.2" r=".9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4-4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a7.1 7.1 0 0 0 11.1 11.1z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.2M12 19.8V22M2 12h2.2M19.8 12H22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M19.1 4.9l-1.6 1.6M6.5 17.5l-1.6 1.6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 5.5-2 6.5-2 6.5h16s-2-1-2-6.5"/><path d="M13.8 19a2 2 0 0 1-3.6 0"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M15.4 20.8A16.2 16.2 0 0 1 3.2 8.6a2 2 0 0 1 2-2.2h2.1a1 1 0 0 1 1 .8l.8 3a1 1 0 0 1-.3 1L7.6 12.4a12.3 12.3 0 0 0 4 4l1.2-1.2a1 1 0 0 1 1-.3l3 .8a1 1 0 0 1 .8 1v2.1a2 2 0 0 1-2.2 2z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.4" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m21 8-9-5-9 5v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v9"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3.2 2"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5 4.5 14H10l-1 7.5L18.5 10H13z"/></symbol>
+    <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="m7.5 10.5 4.5 4 4.5-4"/><path d="M4 20.5h16"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c0-4 3.4-6.6 7.5-6.6s7.5 2.6 7.5 6.6"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5.5" cy="6" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/><path d="M8 6h6.5a4 4 0 0 1 0 8H9a4 4 0 0 0 0 4h7"/></symbol>
+  </svg>
+
+  <div class="app">
+    <!-- ============ Сайдбар ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-truck"/></svg>
+        </div>
+        <div class="brand-text">
+          <strong>ТрансЛайн</strong>
+          <span>CRM для логистики</span>
+        </div>
+        <button class="icon-btn sidebar-close" id="sidebarClose" aria-label="Закрыть меню">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-x"/></svg>
+        </button>
+      </div>
+
+      <button class="workspace" data-placeholder="Переключение компании">
+        <span class="ws-avatar">ТЛ</span>
+        <span class="ws-info">
+          <span class="ws-name">ООО «ТрансЛайн»</span>
+          <span class="ws-role">Отдел продаж · 12 человек</span>
+        </span>
+        <svg viewBox="0 0 24 24" class="ico ws-chev"><use href="#i-chevron"/></svg>
+      </button>
+
+      <nav class="nav">
+        <p class="nav-label">Продажи</p>
+        <a class="nav-item" href="#" data-placeholder="Дашборд">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-grid"/></svg>
+          <span>Дашборд</span>
+        </a>
+        <a class="nav-item is-active" href="#" aria-current="page">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-kanban"/></svg>
+          <span>Лиды</span>
+          <span class="nav-badge" id="navLeadsCount">20</span>
+        </a>
+        <a class="nav-item" href="#" data-placeholder="Заявки">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-file"/></svg>
+          <span>Заявки</span>
+          <span class="nav-badge nav-badge--soft">7</span>
+        </a>
+
+        <p class="nav-label">Операции</p>
+        <a class="nav-item" href="#" data-placeholder="Грузы">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-truck"/></svg>
+          <span>Грузы</span>
+        </a>
+        <a class="nav-item" href="#" data-placeholder="Перевозчики">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-users"/></svg>
+          <span>Перевозчики</span>
+        </a>
+        <a class="nav-item" href="#" data-placeholder="Склады">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-warehouse"/></svg>
+          <span>Склады</span>
+        </a>
+
+        <p class="nav-label">Аналитика</p>
+        <a class="nav-item" href="#" data-placeholder="Отчёты">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-chart"/></svg>
+          <span>Отчёты</span>
+        </a>
+        <a class="nav-item" href="#" data-placeholder="Финансы">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-wallet"/></svg>
+          <span>Финансы</span>
+          <span class="nav-badge nav-badge--soft">new</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="plan-card">
+          <div class="plan-top">
+            <span class="plan-name">План месяца</span>
+            <span class="plan-val">78%</span>
+          </div>
+          <div class="plan-bar"><span style="width:78%"></span></div>
+          <p class="plan-hint">4,7 из 6 млн ₽ закрыто</p>
+        </div>
+
+        <a class="nav-item" href="#" data-placeholder="Настройки">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-gear"/></svg>
+          <span>Настройки</span>
+        </a>
+        <a class="nav-item" href="#" data-placeholder="Помощь">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-help"/></svg>
+          <span>Помощь и поддержка</span>
+        </a>
+
+        <div class="user-row" data-placeholder="Профиль пользователя">
+          <span class="avatar avatar--lg" style="--av:#4560f0">АС</span>
+          <span class="user-info">
+            <strong>Анна Смирнова</strong>
+            <span>Руководитель отдела</span>
+          </span>
+          <button class="icon-btn" aria-label="Меню профиля">
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-more"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+    <!-- ============ Основная часть ============ -->
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn only-mobile" id="menuBtn" aria-label="Открыть меню">
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-menu"/></svg>
+          </button>
+          <div class="page-title">
+            <h1>Лиды</h1>
+            <span class="tag-pill">Воронка продаж</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+            <span class="tt-ico tt-ico--sun"><svg viewBox="0 0 24 24" class="ico"><use href="#i-sun"/></svg></span>
+            <span class="tt-ico tt-ico--moon"><svg viewBox="0 0 24 24" class="ico"><use href="#i-moon"/></svg></span>
+          </button>
+          <button class="icon-btn" data-placeholder="Центр уведомлений" aria-label="Уведомления">
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-bell"/></svg>
+            <span class="dot-badge"></span>
+          </button>
+          <div class="topbar-sep"></div>
+          <button class="user-chip" data-placeholder="Профиль пользователя">
+            <span class="avatar" style="--av:#4560f0">АС</span>
+            <span class="user-chip-name">Анна С.</span>
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-chevron"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- Панель инструментов -->
+        <div class="toolbar">
+          <label class="search">
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-search"/></svg>
+            <input id="searchInput" type="search" placeholder="Поиск по компании, контакту или маршруту…" autocomplete="off" />
+            <kbd>/</kbd>
+          </label>
+
+          <div class="select-wrap">
+            <svg viewBox="0 0 24 24" class="ico"><use href="#i-user"/></svg>
+            <select id="managerFilter" aria-label="Фильтр по менеджеру">
+              <option value="all">Все менеджеры</option>
+            </select>
+            <svg viewBox="0 0 24 24" class="ico chev"><use href="#i-chevron"/></svg>
+          </div>
+
+          <div class="toolbar-actions">
+            <button class="btn btn-ghost" data-placeholder="Фильтры воронки">
+              <svg viewBox="0 0 24 24" class="ico"><use href="#i-sliders"/></svg>
+              <span class="hide-sm">Фильтры</span>
+            </button>
+            <button class="btn btn-ghost" data-placeholder="Импорт лидов">
+              <svg viewBox="0 0 24 24" class="ico"><use href="#i-import"/></svg>
+              <span class="hide-sm">Импорт</span>
+            </button>
+            <button class="btn btn-primary" id="addLeadBtn">
+              <svg viewBox="0 0 24 24" class="ico"><use href="#i-plus"/></svg>
+              Новый лид
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI -->
+        <section class="kpis" aria-label="Ключевые показатели">
+          <article class="kpi">
+            <span class="kpi-ico kpi-ico--blue"><svg viewBox="0 0 24 24" class="ico"><use href="#i-kanban"/></svg></span>
+            <div class="kpi-body">
+              <p class="kpi-label">Лидов в работе</p>
+              <p class="kpi-value" id="kpiTotal">20</p>
+              <p class="kpi-delta is-up"><svg viewBox="0 0 24 24" class="ico"><use href="#i-trend"/></svg> +4 за неделю</p>
+            </div>
+          </article>
+          <article class="kpi">
+            <span class="kpi-ico kpi-ico--violet"><svg viewBox="0 0 24 24" class="ico"><use href="#i-wallet"/></svg></span>
+            <div class="kpi-body">
+              <p class="kpi-label">Сумма воронки</p>
+              <p class="kpi-value" id="kpiSum">3,15 млн ₽</p>
+              <p class="kpi-delta is-up"><svg viewBox="0 0 24 24" class="ico"><use href="#i-trend"/></svg> +12,4% к октябрю</p>
+            </div>
+          </article>
+          <article class="kpi">
+            <span class="kpi-ico kpi-ico--green"><svg viewBox="0 0 24 24" class="ico"><use href="#i-box"/></svg></span>
+            <div class="kpi-body">
+              <p class="kpi-label">Средний чек</p>
+              <p class="kpi-value" id="kpiAvg">157 500 ₽</p>
+              <p class="kpi-delta"><svg viewBox="0 0 24 24" class="ico"><use href="#i-clock"/></svg> цикл сделки 6,2 дня</p>
+            </div>
+          </article>
+          <article class="kpi">
+            <span class="kpi-ico kpi-ico--orange"><svg viewBox="0 0 24 24" class="ico"><use href="#i-bolt"/></svg></span>
+            <div class="kpi-body">
+              <p class="kpi-label">Конверсия в заявку</p>
+              <p class="kpi-value" id="kpiConv">30%</p>
+              <p class="kpi-delta is-up"><svg viewBox="0 0 24 24" class="ico"><use href="#i-trend"/></svg> +2,4 пп</p>
+            </div>
+          </article>
+        </section>
+
+        <!-- Канбан -->
+        <section class="board-wrap">
+          <div class="board" id="board"></div>
+        </section>
+
+        <p class="board-hint">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-route"/></svg>
+          Перетаскивайте карточки между этапами — данные сохранятся до перезагрузки страницы.
+        </p>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Затемнение ============ -->
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ============ Боковая карточка лида ============ -->
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Карточка лида">
+    <header class="drawer-head">
+      <span class="stage-pill" id="drawerStagePill">Новый</span>
+      <div class="drawer-head-actions">
+        <button class="icon-btn" data-placeholder="Звонок из CRM" aria-label="Позвонить">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-phone"/></svg>
+        </button>
+        <button class="icon-btn" id="drawerClose" aria-label="Закрыть">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-x"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="drawer-body">
+      <h2 id="drawerCompany">—</h2>
+      <p class="drawer-sub" id="drawerContact">—</p>
+
+      <div class="drawer-route" id="drawerRoute"></div>
+
+      <div class="drawer-facts" id="drawerFacts"></div>
+
+      <label class="field">
+        <span>Этап воронки</span>
+        <div class="select-wrap select-wrap--wide">
+          <select id="drawerStageSelect"></select>
+          <svg viewBox="0 0 24 24" class="ico chev"><use href="#i-chevron"/></svg>
+        </div>
+      </label>
+
+      <div class="drawer-actions">
+        <a class="btn btn-primary" id="drawerCall" href="tel:+70000000000">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-phone"/></svg> Позвонить
+        </a>
+        <button class="btn btn-ghost" data-placeholder="Карточка заявки">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-file"/></svg> Открыть заявку
+        </button>
+      </div>
+
+      <div class="note-box">
+        <svg viewBox="0 0 24 24" class="ico"><use href="#i-clock"/></svg>
+        <p>История звонков, документы и переписка с клиентом появятся в следующих версиях.</p>
+      </div>
+
+      <p class="drawer-label">Активность</p>
+      <ul class="timeline" id="drawerTimeline"></ul>
+    </div>
+  </aside>
+
+  <!-- ============ Модальное окно: новый лид ============ -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <header class="modal-head">
+      <div>
+        <h2 id="modalTitle">Новый лид</h2>
+        <p>Заполните минимум — остальное можно добавить позже.</p>
+      </div>
+      <button class="icon-btn" id="modalClose" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" class="ico"><use href="#i-x"/></svg>
+      </button>
+    </header>
+
+    <form class="modal-body" id="leadForm">
+      <div class="form-grid">
+        <label class="field field--full">
+          <span>Компания <b>*</b></span>
+          <input name="company" required placeholder="ООО «Ромашка»" />
+        </label>
+        <label class="field">
+          <span>Контактное лицо</span>
+          <input name="contact" placeholder="Иван Петров" />
+        </label>
+        <label class="field">
+          <span>Телефон</span>
+          <input name="phone" type="tel" placeholder="+7 900 000-00-00" />
+        </label>
+        <label class="field">
+          <span>Откуда</span>
+          <input name="from" placeholder="Москва" />
+        </label>
+        <label class="field">
+          <span>Куда</span>
+          <input name="to" placeholder="Казань" />
+        </label>
+        <label class="field">
+          <span>Груз</span>
+          <input name="cargo" placeholder="Сборный груз, 12 т / 46 м³" />
+        </label>
+        <label class="field">
+          <span>Стоимость, ₽</span>
+          <input name="price" type="number" min="0" step="1000" placeholder="120000" />
+        </label>
+        <label class="field">
+          <span>Менеджер</span>
+          <div class="select-wrap select-wrap--wide">
+            <select name="manager" id="formManager"></select>
+            <svg viewBox="0 0 24 24" class="ico chev"><use href="#i-chevron"/></svg>
+          </div>
+        </label>
+        <label class="field">
+          <span>Этап</span>
+          <div class="select-wrap select-wrap--wide">
+            <select name="stage" id="formStage"></select>
+            <svg viewBox="0 0 24 24" class="ico chev"><use href="#i-chevron"/></svg>
+          </div>
+        </label>
+      </div>
+
+      <footer class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="modalCancel">Отмена</button>
+        <button type="submit" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" class="ico"><use href="#i-plus"/></svg> Создать лид
+        </button>
+      </footer>
+    </form>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script>
+/* ============================================================
+   ТрансЛайн CRM — логика главной страницы (воронка лидов)
+   ============================================================ */
+
+(() => {
+  'use strict';
+
+  /* ---------------- Справочники ---------------- */
+  const STAGES = [
+    { id: 'new',       name: 'Новый',          color: '#4f7cff' },
+    { id: 'callback',  name: 'Перезвонить',    color: '#f5a524' },
+    { id: 'lpr',       name: 'Вышел на ЛПР',   color: '#a855f7' },
+    { id: 'potential', name: 'Потенциальный',  color: '#10b981' },
+    { id: 'shipped',   name: 'Уехали',         color: '#06b6d4' },
+    { id: 'waiting',   name: 'Ждем заявку',    color: '#f43f5e' },
+  ];
+
+  const MANAGERS = [
+    { id: 'as', name: 'Анна Смирнова',  short: 'АС', color: '#4560f0' },
+    { id: 'dk', name: 'Дмитрий Ковалёв', short: 'ДК', color: '#8b5cf6' },
+    { id: 'iv', name: 'Ирина Волкова',   short: 'ИВ', color: '#0ea47a' },
+  ];
+
+  const stageById = (id) => STAGES.find((s) => s.id === id) || STAGES[0];
+  const managerById = (id) => MANAGERS.find((m) => m.id === id) || MANAGERS[0];
+
+  /* ---------------- Данные лидов ---------------- */
+  let leads = [
+    { id: 'l1',  stage: 'new',       company: 'ООО «Северный путь»',  contact: 'Игорь Мельник',   phone: '+7 921 455-12-08', from: 'Санкт-Петербург', to: 'Москва',          cargo: 'Сборный груз', weight: '12 т / 46 м³',  price: 96000,  manager: 'as', date: '2026-11-06', tags: ['сборный', 'B2B'], hot: false },
+    { id: 'l2',  stage: 'new',       company: 'ГК «АгроТрейд»',        contact: 'Марина Крылова',  phone: '+7 903 118-74-32', from: 'Воронеж',         to: 'Новороссийск',    cargo: 'Зерно',        weight: '20 т',          price: 148000, manager: 'dk', date: '2026-11-06', tags: ['фура', 'экспорт'], hot: true },
+    { id: 'l3',  stage: 'new',       company: 'ООО «МебельГрад»',      contact: 'Павел Дорохов',   phone: '+7 918 220-45-19', from: 'Краснодар',       to: 'Москва',          cargo: 'Мебель',       weight: '18 т / 74 м³',  price: 172000, manager: 'iv', date: '2026-11-05', tags: ['сборный'], hot: false },
+    { id: 'l4',  stage: 'new',       company: 'ООО «АкваМир»',         contact: 'Роман Тимофеев',  phone: '+7 909 512-33-70', from: 'Ростов-на-Дону',  to: 'Волгоград',       cargo: 'Реф. продукты', weight: '14 т',         price: 74000,  manager: 'iv', date: '2026-11-05', tags: ['реф'], hot: false },
+    { id: 'l5',  stage: 'new',       company: 'ГК «Русмолоко»',        contact: 'Тимур Исаев',     phone: '+7 913 770-28-14', from: 'Барнаул',         to: 'Новосибирск',     cargo: 'Молочная продукция', weight: '16 т',    price: 78000,  manager: 'as', date: '2026-11-04', tags: ['реф', 'FMCG'], hot: false },
+
+    { id: 'l6',  stage: 'callback',  company: 'ИП Сафин Р. Р.',         contact: 'Ринат Сафин',     phone: '+7 917 300-66-25', from: 'Казань',          to: 'Екатеринбург',    cargo: 'ТНП',          weight: '5 т / 20 м³',   price: 48000,  manager: 'as', date: '2026-11-04', tags: ['сборный'], hot: false },
+    { id: 'l7',  stage: 'callback',  company: 'ООО «ХимПром»',         contact: 'Анна Белова',     phone: '+7 910 442-19-83', from: 'Дзержинск',       to: 'Санкт-Петербург', cargo: 'Химия, ADR',   weight: '20 т',          price: 210000, manager: 'dk', date: '2026-11-03', tags: ['ADR', 'фура'], hot: true },
+    { id: 'l8',  stage: 'callback',  company: 'ООО «ТехноПарк»',       contact: 'Илья Громов',     phone: '+7 925 614-08-90', from: 'Москва',          to: 'Минск',           cargo: 'Электроника',  weight: '3 т / 12 м³',   price: 145000, manager: 'iv', date: '2026-11-03', tags: ['B2B', 'срочно'], hot: false },
+    { id: 'l9',  stage: 'callback',  company: 'ООО «МедТек»',          contact: 'Светлана Юрьева', phone: '+7 916 208-55-41', from: 'Москва',          to: 'Краснодар',       cargo: 'Медоборудование', weight: '2 т',        price: 88000,  manager: 'as', date: '2026-11-02', tags: ['B2B'], hot: false },
+
+    { id: 'l10', stage: 'lpr',       company: '«Балт-Строй»',          contact: 'Сергей Гущин',    phone: '+7 911 340-77-62', from: 'Калининград',     to: 'Смоленск',        cargo: 'Стройматериалы', weight: '20 т',        price: 265000, manager: 'iv', date: '2026-11-02', tags: ['фура'], hot: false },
+    { id: 'l11', stage: 'lpr',       company: '«СибирьТрансСервис»',   contact: 'Оксана Панова',   phone: '+7 912 505-14-37', from: 'Тюмень',          to: 'Омск',            cargo: 'Нефтепродукты', weight: '20 т',        price: 132000, manager: 'as', date: '2026-11-01', tags: ['цистерна'], hot: true },
+
+    { id: 'l12', stage: 'potential', company: 'ООО «ФрешЛогистик»',    contact: 'Ольга Ким',       phone: '+7 926 118-90-55', from: 'Москва',          to: 'Владивосток',     cargo: 'Реф. груз',    weight: '18 т',          price: 640000, manager: 'as', date: '2026-10-31', tags: ['реф', 'VIP'], hot: true },
+    { id: 'l13', stage: 'potential', company: 'ООО «УралМеталл»',      contact: 'Артём Соколов',   phone: '+7 919 330-62-18', from: 'Челябинск',       to: 'Москва',          cargo: 'Металл',       weight: '22 т',          price: 320000, manager: 'dk', date: '2026-10-30', tags: ['фура'], hot: false },
+    { id: 'l14', stage: 'potential', company: 'ООО «Гринлайн»',        contact: 'Максим Литвинов', phone: '+7 988 401-26-73', from: 'Сочи',            to: 'Москва',          cargo: 'Овощи, реф',   weight: '16 т',          price: 175000, manager: 'dk', date: '2026-10-30', tags: ['реф', 'FMCG'], hot: false },
+
+    { id: 'l15', stage: 'shipped',   company: '«ТД Восток»',           contact: 'Елена Егорова',   phone: '+7 923 445-71-02', from: 'Новосибирск',     to: 'Иркутск',         cargo: 'Оборудование', weight: '15 т / 82 м³',  price: 285000, manager: 'iv', date: '2026-10-29', tags: ['фура'], hot: false },
+    { id: 'l16', stage: 'shipped',   company: 'ООО «ПродСнаб»',        contact: 'Виктор Лазарев',  phone: '+7 903 771-38-24', from: 'Москва',          to: 'Тверь',           cargo: 'Продукты',     weight: '8 т',           price: 54000,  manager: 'as', date: '2026-10-28', tags: ['FMCG'], hot: false },
+    { id: 'l17', stage: 'shipped',   company: '«Логистик Плюс»',       contact: 'Наталья Реброва', phone: '+7 927 812-44-16', from: 'Самара',          to: 'Казань',          cargo: 'Сборный груз', weight: '9 т',           price: 61000,  manager: 'as', date: '2026-10-27', tags: ['сборный'], hot: false },
+
+    { id: 'l18', stage: 'waiting',   company: 'ООО «СтройБаза 24»',    contact: 'Дмитрий Орлов',   phone: '+7 902 118-63-09', from: 'Красноярск',      to: 'Кемерово',        cargo: 'Пиломатериалы', weight: '20 т',         price: 118000, manager: 'dk', date: '2026-10-27', tags: ['фура'], hot: false },
+    { id: 'l19', stage: 'waiting',   company: '«Альфа Ритейл»',        contact: 'Ксения Ветрова',  phone: '+7 917 605-77-31', from: 'Москва',          to: 'Нижний Новгород', cargo: 'FMCG',         weight: '10 т / 40 м³',  price: 92000,  manager: 'iv', date: '2026-10-26', tags: ['FMCG', 'срочно'], hot: true },
+    { id: 'l20', stage: 'waiting',   company: 'ООО «ПромСнаб Урал»',   contact: 'Кирилл Абрамов',  phone: '+7 922 340-55-87', from: 'Пермь',           to: 'Тюмень',          cargo: 'Трубы',        weight: '21 т',          price: 158000, manager: 'dk', date: '2026-10-25', tags: ['фура'], hot: false },
+  ];
+
+  /* ---------------- Хелперы ---------------- */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+
+  function formatDate(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return iso;
+    return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  }
+
+  const moneyFmt = new Intl.NumberFormat('ru-RU');
+  function money(n) {
+    return `${moneyFmt.format(Math.round(n || 0))} \u20BD`;
+  }
+  function moneyShort(n) {
+    if (n >= 1e6) return `${(n / 1e6).toFixed(2).replace('.', ',').replace(/,?0+$/, '')} млн ₽`;
+    if (n >= 1e3) return `${Math.round(n / 1e3)} тыс ₽`;
+    return money(n);
+  }
+  function escapeHtml(str = '') {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  const normalize = (str = '') => String(str).toLowerCase().replace(/[«»"'`]/g, '').replace(/\s+/g, ' ').trim();
+
+  const icon = (id, cls = 'ico') => `<svg viewBox="0 0 24 24" class="${cls}"><use href="#${id}"/></svg>`;
+
+  /* ---------------- DOM ---------------- */
+  const board = $('#board');
+  const searchInput = $('#searchInput');
+  const managerFilter = $('#managerFilter');
+  const kpiTotal = $('#kpiTotal');
+  const kpiSum = $('#kpiSum');
+  const kpiAvg = $('#kpiAvg');
+  const kpiConv = $('#kpiConv');
+  const navLeadsCount = $('#navLeadsCount');
+  const toasts = $('#toasts');
+  const scrim = $('#scrim');
+  const drawer = $('#drawer');
+  const modal = $('#modal');
+  const sidebar = $('#sidebar');
+  const sidebarScrim = $('#sidebarScrim');
+
+  let draggedId = null;
+  let overBody = null;
+  let openLeadId = null;
+
+  /* ---------------- Тосты ---------------- */
+  function toast(message, type = 'info') {
+    const el = document.createElement('div');
+    el.className = `toast toast--${type}`;
+    el.innerHTML = `${icon(type === 'success' ? 'i-check' : 'i-help')}<span>${escapeHtml(message)}</span>`;
+    toasts.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('is-out');
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+    }, 2600);
+  }
+
+  /* ---------------- Рендер карточки ---------------- */
+  function cardMarkup(lead) {
+    const m = managerById(lead.manager);
+    const stage = stageById(lead.stage);
+    const tags = (lead.tags || []).map((t) => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+    return `
+      <article class="card" draggable="true" data-id="${lead.id}" style="--stage:${stage.color}" tabindex="0" aria-label="Лид: ${escapeHtml(lead.company)}">
+        <div class="card-top">
+          <span class="card-company">${escapeHtml(lead.company)}</span>
+          ${lead.hot ? `<span class="card-flag">${icon('i-bolt')}срочно</span>` : ''}
+        </div>
+        <div class="card-contact">
+          <span class="name">${escapeHtml(lead.contact)}</span>
+          <span class="sep"></span>
+          <span class="phone">${escapeHtml(lead.phone)}</span>
+        </div>
+        <div class="card-route">
+          <span class="route-point"><span class="route-dot"></span>${escapeHtml(lead.from)}</span>
+          <span class="route-line"></span>
+          <span class="route-point"><span class="route-dot end"></span>${escapeHtml(lead.to)}</span>
+        </div>
+        <div class="card-meta">${icon('i-box')}<span>${escapeHtml(lead.cargo)} · ${escapeHtml(lead.weight)}</span></div>
+        ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+        <div class="card-foot">
+          <span class="card-price">${money(lead.price)}</span>
+          <span class="card-date">${formatDate(lead.date)}</span>
+          <span class="avatar" style="--av:${m.color}" title="${escapeHtml(m.name)}">${m.short}</span>
+        </div>
+      </article>`;
+  }
+
+  /* ---------------- Рендер доски ---------------- */
+  function getVisibleLeads() {
+    const q = normalize(searchInput.value);
+    const mgr = managerFilter.value;
+    return leads.filter((lead) => {
+      if (mgr !== 'all' && lead.manager !== mgr) return false;
+      if (!q) return true;
+      const haystack = normalize([lead.company, lead.contact, lead.phone, lead.from, lead.to, lead.cargo, ...(lead.tags || [])].join(' '));
+      return haystack.includes(q);
+    });
+  }
+
+  function renderBoard(flashId) {
+    const visible = getVisibleLeads();
+    const filtering = Boolean(normalize(searchInput.value)) || managerFilter.value !== 'all';
+
+    board.innerHTML = STAGES.map((stage) => {
+      const items = visible.filter((l) => l.stage === stage.id);
+      const sum = items.reduce((acc, l) => acc + l.price, 0);
+      const bodyClass = items.length ? '' : ` is-empty${filtering ? ' is-filtered-empty' : ''}`;
+
+      return `
+        <section class="column" data-stage="${stage.id}" style="--stage:${stage.color}" aria-label="${escapeHtml(stage.name)}">
+          <header class="column-head">
+            <span class="stage-dot"></span>
+            <span class="column-title">${escapeHtml(stage.name)}</span>
+            <span class="column-count">${items.length}</span>
+            <span class="column-sum">${items.length ? moneyShort(sum) : '—'}</span>
+            <button class="add-btn" data-add="${stage.id}" aria-label="Добавить лид в этап ${escapeHtml(stage.name)}">${icon('i-plus')}</button>
+          </header>
+          <div class="column-body${bodyClass}" data-drop="${stage.id}">
+            ${items.map(cardMarkup).join('')}
+          </div>
+          <div class="column-footer">
+            <button class="column-add" data-add="${stage.id}">${icon('i-plus')}Добавить лид</button>
+          </div>
+        </section>`;
+    }).join('');
+
+    if (flashId) {
+      const card = board.querySelector(`.card[data-id="${flashId}"]`);
+      if (card) {
+        card.classList.add('is-flash');
+        card.addEventListener('animationend', () => card.classList.remove('is-flash'), { once: true });
+        card.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    }
+  }
+
+  function updateKpis() {
+    const total = leads.length;
+    const sum = leads.reduce((acc, l) => acc + l.price, 0);
+    const avg = total ? sum / total : 0;
+    const inRequests = leads.filter((l) => l.stage === 'shipped' || l.stage === 'waiting').length;
+    const conv = total ? Math.round((inRequests / total) * 100) : 0;
+
+    kpiTotal.textContent = total;
+    kpiSum.textContent = moneyShort(sum);
+    kpiAvg.textContent = money(avg);
+    kpiConv.textContent = `${conv}%`;
+    navLeadsCount.textContent = total;
+  }
+
+  function renderAll(flashId) {
+    renderBoard(flashId);
+    updateKpis();
+  }
+
+  /* ---------------- Drag & drop ---------------- */
+  function clearOver() {
+    $$('.column-body.is-over', board).forEach((el) => el.classList.remove('is-over'));
+    overBody = null;
+  }
+
+  board.addEventListener('dragstart', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    draggedId = card.dataset.id;
+    card.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedId);
+  });
+
+  board.addEventListener('dragend', (e) => {
+    const card = e.target.closest('.card');
+    if (card) card.classList.remove('is-dragging');
+    clearOver();
+    draggedId = null;
+  });
+
+  board.addEventListener('dragover', (e) => {
+    const body = e.target.closest('.column-body');
+    if (!body || !draggedId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (overBody !== body) {
+      clearOver();
+      body.classList.add('is-over');
+      overBody = body;
+    }
+  });
+
+  board.addEventListener('dragleave', (e) => {
+    if (!board.contains(e.relatedTarget)) clearOver();
+  });
+
+  board.addEventListener('drop', (e) => {
+    const body = e.target.closest('.column-body');
+    if (!body || !draggedId) return;
+    e.preventDefault();
+
+    const lead = leads.find((l) => l.id === draggedId);
+    const stageId = body.dataset.drop;
+    clearOver();
+    draggedId = null;
+
+    if (!lead || lead.stage === stageId) {
+      renderAll();
+      return;
+    }
+    lead.stage = stageId;
+    lead.date = new Date().toISOString().slice(0, 10);
+    renderAll(lead.id);
+    toast(`«${lead.company}» → ${stageById(stageId).name}`, 'success');
+  });
+
+  /* ---------------- Клики по доске ---------------- */
+  board.addEventListener('click', (e) => {
+    const addBtn = e.target.closest('[data-add]');
+    if (addBtn) {
+      openModal(addBtn.dataset.add);
+      return;
+    }
+    const card = e.target.closest('.card');
+    if (card) openDrawer(card.dataset.id);
+  });
+
+  board.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const card = e.target.closest('.card');
+    if (!card) return;
+    e.preventDefault();
+    openDrawer(card.dataset.id);
+  });
+
+  /* ---------------- Drawer ---------------- */
+  const drawerStagePill = $('#drawerStagePill');
+  const drawerCompany = $('#drawerCompany');
+  const drawerContact = $('#drawerContact');
+  const drawerRoute = $('#drawerRoute');
+  const drawerFacts = $('#drawerFacts');
+  const drawerStageSelect = $('#drawerStageSelect');
+  const drawerCall = $('#drawerCall');
+  const drawerTimeline = $('#drawerTimeline');
+
+  function factMarkup(label, value) {
+    return `<div class="fact"><span class="fact-label">${label}</span><span class="fact-value">${value}</span></div>`;
+  }
+
+  function buildTimeline(lead) {
+    const stageIndex = STAGES.findIndex((s) => s.id === lead.stage);
+    const items = [{ text: 'Лид создан из формы на сайте', time: formatDate(lead.date) }];
+    if (stageIndex >= 1) items.push({ text: 'Звонок: обсудили маршрут и объём', time: `${formatDate(lead.date)}, 11:20` });
+    if (stageIndex >= 2) items.push({ text: 'Вышли на ЛПР, отправили коммерческое предложение', time: `${formatDate(lead.date)}, 15:05` });
+    if (stageIndex >= 3) items.push({ text: 'Подтвердили ставку, готовим заявку', time: `${formatDate(lead.date)}, 17:40` });
+    if (stageIndex >= 4) items.push({ text: 'Машина загружена, груз в пути', time: formatDate(lead.date) });
+    if (stageIndex >= 5) items.push({ text: 'Ждём заявку от клиента', time: formatDate(lead.date) });
+
+    return items
+      .slice()
+      .reverse()
+      .map((i) => `<li>${escapeHtml(i.text)}<time>${escapeHtml(i.time)}</time></li>`)
+      .join('');
+  }
+
+  function openDrawer(id) {
+    const lead = leads.find((l) => l.id === id);
+    if (!lead) return;
+    openLeadId = id;
+
+    const stage = stageById(lead.stage);
+    const m = managerById(lead.manager);
+
+    drawerStagePill.textContent = stage.name;
+    drawerStagePill.style.setProperty('--stage', stage.color);
+    drawerCompany.textContent = lead.company;
+    drawerContact.innerHTML = `${escapeHtml(lead.contact)} · <a href="tel:${lead.phone.replace(/[^+\d]/g, '')}">${escapeHtml(lead.phone)}</a>`;
+
+    drawerRoute.innerHTML = `
+      <span class="route-point"><span class="route-dot"></span>${escapeHtml(lead.from)}</span>
+      <span class="route-line"></span>
+      ${icon('i-truck')}
+      <span class="route-line"></span>
+      <span class="route-point"><span class="route-dot end" style="background:${stage.color}"></span>${escapeHtml(lead.to)}</span>`;
+
+    drawerFacts.innerHTML = [
+      factMarkup('Стоимость', money(lead.price)),
+      factMarkup('Груз', escapeHtml(lead.cargo)),
+      factMarkup('Вес / объём', escapeHtml(lead.weight)),
+      factMarkup('Менеджер', `${m.short} · ${escapeHtml(m.name.split(' ')[0])}`),
+    ].join('');
+
+    drawerStageSelect.innerHTML = STAGES.map(
+      (s) => `<option value="${s.id}"${s.id === lead.stage ? ' selected' : ''}>${escapeHtml(s.name)}</option>`
+    ).join('');
+
+    drawerCall.href = `tel:${lead.phone.replace(/[^+\d]/g, '')}`;
+    drawerTimeline.innerHTML = buildTimeline(lead);
+
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    updateScrim();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    openLeadId = null;
+    updateScrim();
+  }
+
+  drawerStageSelect.addEventListener('change', (e) => {
+    const lead = leads.find((l) => l.id === openLeadId);
+    if (!lead) return;
+    const next = e.target.value;
+    if (lead.stage === next) return;
+    lead.stage = next;
+    lead.date = new Date().toISOString().slice(0, 10);
+    renderAll(lead.id);
+    openDrawer(lead.id);
+    toast(`«${lead.company}» → ${stageById(next).name}`, 'success');
+  });
+
+  $('#drawerClose').addEventListener('click', closeDrawer);
+
+  /* ---------------- Модальное окно ---------------- */
+  const leadForm = $('#leadForm');
+  const formManager = $('#formManager');
+  const formStage = $('#formStage');
+
+  formManager.innerHTML = MANAGERS.map((m) => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('');
+  formStage.innerHTML = STAGES.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+
+  function openModal(stageId = 'new') {
+    leadForm.reset();
+    formStage.value = stageId;
+    formManager.value = 'as';
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    updateScrim();
+    setTimeout(() => $('#leadForm [name="company"]').focus(), 120);
+  }
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    updateScrim();
+  }
+
+  $('#addLeadBtn').addEventListener('click', () => openModal('new'));
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#modalCancel').addEventListener('click', closeModal);
+
+  leadForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(leadForm);
+    const company = String(data.get('company') || '').trim();
+    if (!company) return;
+
+    const price = Number(data.get('price')) || 0;
+    const lead = {
+      id: `l-${Date.now()}`,
+      stage: String(data.get('stage') || 'new'),
+      company,
+      contact: String(data.get('contact') || 'Контакт не указан').trim(),
+      phone: String(data.get('phone') || '+7 900 000-00-00').trim(),
+      from: String(data.get('from') || 'Не указано').trim(),
+      to: String(data.get('to') || 'Не указано').trim(),
+      cargo: String(data.get('cargo') || 'Уточняется').trim(),
+      weight: 'уточняется',
+      price,
+      manager: String(data.get('manager') || 'as'),
+      date: new Date().toISOString().slice(0, 10),
+      tags: ['новый'],
+      hot: false,
+    };
+
+    leads.unshift(lead);
+    renderAll(lead.id);
+    closeModal();
+    toast(`Лид «${lead.company}» создан`, 'success');
+  });
+
+  /* ---------------- Скрим / оверлеи ---------------- */
+  function updateScrim() {
+    const on = modal.classList.contains('is-open') || drawer.classList.contains('is-open');
+    scrim.classList.toggle('is-on', on);
+  }
+  scrim.addEventListener('click', () => {
+    if (modal.classList.contains('is-open')) closeModal();
+    else closeDrawer();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (modal.classList.contains('is-open')) closeModal();
+      else if (drawer.classList.contains('is-open')) closeDrawer();
+      else closeSidebar();
+    }
+    if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+
+  /* ---------------- Фильтры ---------------- */
+  managerFilter.innerHTML =
+    `<option value="all">Все менеджеры</option>` +
+    MANAGERS.map((m) => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('');
+
+  searchInput.addEventListener('input', () => renderBoard());
+  managerFilter.addEventListener('change', () => renderBoard());
+
+  /* ---------------- Тема ---------------- */
+  const themeToggle = $('#themeToggle');
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему');
+    try { localStorage.setItem('tl-theme', theme); } catch (e) {}
+  }
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    toast(next === 'dark' ? 'Тёмная тема включена' : 'Светлая тема включена');
+  });
+  applyTheme(document.documentElement.dataset.theme || 'light');
+
+  /* ---------------- Мобильный сайдбар ---------------- */
+  const menuBtn = $('#menuBtn');
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    sidebarScrim.classList.add('is-on');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    sidebarScrim.classList.remove('is-on');
+  }
+  menuBtn.addEventListener('click', openSidebar);
+  $('#sidebarClose').addEventListener('click', closeSidebar);
+  sidebarScrim.addEventListener('click', closeSidebar);
+
+  /* ---------------- Заглушки переходов ---------------- */
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-placeholder]');
+    if (!target) return;
+    e.preventDefault();
+    const label = target.dataset.placeholder;
+    toast(`«${label}» — раздел в разработке`, 'info');
+    if (sidebar.contains(target)) closeSidebar();
+  });
+
+  /* ---------------- Инициализация ---------------- */
+  renderAll();
+})();
+
+</script>
+</body>
+</html>
