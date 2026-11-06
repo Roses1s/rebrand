@@ -1,0 +1,668 @@
+/* ==========================================================================
+   Компактный масштаб: тот же дизайн, но плотнее.
+   Подключается последним и переопределяет размеры, не трогая цвета.
+   ========================================================================== */
+
+body {
+  font-size: 13px;
+}
+
+/* --- Панель ------------------------------------------------------------- */
+
+.sidebar {
+  width: 228px;
+  padding: 12px 10px 12px;
+}
+
+.brand {
+  gap: 9px;
+  padding: 2px 6px 8px;
+}
+
+.brand__mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.brand__mark svg {
+  width: 17px;
+  height: 17px;
+}
+
+.brand__name {
+  font-size: 13.5px;
+}
+
+.brand__sub {
+  font-size: 9.5px;
+}
+
+.side-label {
+  padding: 12px 8px 6px;
+  font-size: 9.5px;
+}
+
+.nav-item {
+  height: 36px;
+  gap: 9px;
+  padding: 0 9px;
+  font-size: 12.5px;
+}
+
+.nav-item svg {
+  width: 16.5px;
+  height: 16.5px;
+}
+
+.nav-count {
+  min-width: 20px;
+  height: 18px;
+  font-size: 9.5px;
+}
+
+.team__row {
+  gap: 8px;
+  padding: 5px 9px;
+}
+
+.team__name {
+  font-size: 11.5px;
+}
+
+.team__role {
+  font-size: 9.5px;
+}
+
+.team__dot {
+  width: 6px;
+  height: 6px;
+}
+
+.plan {
+  margin-top: 12px;
+  padding: 10px 11px 11px;
+}
+
+.plan__title {
+  font-size: 11.5px;
+}
+
+.plan__sub {
+  font-size: 10px;
+}
+
+.plan__track {
+  height: 5px;
+  margin-top: 8px;
+}
+
+/* --- Верхняя строка ----------------------------------------------------- */
+
+.topbar {
+  height: 64px;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.topbar__head {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.topbar__title {
+  font-size: 16px;
+}
+
+.topbar__sub {
+  font-size: 10px;
+}
+
+.topbar__search {
+  flex: 1 1 auto;
+  min-width: 140px;
+  max-width: 320px;
+}
+
+.topbar__actions {
+  flex: none;
+  gap: 6px;
+}
+
+.counter-btn {
+  height: 34px;
+  padding: 0 11px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  flex: none;
+}
+
+.counter-btn b {
+  min-width: 17px;
+  height: 17px;
+  font-size: 9.5px;
+}
+
+.btn {
+  height: 34px;
+  padding: 0 13px;
+  font-size: 12.5px;
+}
+
+.btn--sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11.5px;
+}
+
+.btn--lg {
+  height: 40px;
+  font-size: 13px;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.search {
+  height: 36px;
+  padding: 0 13px;
+}
+
+.search input {
+  font-size: 12px;
+}
+
+.search kbd {
+  height: 19px;
+  font-size: 9px;
+}
+
+.main {
+  padding: 2px 20px 28px;
+}
+
+.page__head {
+  margin-bottom: 14px;
+}
+
+.page__title {
+  font-size: 22px;
+}
+
+.page__sub {
+  font-size: 11.5px;
+}
+
+/* --- KPI ---------------------------------------------------------------- */
+
+.kpi-grid {
+  gap: 10px;
+}
+
+.kpi {
+  gap: 8px;
+  padding: 11px 12px 11px;
+  border-radius: 12px;
+}
+
+.kpi__label {
+  font-size: 9px;
+}
+
+.kpi__value {
+  font-size: 22px;
+}
+
+.kpi__value small {
+  font-size: 12px;
+}
+
+.kpi__foot {
+  font-size: 10.5px;
+}
+
+.tile {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.tile svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* --- Чипы, сегменты, аватары -------------------------------------------- */
+
+.toolbar {
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  height: 29px;
+  padding: 0 11px;
+  font-size: 11.5px;
+}
+
+.chip__count {
+  font-size: 10px;
+}
+
+.seg {
+  padding: 2px;
+}
+
+.seg button {
+  height: 26px;
+  padding: 0 11px;
+  font-size: 11.5px;
+}
+
+.tag {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10.5px;
+}
+
+.status {
+  height: 23px;
+  padding: 0 9px;
+  font-size: 10.5px;
+}
+
+.badge {
+  height: 20px;
+  padding: 0 7px;
+  font-size: 9.5px;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 9.5px;
+}
+
+.avatar--sm {
+  width: 22px;
+  height: 22px;
+  font-size: 8.5px;
+}
+
+.avatar--lg {
+  width: 36px;
+  height: 36px;
+  font-size: 11.5px;
+}
+
+.avatar--xl {
+  width: 48px;
+  height: 48px;
+  font-size: 14px;
+}
+
+.input,
+.select,
+.textarea {
+  font-size: 12.5px;
+}
+
+.input,
+.select {
+  height: 38px;
+}
+
+/* --- Карточки и таблицы ------------------------------------------------- */
+
+.card {
+  border-radius: 12px;
+}
+
+.card__head {
+  padding: 14px 16px 0;
+}
+
+.card__title {
+  font-size: 13.5px;
+}
+
+.card__sub {
+  font-size: 11px;
+}
+
+.card__body {
+  padding: 12px 16px 16px;
+}
+
+.table th {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 9.5px;
+}
+
+.table td {
+  height: 54px;
+  padding: 7px 14px;
+}
+
+.cell-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.cell-logo svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cell-company__name {
+  font-size: 12px;
+}
+
+.cell-company__sub,
+.cell-sub {
+  font-size: 10px;
+}
+
+.cell-main,
+.cell-money {
+  font-size: 11.5px;
+}
+
+/* --- Воронка ------------------------------------------------------------ */
+
+.board {
+  grid-auto-columns: 258px;
+  gap: 10px;
+}
+
+.col__name {
+  font-size: 12px;
+}
+
+.col__count {
+  min-width: 20px;
+  height: 19px;
+  font-size: 9.5px;
+}
+
+.col__sub {
+  font-size: 10px;
+  height: 14px;
+}
+
+.col__btn {
+  width: 24px;
+  height: 24px;
+}
+
+.col__cards {
+  gap: 8px;
+  max-height: calc(100vh - 300px);
+}
+
+.lead-card {
+  gap: 6px;
+  padding: 10px 11px 9px;
+  border-radius: 11px;
+}
+
+.lead-card__title {
+  font-size: 12.5px;
+}
+
+.lead-card__sub {
+  font-size: 10.5px;
+}
+
+.route {
+  height: 23px;
+  padding: 0 8px;
+  font-size: 10.5px;
+}
+
+.cargo {
+  font-size: 10.5px;
+}
+
+.cargo__weight {
+  font-size: 9.5px;
+}
+
+.lead-card__foot {
+  gap: 6px;
+  padding-top: 7px;
+}
+
+.price {
+  font-size: 13.5px;
+}
+
+.due {
+  height: 21px;
+  padding: 0 6px;
+  font-size: 9.5px;
+}
+
+/* --- Карточка лида и заявки -------------------------------------------- */
+
+.lead-head {
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lead-head__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.lead-head__logo svg {
+  width: 20px;
+  height: 20px;
+}
+
+.lead-head__name {
+  font-size: 20px;
+}
+
+.lead-head__meta {
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.stage-strip {
+  padding: 3px;
+}
+
+.stage-strip button {
+  height: 28px;
+  padding: 0 11px;
+  font-size: 11px;
+}
+
+.tabbar {
+  gap: 18px;
+}
+
+.tabbar button {
+  height: 38px;
+  font-size: 11.5px;
+}
+
+.field-row {
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 11.5px;
+}
+
+.money-big {
+  font-size: 24px;
+}
+
+.route-card {
+  padding: 11px;
+}
+
+.route-card__row {
+  font-size: 12px;
+}
+
+.route-chip {
+  height: 23px;
+  padding: 0 7px;
+  font-size: 10px;
+}
+
+/* --- Задачи ------------------------------------------------------------- */
+
+.task-board {
+  grid-template-columns: repeat(4, minmax(222px, 1fr));
+  gap: 10px;
+}
+
+.task-col {
+  gap: 8px;
+  padding: 10px;
+}
+
+.task-col__head {
+  font-size: 11.5px;
+}
+
+.task-card {
+  gap: 6px;
+  padding: 10px;
+  border-radius: 11px;
+}
+
+.task-card__title {
+  font-size: 11.5px;
+}
+
+.task-card__company,
+.task-card__meta {
+  font-size: 10.5px;
+}
+
+.task-card__type {
+  width: 24px;
+  height: 24px;
+}
+
+.task-check {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- Аналитика ---------------------------------------------------------- */
+
+.chart {
+  height: 150px;
+}
+
+.bar-row {
+  grid-template-columns: 112px minmax(0, 1fr) 74px;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.bar-row__name {
+  font-size: 11px;
+}
+
+.bar-row__value {
+  font-size: 10.5px;
+}
+
+.mgr-row {
+  gap: 9px;
+  padding: 8px 0;
+}
+
+.mgr-row__name {
+  font-size: 11.5px;
+}
+
+.mgr-row__sub {
+  font-size: 10px;
+}
+
+.mgr-row__sum {
+  font-size: 11px;
+}
+
+/* --- Настройки ---------------------------------------------------------- */
+
+.theme-preview {
+  height: 72px;
+}
+
+.theme-card {
+  padding: 10px;
+}
+
+.theme-card__row {
+  font-size: 11.5px;
+}
+
+.stage-edit {
+  gap: 7px;
+  padding: 10px;
+}
+
+.stage-edit .input {
+  height: 32px;
+  font-size: 12px;
+}
+
+.swatch-dot {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: auto;
+    padding: 0 8px;
+  }
+
+  .main {
+    padding: 4px 14px 30px;
+  }
+
+  .board {
+    grid-auto-columns: 246px;
+  }
+
+  .task-board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Обрезка длинных подписей вместо переноса */
+.topbar__head {
+  max-width: 42%;
+}
+
+.topbar__sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col__sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .topbar__head {
+    max-width: 100%;
+  }
+}

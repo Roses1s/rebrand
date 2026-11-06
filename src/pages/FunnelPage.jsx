@@ -15,7 +15,6 @@ import {
 
 import { Shell } from "../app/Shell";
 import { Avatar, Chip } from "../ui/Tag";
-import { Segmented } from "../ui/Segmented";
 import { FUNNEL_KPI, OWNER, PRIORITY, STAGES } from "../mock/data";
 import { shortMoney } from "../lib/format";
 
@@ -103,18 +102,19 @@ export function FunnelPage() {
         </Chip>
 
         <div className="toolbar__right">
-          <Segmented
-            label="Менеджер"
+          <select
+            className="select"
+            aria-label="Менеджер"
+            style={{ width: 168, height: 32, borderRadius: 999, fontSize: 12, paddingLeft: 14 }}
             value={owner}
-            onChange={setOwner}
-            options={[
-              { value: "all", label: "Все" },
-              { value: "1", label: "Алексей" },
-              { value: "2", label: "Мария" },
-              { value: "3", label: "Игорь" },
-              { value: "4", label: "Дарья" },
-            ]}
-          />
+            onChange={(event) => setOwner(event.target.value)}
+          >
+            <option value="all">Все менеджеры</option>
+            <option value="1">Алексей Громов</option>
+            <option value="2">Мария Соколова</option>
+            <option value="3">Игорь Левченко</option>
+            <option value="4">Дарья Ким</option>
+          </select>
         </div>
       </div>
 
@@ -135,7 +135,9 @@ export function FunnelPage() {
                 </button>
               </div>
 
-              <div className="col__sub">{stage.summary}</div>
+              <div className="col__sub" title={stage.summary}>
+                {stage.summary}
+              </div>
               <div className="col__rule" style={{ "--col-color": stage.color }} />
 
               <div className="col__cards">
