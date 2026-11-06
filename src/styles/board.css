@@ -97,6 +97,7 @@
 }
 
 .col__cards {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -104,6 +105,28 @@
   overflow-y: auto;
   padding-right: 2px;
   padding-bottom: 4px;
+  border-radius: 12px;
+  transition:
+    background-color 160ms var(--ease),
+    box-shadow 160ms var(--ease);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+/* Скроллбар колонки тонкий, чтобы не отъедал ширину карточек. */
+.col__cards::-webkit-scrollbar {
+  width: 6px;
+}
+
+.col__cards::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 1px solid transparent;
+  border-radius: 99px;
+  background-clip: content-box;
+}
+
+.col__cards::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* --- Карточка лида ------------------------------------------------------ */
@@ -322,12 +345,6 @@
 }
 
 /* Зона приёма — только область карточек, шапка колонки остаётся нейтральной. */
-.col__cards {
-  position: relative;
-  border-radius: 12px;
-  transition: background-color 160ms var(--ease), box-shadow 160ms var(--ease);
-}
-
 .col__cards.is-over {
   background: var(--accent-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
@@ -386,25 +403,4 @@
   font-size: 11.5px;
   font-weight: 600;
   color: var(--accent);
-}
-
-/* Внутри колонки — тонкий скроллбар, чтобы не отъедал ширину карточек. */
-.col__cards {
-  scrollbar-width: thin;
-  scrollbar-gutter: stable;
-}
-
-.col__cards::-webkit-scrollbar {
-  width: 6px;
-}
-
-.col__cards::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
-  border: 1px solid transparent;
-  border-radius: 99px;
-  background-clip: content-box;
-}
-
-.col__cards::-webkit-scrollbar-track {
-  background: transparent;
 }

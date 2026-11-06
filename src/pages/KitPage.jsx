@@ -1,3 +1,4 @@
+/** Витрина дизайн-системы (/kit): токены, кнопки, поля, статусы, таблицы, состояния. */
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Package, Phone } from "lucide-react";
 

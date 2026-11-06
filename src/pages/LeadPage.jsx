@@ -1,3 +1,7 @@
+/**
+ * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
+ * Лид коллеги открывается усечённо — только название, ИНН и продавец.
+ */
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {

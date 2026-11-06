@@ -1,3 +1,4 @@
+/** Бухгалтерия: честная заглушка из пяти блоков — раздел ещё в разработке. */
 import { Banknote, FileText, Landmark, Receipt, Wallet } from "lucide-react";
 
 import { Shell } from "../app/Shell";

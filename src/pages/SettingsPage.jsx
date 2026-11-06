@@ -1,3 +1,4 @@
+/** Настройки: тема, акцент, плотность, роль в макете и редактор этапов воронки. */
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Check, Moon, Plus, Sun, Trash2 } from "lucide-react";
 

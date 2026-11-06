@@ -1,3 +1,4 @@
+/** Администрирование для роли «Администратор»: пользователи, доступы, безопасность, копии. */
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, Database, HardDrive, Lock, Plus, ShieldCheck, UserPlus, Users } from "lucide-react";

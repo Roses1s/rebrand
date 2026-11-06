@@ -1,3 +1,4 @@
+/** Заявки менеджера: фильтры по статусам, суммы клиента и перевозчика, маржа. */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";

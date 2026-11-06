@@ -1,3 +1,8 @@
+/**
+ * Воронка лидов — стартовый экран менеджера.
+ * KPI считаются по своим лидам; переключатель «канбан / список»:
+ * канбан с перетаскиванием на @dnd-kit, список с сортировкой и массовыми действиями.
+ */
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {

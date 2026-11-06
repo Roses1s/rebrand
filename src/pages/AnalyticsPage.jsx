@@ -1,3 +1,4 @@
+/** Личная аналитика: период, своя воронка, поступление лидов, крупные сделки, источники. */
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 

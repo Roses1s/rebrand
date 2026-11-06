@@ -1,3 +1,7 @@
+/**
+ * Оболочка приложения: панель разделов, верхняя строка и рабочая область.
+ * На телефоне панель выезжает по кнопке меню, «Новый лид» открывает диалог.
+ */
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {

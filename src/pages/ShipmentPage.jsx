@@ -1,3 +1,4 @@
+/** Карточка заявки: статус-степпер, деньги, перевозчик, груз и вложения. */
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {

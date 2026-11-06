@@ -14,7 +14,10 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { AdminPage } from "./pages/AdminPage";
 import { KitPage } from "./pages/KitPage";
 
-/** Макет CRM. Вход и авторизация намеренно не рисуются. */
+/**
+ * Маршруты макета CRM Детроид. Входа и авторизации нет: приложение
+ * открывается сразу внутри системы, роль переключается в настройках.
+ */
 export default function App() {
   return (
     <BrowserRouter>

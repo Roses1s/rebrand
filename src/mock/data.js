@@ -557,28 +557,14 @@ export const TASK_TYPES = {
   quote: { label: "Ставка", icon: "file", cls: "" },
 };
 
+/**
+ * Аналитика по периодам: только то, что нельзя вывести из доски менеджера.
+ * Воронка, конверсия, средний чек и маржа считаются в AnalyticsPage
+ * из его собственных лидов.
+ */
 export const ANALYTICS = {
   week: {
-    kpi: [
-      { label: "Сумма воронки", value: "2,9 млн ₽", foot: "20 лидов", color: "var(--stage-4)" },
-      { label: "Конверсия", value: "20%", foot: "из лида в заявку", color: "var(--stage-5)" },
-      { label: "Средний чек", value: "146 тыс ₽", foot: "по 18 заявкам", color: "var(--stage-1)" },
-      { label: "Маржа", value: "412 тыс ₽", foot: "за неделю", color: "var(--stage-2)" },
-    ],
-    funnel: [
-      { name: "Новый", count: 4, sum: "741 тыс ₽", width: 40, color: "var(--stage-1)" },
-      { name: "Перезвонить", count: 3, sum: "451 тыс ₽", width: 56, color: "var(--stage-2)" },
-      { name: "Вышел на ЛПР", count: 4, sum: "725 тыс ₽", width: 72, color: "var(--stage-3)" },
-      { name: "Потенциальный", count: 4, sum: "659 тыс ₽", width: 86, color: "var(--stage-4)" },
-      { name: "Ждём заявку", count: 3, sum: "339 тыс ₽", width: 96, color: "var(--stage-5)" },
-    ],
     inflow: [2, 1, 4, 3, 5, 6, 8, 11],
-    managers: [
-      { name: "Алексей Громов", leads: 6, sum: "1,1 млн ₽", width: 92, color: "var(--stage-3)" },
-      { name: "Мария Соколова", leads: 5, sum: "816 тыс ₽", width: 74, color: "var(--stage-5)" },
-      { name: "Игорь Левченко", leads: 4, sum: "587 тыс ₽", width: 55, color: "var(--stage-2)" },
-      { name: "Дарья Ким", leads: 5, sum: "484 тыс ₽", width: 41, color: "var(--stage-1)" },
-    ],
     sources: [
       { name: "Холодный обзвон", count: 6, width: 88 },
       { name: "Сайт / форма заявки", count: 5, width: 74 },
@@ -589,26 +575,7 @@ export const ANALYTICS = {
     ],
   },
   month: {
-    kpi: [
-      { label: "Сумма воронки", value: "11,4 млн ₽", foot: "78 лидов", color: "var(--stage-4)" },
-      { label: "Конверсия", value: "24%", foot: "из лида в заявку", color: "var(--stage-5)" },
-      { label: "Средний чек", value: "158 тыс ₽", foot: "по 72 заявкам", color: "var(--stage-1)" },
-      { label: "Маржа", value: "2,43 млн ₽", foot: "план 2,8 млн ₽", color: "var(--stage-2)" },
-    ],
-    funnel: [
-      { name: "Новый", count: 21, sum: "3,1 млн ₽", width: 44, color: "var(--stage-1)" },
-      { name: "Перезвонить", count: 16, sum: "2,4 млн ₽", width: 60, color: "var(--stage-2)" },
-      { name: "Вышел на ЛПР", count: 14, sum: "2,6 млн ₽", width: 76, color: "var(--stage-3)" },
-      { name: "Потенциальный", count: 15, sum: "2,2 млн ₽", width: 88, color: "var(--stage-4)" },
-      { name: "Ждём заявку", count: 12, sum: "1,1 млн ₽", width: 96, color: "var(--stage-5)" },
-    ],
     inflow: [12, 18, 9, 24, 21, 28, 26, 34],
-    managers: [
-      { name: "Алексей Громов", leads: 24, sum: "3,4 млн ₽", width: 96, color: "var(--stage-3)" },
-      { name: "Мария Соколова", leads: 21, sum: "2,9 млн ₽", width: 82, color: "var(--stage-5)" },
-      { name: "Игорь Левченко", leads: 18, sum: "2,6 млн ₽", width: 72, color: "var(--stage-2)" },
-      { name: "Дарья Ким", leads: 15, sum: "2,5 млн ₽", width: 66, color: "var(--stage-1)" },
-    ],
     sources: [
       { name: "Холодный обзвон", count: 22, width: 92 },
       { name: "Сайт / форма заявки", count: 18, width: 76 },
@@ -619,28 +586,9 @@ export const ANALYTICS = {
     ],
   },
   quarter: {
-    kpi: [
-      { label: "Сумма воронки", value: "34,8 млн ₽", foot: "231 лид", color: "var(--stage-4)" },
-      { label: "Конверсия", value: "27%", foot: "из лида в заявку", color: "var(--stage-5)" },
-      { label: "Средний чек", value: "164 тыс ₽", foot: "по 214 заявкам", color: "var(--stage-1)" },
-      { label: "Маржа", value: "7,9 млн ₽", foot: "план 8,4 млн ₽", color: "var(--stage-2)" },
-    ],
-    funnel: [
-      { name: "Новый", count: 68, sum: "9,4 млн ₽", width: 46, color: "var(--stage-1)" },
-      { name: "Перезвонить", count: 52, sum: "7,8 млн ₽", width: 62, color: "var(--stage-2)" },
-      { name: "Вышел на ЛПР", count: 44, sum: "7,1 млн ₽", width: 78, color: "var(--stage-3)" },
-      { name: "Потенциальный", count: 38, sum: "6,2 млн ₽", width: 90, color: "var(--stage-4)" },
-      { name: "Ждём заявку", count: 29, sum: "4,3 млн ₽", width: 98, color: "var(--stage-5)" },
-    ],
     inflow: [42, 38, 51, 47, 63, 58, 71, 79],
-    managers: [
-      { name: "Алексей Громов", leads: 68, sum: "9,8 млн ₽", width: 98, color: "var(--stage-3)" },
-      { name: "Мария Соколова", leads: 61, sum: "8,4 млн ₽", width: 84, color: "var(--stage-5)" },
-      { name: "Игорь Левченко", leads: 54, sum: "7,9 млн ₽", width: 76, color: "var(--stage-2)" },
-      { name: "Дарья Ким", leads: 48, sum: "8,7 млн ₽", width: 88, color: "var(--stage-1)" },
-    ],
     sources: [
-      { name: "Холодный обзвон", count: 64, sum: "", width: 94 },
+      { name: "Холодный обзвон", count: 64, width: 94 },
       { name: "Сайт / форма заявки", count: 52, width: 78 },
       { name: "Рекомендация", count: 41, width: 60 },
       { name: "Яндекс.Директ", count: 33, width: 48 },

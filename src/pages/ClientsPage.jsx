@@ -1,3 +1,7 @@
+/**
+ * Клиенты компании: поиск и сегменты «Все / Мои / Проигранные».
+ * Свои лиды открываются по клику, активные лиды коллег закрыты замком.
+ */
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Lock, Search } from "lucide-react";
