@@ -19,7 +19,9 @@ export const STAGE_COLORS = [
 ];
 
 const DEFAULT_STAGES = STAGES.map(({ id, name, color, hint }) => ({ id, name, color, hint }));
-const DEFAULT_LEADS = STAGES.flatMap((stage) => stage.leads.map((lead) => ({ ...lead })));
+const DEFAULT_LEADS = STAGES.flatMap((stage) =>
+  stage.leads.map((lead, index) => ({ ...lead, position: index })),
+);
 
 function load(key, fallback) {
   try {
@@ -45,8 +47,22 @@ function loadState() {
   const stages = load(STAGES_KEY, DEFAULT_STAGES);
   const known = new Set(stages.map((stage) => stage.id));
   const leads = load(LEADS_KEY, DEFAULT_LEADS).map((lead) =>
-    known.has(lead.stageId) ? lead : { ...lead, stageId: stages[0].id },
+    known.has(lead.stageId) ? { ...lead } : { ...lead, stageId: stages[0].id },
   );
+
+  const byStage = new Map();
+  leads.forEach((lead) => {
+    if (!byStage.has(lead.stageId)) byStage.set(lead.stageId, []);
+    byStage.get(lead.stageId).push(lead);
+  });
+  byStage.forEach((list) => {
+    list
+      .sort((a, b) => (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER))
+      .forEach((lead, index) => {
+        lead.position = index;
+      });
+  });
+
   return { stages, leads };
 }
 
@@ -75,6 +91,10 @@ export function LeadsProvider({ children }) {
     const addLead = (draft) =>
       setLeads((prev) => {
         const nextId = prev.reduce((max, lead) => Math.max(max, lead.id), 0) + 1;
+        const targetStage = draft.stageId ?? stages[0]?.id ?? 1;
+        const top = prev
+          .filter((lead) => lead.stageId === targetStage)
+          .reduce((min, lead) => Math.min(min, lead.position ?? 0), 0);
         return [
           {
             id: nextId,
@@ -94,7 +114,8 @@ export function LeadsProvider({ children }) {
             late: false,
             due: "сегодня",
             created: "только что",
-            stageId: stages[0]?.id ?? 1,
+            stageId: targetStage,
+            position: top - 1,
             ownerId: ME.id,
             ...draft,
           },
@@ -102,10 +123,54 @@ export function LeadsProvider({ children }) {
         ];
       });
 
-    const moveLead = (id, stageId) =>
-      setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, stageId } : lead)));
+    /**
+     * Перенос лида на этап с конкретной позицией.
+     * index — место среди карточек этапа без самого лида: 0 — в начало, null — в конец.
+     */
+    const moveLead = (id, stageId, index = null) =>
+      setLeads((prev) => {
+        const moving = prev.find((lead) => lead.id === id);
+        if (!moving) return prev;
 
-    const removeLeads = (ids) => setLeads((prev) => prev.filter((lead) => !ids.includes(lead.id)));
+        const rest = prev.filter((lead) => lead.id !== id);
+        const target = rest
+          .filter((lead) => lead.stageId === stageId)
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+        const at = index == null ? target.length : Math.max(0, Math.min(index, target.length));
+        const order = [...target.slice(0, at).map((lead) => lead.id), id, ...target.slice(at).map((lead) => lead.id)];
+        const positions = new Map(order.map((leadId, position) => [leadId, position]));
+
+        if (moving.stageId !== stageId) {
+          rest
+            .filter((lead) => lead.stageId === moving.stageId)
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+            .forEach((lead, position) => positions.set(lead.id, position));
+        }
+
+        return prev.map((lead) => {
+          if (lead.id === id) return { ...lead, stageId, position: positions.get(id) ?? 0 };
+          const position = positions.get(lead.id);
+          return position == null ? lead : { ...lead, position };
+        });
+      });
+
+    const removeLeads = (ids) =>
+      setLeads((prev) => {
+        const rest = prev.filter((lead) => !ids.includes(lead.id));
+        const byStage = new Map();
+        rest.forEach((lead) => {
+          if (!byStage.has(lead.stageId)) byStage.set(lead.stageId, []);
+          byStage.get(lead.stageId).push(lead);
+        });
+        const positions = new Map();
+        byStage.forEach((list) =>
+          list
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+            .forEach((lead, index) => positions.set(lead.id, index)),
+        );
+        return rest.map((lead) => ({ ...lead, position: positions.get(lead.id) ?? lead.position }));
+      });
 
     const addStage = () =>
       setStages((prev) => {

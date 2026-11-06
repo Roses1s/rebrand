@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowUpDown,
@@ -25,12 +25,18 @@ import {
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCorners,
-  useDraggable,
+  pointerWithin,
+  rectIntersection,
   useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
@@ -84,14 +90,17 @@ function LeadCard({ lead }) {
   );
 }
 
-function DraggableLead({ lead }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
+function SortableLead({ lead }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useSortable({
+    id: lead.id,
+    data: { stageId: lead.stageId },
+  });
 
   return (
     <div
       ref={setNodeRef}
       className={`drag-wrap${isDragging ? " is-dragging" : ""}`}
-      title="Перетащите карточку на другой этап"
+      title="Перетащите карточку на другой этап. С клавиатуры: Space, стрелки, Space"
       {...attributes}
       {...listeners}
     >
@@ -100,16 +109,13 @@ function DraggableLead({ lead }) {
   );
 }
 
-function StageColumn({ stage, stageLeads, dragging, onAdd }) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
   const sum = sumOf(stageLeads);
+  const showLine = dragging && dropIndex != null;
 
   return (
-    <section
-      ref={setNodeRef}
-      className={`col${isOver ? " is-over" : ""}${dragging ? " is-target" : ""}`}
-      aria-label={stage.name}
-    >
+    <section ref={setNodeRef} className={`col${isOver ? " is-over" : ""}`} aria-label={stage.name}>
       <div className="col__head">
         <span className="col__dot" style={{ background: stage.color }} />
         <span className="col__name">{stage.name}</span>
@@ -139,15 +145,27 @@ function StageColumn({ stage, stageLeads, dragging, onAdd }) {
       <div className="col__rule" style={{ "--col-color": stage.color }} />
 
       <div className="col__cards">
-        {stageLeads.map((lead) => (
-          <DraggableLead key={lead.id} lead={lead} />
-        ))}
+        <SortableContext items={stageLeads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
+          {stageLeads.map((lead, index) => (
+            <Fragment key={lead.id}>
+              {showLine && dropIndex === index && <div className="drop-line" aria-hidden="true" />}
+              <SortableLead lead={lead} />
+            </Fragment>
+          ))}
 
-        {stageLeads.length === 0 && (
-          <div className="col__drop-hint" aria-hidden="true">
-            {dragging ? "Отпустите здесь" : "Пока пусто — перетащите лид или добавьте новый"}
-          </div>
-        )}
+          {showLine && dropIndex >= stageLeads.length && <div className="drop-line" aria-hidden="true" />}
+        </SortableContext>
+
+        {stageLeads.length === 0 &&
+          (dragging && showLine ? (
+            <div className="col__drop-slot" aria-hidden="true">
+              Отпустите здесь
+            </div>
+          ) : (
+            <div className="col__drop-hint" aria-hidden="true">
+              Пока пусто — перетащите лид или добавьте новый
+            </div>
+          ))}
       </div>
     </section>
   );
@@ -186,16 +204,81 @@ export function FunnelPage() {
   const [sort, setSort] = useState({ key: "stage", dir: "asc" });
   const [selected, setSelected] = useState([]);
   const [activeId, setActiveId] = useState(null);
+  const [activeWidth, setActiveWidth] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
+  const suppressClick = useRef(false);
   const allCheckbox = useRef(null);
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 160, tolerance: 8 } }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id), [leads]);
-  const activeLead = activeId ? myLeads.find((lead) => lead.id === activeId) : null;
+  const myLeads = useMemo(
+    () => leads.filter((lead) => lead.ownerId === ME.id).sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
+    [leads],
+  );
+  const activeLead = activeId != null ? myLeads.find((lead) => lead.id === activeId) : null;
+
+  /** Точка вставки: карточка под курсором важнее колонки, иначе — в конец этапа. */
+  const resolveTarget = useCallback(
+    ({ active, over }) => {
+      if (!over) return null;
+
+      if (typeof over.id === "string" && over.id.startsWith("stage-")) {
+        const stageId = Number(over.id.slice("stage-".length));
+        const count = myLeads.filter((lead) => lead.stageId === stageId && lead.id !== active.id).length;
+        return { stageId, index: count };
+      }
+
+      const overLead = myLeads.find((lead) => lead.id === over.id);
+      if (!overLead) return null;
+      if (overLead.id === active.id) {
+        return { stageId: overLead.stageId, index: overLead.position ?? 0 };
+      }
+
+      const list = myLeads.filter((lead) => lead.stageId === overLead.stageId && lead.id !== active.id);
+      const overIndex = list.findIndex((lead) => lead.id === overLead.id);
+      if (overIndex < 0) return { stageId: overLead.stageId, index: list.length };
+
+      const activeRect = active.rect.current.translated ?? active.rect.current.initial;
+      const below = activeRect
+        ? activeRect.top + activeRect.height / 2 > over.rect.top + over.rect.height / 2
+        : false;
+
+      return { stageId: overLead.stageId, index: below ? overIndex + 1 : overIndex };
+    },
+    [myLeads],
+  );
+
+  const collisionDetection = useCallback((args) => {
+    const hits = pointerWithin(args);
+    const list = hits.length ? hits : rectIntersection(args);
+    // Карточки точнее колонки: сначала они, колонка — запасной вариант.
+    return [...list].sort(
+      (a, b) => Number(String(a.id).startsWith("stage-")) - Number(String(b.id).startsWith("stage-")),
+    );
+  }, []);
+
+  function resetDrag() {
+    setActiveId(null);
+    setActiveWidth(null);
+    setDropTarget(null);
+  }
+
+  function handleDragStart(event) {
+    setActiveId(event.active.id);
+    setActiveWidth(event.active.rect.current.initial?.width ?? null);
+    setDropTarget(null);
+  }
+
+  function handleDragOver(event) {
+    const next = resolveTarget(event);
+    setDropTarget((prev) =>
+      prev && next && prev.stageId === next.stageId && prev.index === next.index ? prev : next,
+    );
+  }
 
   function switchView(next) {
     setView(next);
@@ -210,13 +293,22 @@ export function FunnelPage() {
     setSort((prev) => (prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
   }
 
-  function handleDragEnd({ active, over }) {
-    setActiveId(null);
-    if (!over) return;
-    const stageId = Number(over.id);
-    if (!stages.some((stage) => stage.id === stageId)) return;
-    const lead = myLeads.find((item) => item.id === Number(active.id));
-    if (lead && lead.stageId !== stageId) moveLead(lead.id, stageId);
+  function handleDragEnd(event) {
+    const target = resolveTarget(event);
+    resetDrag();
+
+    // Гасим «хвостовой» клик, чтобы после переноса не открывалась карточка.
+    suppressClick.current = true;
+    window.setTimeout(() => {
+      suppressClick.current = false;
+    }, 240);
+
+    if (!target) return;
+    const lead = myLeads.find((item) => item.id === event.active.id);
+    if (!lead) return;
+    if (lead.stageId === target.stageId && lead.position === target.index) return;
+
+    moveLead(lead.id, target.stageId, target.index);
   }
 
   const kpi = useMemo(() => {
@@ -367,26 +459,46 @@ export function FunnelPage() {
       {view === "board" ? (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={({ active }) => setActiveId(Number(active.id))}
-          onDragCancel={() => setActiveId(null)}
+          collisionDetection={collisionDetection}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragCancel={resetDrag}
           onDragEnd={handleDragEnd}
         >
-          <div className={activeId ? "board board--dragging" : "board"}>
-            {stages.map((stage) => (
-              <StageColumn
-                key={stage.id}
-                stage={stage}
-                dragging={Boolean(activeId)}
-                stageLeads={myLeads.filter((lead) => lead.stageId === stage.id && visible(lead))}
-                onAdd={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
-              />
-            ))}
+          <div
+            className={activeId != null ? "board board--dragging" : "board"}
+            onClickCapture={(event) => {
+              if (!suppressClick.current) return;
+              event.preventDefault();
+              event.stopPropagation();
+              suppressClick.current = false;
+            }}
+          >
+            {stages.map((stage) => {
+              const stageLeads = myLeads.filter((lead) => lead.stageId === stage.id && visible(lead));
+
+              let dropIndex = null;
+              if (dropTarget && dropTarget.stageId === stage.id) {
+                const order = myLeads.filter((lead) => lead.stageId === stage.id && lead.id !== activeId);
+                dropIndex = order.slice(0, dropTarget.index).filter(visible).length;
+              }
+
+              return (
+                <StageColumn
+                  key={stage.id}
+                  stage={stage}
+                  dragging={activeId != null}
+                  stageLeads={stageLeads}
+                  dropIndex={dropIndex}
+                  onAdd={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
+                />
+              );
+            })}
           </div>
 
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.22, 0.8, 0.28, 1)" }}>
             {activeLead ? (
-              <div className="drag-overlay">
+              <div className="drag-overlay" style={activeWidth ? { width: activeWidth } : undefined}>
                 <LeadCard lead={activeLead} />
               </div>
             ) : null}
