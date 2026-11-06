@@ -480,62 +480,82 @@ html[data-theme="dark"] .plan {
 
   .sidebar {
     position: fixed;
-    bottom: 12px;
-    left: 12px;
-    right: 12px;
-    top: auto;
-    z-index: 40;
-    width: auto;
-    height: 66px;
-    padding: 0 8px;
-    flex-direction: row;
-    align-items: center;
-    border: 1px solid var(--line);
-    border-radius: 18px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    width: 268px;
+    height: 100dvh;
+    padding: 14px 12px 16px;
+    border-right: 1px solid var(--line);
+    border-radius: 0;
     box-shadow: var(--shadow-lg);
-    overflow: visible;
+    transform: translateX(-104%);
+    transition: transform 220ms var(--ease);
+    overflow-y: auto;
   }
 
-  .brand,
-  .side-label,
-  .team,
-  .plan {
-    display: none;
+  .app--menu .sidebar {
+    transform: none;
   }
 
-  .side-nav {
-    flex-direction: row;
-    justify-content: space-between;
-    flex: 1;
-    gap: 0;
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    display: block;
+    background: rgba(23, 22, 44, 0.38);
+    backdrop-filter: blur(2px);
   }
 
-  .nav-item {
-    justify-content: center;
-    height: 50px;
-    flex: 1;
-    padding: 0;
+  .sidebar__close {
+    display: inline-grid;
   }
 
-  .nav-item span:not(.nav-count) {
-    display: none;
-  }
-
-  .nav-count {
-    display: none;
+  .menu-btn {
+    display: inline-grid;
   }
 
   .content {
-    padding-bottom: 86px;
+    padding-bottom: 0;
   }
 
   .topbar {
-    padding: 0 16px;
+    height: auto;
+    min-height: 56px;
+    padding: 8px 14px;
     gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .topbar__head {
+    order: 1;
+    flex: 1 1 auto;
+    max-width: none;
+    min-width: 0;
   }
 
   .topbar__title {
-    font-size: 17px;
+    font-size: 16px;
+  }
+
+  .topbar__sub {
+    font-size: 10.5px;
+  }
+
+  .menu-btn {
+    order: 0;
+  }
+
+  .topbar__search {
+    order: 3;
+    display: block;
+    flex: 1 1 100%;
+  }
+
+  .topbar__actions {
+    order: 2;
+    gap: 6px;
   }
 
   .counter-btn {
@@ -543,14 +563,106 @@ html[data-theme="dark"] .plan {
   }
 
   .main {
-    padding: 4px 16px 32px;
+    padding: 6px 14px 32px;
   }
 
   .page__title {
-    font-size: 22px;
+    font-size: 20px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .kpi__value {
-    font-size: 23px;
+    font-size: 20px;
   }
+}
+
+@media (max-width: 680px) {
+  .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .toolbar__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Воронка на телефоне — вертикальные секции, а не горизонтальная лента */
+  .board {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: visible;
+  }
+
+  .col {
+    width: auto;
+    max-width: none;
+  }
+
+  .col__cards {
+    max-height: none;
+  }
+
+  .grid--2-1,
+  .grid--1-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table-wrap {
+    border-radius: var(--r-2);
+  }
+
+  .topbar__actions .btn--primary span {
+    display: none;
+  }
+
+  .topbar__actions .btn--primary {
+    padding: 0 12px;
+  }
+}
+
+/* --- Кнопка меню на телефоне -------------------------------------------- */
+
+.menu-btn {
+  display: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--surface);
+  color: var(--ink-2);
+  flex: none;
+}
+
+.menu-btn:hover {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+
+.sidebar__close {
+  display: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  border-radius: 8px;
+  color: var(--ink-3);
+}
+
+.sidebar__close:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.scrim {
+  display: none;
 }

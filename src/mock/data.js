@@ -4,7 +4,24 @@
  * lead.inn, shipment.customer_price и т.д.
  */
 
-export const ME = { id: 1, name: "Алексей Громов", role: "Менеджер по продажам", initials: "АГ" };
+const STORED_ROLE = (() => {
+  try {
+    return window.localStorage.getItem("crm.role");
+  } catch {
+    return null;
+  }
+})();
+
+/** Демо-роль: обычный менеджер по умолчанию, администратор — переключателем в настройках. */
+export const IS_ADMIN = STORED_ROLE === "admin";
+
+export const ME = {
+  id: 1,
+  name: "Алексей Громов",
+  role: IS_ADMIN ? "Администратор" : "Менеджер по продажам",
+  initials: "АГ",
+  isAdmin: IS_ADMIN,
+};
 
 export const TEAM = [
   { id: 1, initials: "АГ", name: "Алексей Громов", role: "Менеджер по продажам", color: "", online: true },

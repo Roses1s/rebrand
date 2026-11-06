@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Lock, Search } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { Avatar } from "../ui/Tag";
+import { TableSkeleton } from "../ui/States";
 import { CLIENTS, ME, OWNER } from "../mock/data";
 import { money } from "../lib/format";
 
@@ -19,6 +20,12 @@ export function ClientsPage() {
   const navigate = useNavigate();
   const [segment, setSegment] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoading(false), 260);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -76,7 +83,15 @@ export function ClientsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((client) => {
+            {loading && (
+              <tr>
+                <td colSpan={7} style={{ padding: 0 }}>
+                  <TableSkeleton rows={6} cols={6} />
+                </td>
+              </tr>
+            )}
+            {!loading &&
+              rows.map((client) => {
               const owner = OWNER(client.ownerId);
               const locked = client.ownerId !== ME.id;
               return (

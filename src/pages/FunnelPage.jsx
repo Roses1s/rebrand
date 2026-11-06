@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowUpDown,
@@ -14,21 +14,23 @@ import {
   Phone,
   Plus,
   Target,
+  Trash2,
   Users,
   Wallet,
+  X,
 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { STAGE_META, useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
-import { ME, OWNER, PRIORITY, STAGES, TASKS } from "../mock/data";
+import { ME, OWNER, PRIORITY, TASKS } from "../mock/data";
 import { shortMoney } from "../lib/format";
 
 const ICONS = { users: Users, wallet: Wallet, target: Target, flame: Flame, clock: Clock };
+const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
 
-const myLeads = STAGES.flatMap((stage) => stage.leads).filter((lead) => lead.ownerId === ME.id);
-const sumOf = (leads) => leads.reduce((total, lead) => total + lead.price, 0);
+const sumOf = (leads) => leads.reduce((total, lead) => total + (Number(lead.price) || 0), 0);
 const overdueTasks = TASKS.filter((task) => task.ownerId === ME.id && task.status === "overdue").length;
-const stageOf = (lead) => STAGES.find((stage) => stage.id === lead.stageId);
 
 function LeadCard({ lead }) {
   const priority = PRIORITY[lead.priority];
@@ -91,6 +93,7 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
+  const { leads, addLead, removeLeads } = useLeads();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState(() => {
     try {
@@ -100,6 +103,10 @@ export function FunnelPage() {
     }
   });
   const [sort, setSort] = useState({ key: "stage", dir: "asc" });
+  const [selected, setSelected] = useState([]);
+  const allCheckbox = useRef(null);
+
+  const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id), [leads]);
 
   function switchView(next) {
     setView(next);
@@ -129,14 +136,14 @@ export function FunnelPage() {
       {
         label: "Сумма воронки",
         value: shortMoney(sum),
-        foot: `средний чек ${shortMoney(Math.round(sum / myLeads.length))}`,
+        foot: myLeads.length ? `средний чек ${shortMoney(Math.round(sum / myLeads.length))}` : "лидов пока нет",
         color: "var(--stage-4)",
         icon: "wallet",
       },
       {
         label: "Потенциальные",
         value: String(potential),
-        foot: `конверсия ${Math.round((potential / myLeads.length) * 100)}%`,
+        foot: myLeads.length ? `конверсия ${Math.round((potential / myLeads.length) * 100)}%` : "—",
         color: "var(--stage-5)",
         icon: "target",
       },
@@ -155,7 +162,7 @@ export function FunnelPage() {
         icon: "clock",
       },
     ];
-  }, []);
+  }, [myLeads]);
 
   const visible = (lead) => {
     if (filter === "hot" && !lead.hot) return false;
@@ -167,12 +174,42 @@ export function FunnelPage() {
     const rows = myLeads.filter(visible);
     const dir = sort.dir === "asc" ? 1 : -1;
     return [...rows].sort((a, b) => {
-      if (sort.key === "price") return (a.price - b.price) * dir;
-      if (sort.key === "stage") return (a.stageId - b.stageId) * dir;
-      if (sort.key === "name") return a.name.localeCompare(b.name, "ru") * dir;
-      return 0;
+      switch (sort.key) {
+        case "price":
+          return (a.price - b.price) * dir;
+        case "stage":
+          return (a.stageId - b.stageId) * dir;
+        case "contact":
+          return a.contact.localeCompare(b.contact, "ru") * dir;
+        case "priority":
+          return ((PRIORITY_RANK[a.priority] ?? 0) - (PRIORITY_RANK[b.priority] ?? 0)) * dir;
+        case "due":
+          return ((a.late ? 0 : 1) - (b.late ? 0 : 1) || a.due.localeCompare(b.due, "ru")) * dir;
+        default:
+          return a.name.localeCompare(b.name, "ru") * dir;
+      }
     });
-  }, [filter, sort]);
+  }, [myLeads, filter, sort]);
+
+  const allSelected = listRows.length > 0 && listRows.every((lead) => selected.includes(lead.id));
+  const someSelected = selected.length > 0 && !allSelected;
+
+  useEffect(() => {
+    if (allCheckbox.current) allCheckbox.current.indeterminate = someSelected;
+  }, [someSelected]);
+
+  function toggleSelect(id) {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  }
+
+  function toggleAll() {
+    setSelected(allSelected ? [] : listRows.map((lead) => lead.id));
+  }
+
+  function removeSelected() {
+    removeLeads(selected);
+    setSelected([]);
+  }
 
   return (
     <Shell>
@@ -213,7 +250,7 @@ export function FunnelPage() {
         </Chip>
 
         <div className="toolbar__right">
-          <span className="muted" style={{ fontSize: 11.5 }}>
+          <span className="muted toolbar__sum">
             Моя доска · {shortMoney(sumOf(myLeads))}
           </span>
 
@@ -230,16 +267,22 @@ export function FunnelPage() {
 
       {view === "board" ? (
         <div className="board">
-          {STAGES.map((stage) => {
-            const leads = stage.leads.filter((lead) => lead.ownerId === ME.id && visible(lead));
-            const sum = sumOf(leads);
+          {STAGE_META.map((stage) => {
+            const stageLeads = myLeads.filter((lead) => lead.stageId === stage.id && visible(lead));
+            const sum = sumOf(stageLeads);
             return (
               <section key={stage.id} className="col" aria-label={stage.name}>
                 <div className="col__head">
                   <span className="col__dot" style={{ background: stage.color }} />
                   <span className="col__name">{stage.name}</span>
-                  <span className="col__count">{leads.length}</span>
-                  <button type="button" className="col__btn" aria-label={`Добавить лид в «${stage.name}»`}>
+                  <span className="col__count">{stageLeads.length}</span>
+                  <button
+                    type="button"
+                    className="col__btn"
+                    aria-label={`Добавить лид в «${stage.name}»`}
+                    title="Добавить лид на этот этап"
+                    onClick={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
+                  >
                     <Plus size={15} strokeWidth={2} />
                   </button>
                   <button type="button" className="col__btn" aria-label={`Меню этапа «${stage.name}»`}>
@@ -253,13 +296,13 @@ export function FunnelPage() {
                 <div className="col__rule" style={{ "--col-color": stage.color }} />
 
                 <div className="col__cards">
-                  {leads.map((lead) => (
+                  {stageLeads.map((lead) => (
                     <LeadCard key={lead.id} lead={lead} />
                   ))}
 
-                  {leads.length === 0 && (
+                  {stageLeads.length === 0 && (
                     <div className="card" style={{ padding: 18, textAlign: "center", color: "var(--ink-3)", fontSize: 12 }}>
-                      {stage.leads.some((lead) => lead.ownerId === ME.id)
+                      {myLeads.some((lead) => lead.stageId === stage.id)
                         ? "По этому фильтру карточек нет"
                         : "Пока пусто — добавьте лид"}
                     </div>
@@ -270,83 +313,140 @@ export function FunnelPage() {
           })}
         </div>
       ) : (
-        <div className="table-wrap">
-          <table className="table leads-table">
-            <thead>
-              <tr>
-                <SortHead label="Компания" sortKey="name" sort={sort} onSort={toggleSort} />
-                <th>Контакт</th>
-                <SortHead label="Этап" sortKey="stage" sort={sort} onSort={toggleSort} width={170} />
-                <th>Маршрут</th>
-                <th>Приоритет</th>
-                <SortHead label="Сумма" sortKey="price" sort={sort} onSort={toggleSort} align="right" width={120} />
-                <th>Срок</th>
-              </tr>
-            </thead>
-            <tbody>
-              {listRows.map((lead) => {
-                const stage = stageOf(lead);
-                const priority = PRIORITY[lead.priority];
-                return (
-                  <tr key={lead.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/crm/leads/${lead.id}`)}>
-                    <td>
-                      <div className="cell-company">
-                        <span className="cell-logo">
-                          {lead.hot ? (
-                            <Flame size={16} strokeWidth={2} style={{ color: "var(--warn)" }} />
-                          ) : (
-                            <Package size={16} strokeWidth={1.8} />
-                          )}
-                        </span>
-                        <div style={{ minWidth: 0 }}>
-                          <Link to={`/crm/leads/${lead.id}`} className="cell-company__name">
-                            {lead.name}
-                          </Link>
-                          <div className="cell-company__sub">
-                            {lead.city} · ИНН {lead.inn}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cell-main">{lead.contact}</div>
-                      <div className="cell-sub">{lead.phone}</div>
-                    </td>
-                    <td>
-                      <span className="stage-cell">
-                        <span className="bar-row__dot" style={{ background: stage.color }} />
-                        {stage.name}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="cell-main">{lead.route}</div>
-                      <div className="cell-sub">
-                        {lead.cargo} · {lead.weight}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`badge ${priority.cls}`}>{priority.label}</span>
-                    </td>
-                    <td className="cell-money">{shortMoney(lead.price)}</td>
-                    <td>
-                      <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {listRows.length === 0 && (
-            <div className="empty">
-              <span className="empty__icon">
-                <List size={20} strokeWidth={1.8} />
+        <>
+          {selected.length > 0 && (
+            <div className="bulk-bar">
+              <span className="bulk-bar__count">
+                Выбрано записей: <b>{selected.length}</b>
               </span>
-              <span className="empty__title">Лидов нет</span>
-              <p className="empty__text">Измените фильтр или добавьте новый лид кнопкой в шапке.</p>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setSelected([])}>
+                <X size={14} strokeWidth={2} />
+                Снять выделение
+              </button>
+              <button type="button" className="btn btn--danger btn--sm" style={{ marginLeft: "auto" }} onClick={removeSelected}>
+                <Trash2 size={14} strokeWidth={2} />
+                Удалить
+              </button>
             </div>
           )}
-        </div>
+
+          <div className="table-wrap">
+            <table className="table leads-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 36, paddingRight: 0 }}>
+                    <input
+                      ref={allCheckbox}
+                      type="checkbox"
+                      className="row-check"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      aria-label="Выбрать все лиды"
+                    />
+                  </th>
+                  <SortHead label="Компания" sortKey="name" sort={sort} onSort={toggleSort} />
+                  <SortHead label="Контакт" sortKey="contact" sort={sort} onSort={toggleSort} />
+                  <SortHead label="Этап" sortKey="stage" sort={sort} onSort={toggleSort} width={170} />
+                  <th>Маршрут</th>
+                  <SortHead label="Приоритет" sortKey="priority" sort={sort} onSort={toggleSort} width={110} />
+                  <SortHead label="Сумма" sortKey="price" sort={sort} onSort={toggleSort} align="right" width={120} />
+                  <SortHead label="Срок" sortKey="due" sort={sort} onSort={toggleSort} width={110} />
+                </tr>
+              </thead>
+              <tbody>
+                {listRows.map((lead) => {
+                  const stage = STAGE_META.find((item) => item.id === lead.stageId) ?? STAGE_META[0];
+                  const priority = PRIORITY[lead.priority];
+                  const isSelected = selected.includes(lead.id);
+                  return (
+                    <tr
+                      key={lead.id}
+                      className={isSelected ? "is-selected" : undefined}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => navigate(`/crm/leads/${lead.id}`)}
+                    >
+                      <td style={{ paddingRight: 0 }} onClick={(event) => event.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="row-check"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(lead.id)}
+                          aria-label={`Выбрать ${lead.name}`}
+                        />
+                      </td>
+                      <td>
+                        <div className="cell-company">
+                          <span className="cell-logo">
+                            {lead.hot ? (
+                              <Flame size={16} strokeWidth={2} style={{ color: "var(--warn)" }} />
+                            ) : (
+                              <Package size={16} strokeWidth={1.8} />
+                            )}
+                          </span>
+                          <div style={{ minWidth: 0 }}>
+                            <Link
+                              to={`/crm/leads/${lead.id}`}
+                              className="cell-company__name"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {lead.name}
+                            </Link>
+                            <div className="cell-company__sub">
+                              {lead.city} · ИНН {lead.inn}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="cell-main">{lead.contact}</div>
+                        <div className="cell-sub">{lead.phone}</div>
+                      </td>
+                      <td>
+                        <span className="stage-cell">
+                          <span className="bar-row__dot" style={{ background: stage.color }} />
+                          {stage.name}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="cell-main">{lead.route}</div>
+                        <div className="cell-sub">
+                          {lead.cargo} · {lead.weight}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${priority.cls}`}>{priority.label}</span>
+                      </td>
+                      <td className="cell-money">{shortMoney(lead.price)}</td>
+                      <td>
+                        <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {listRows.length === 0 && (
+              <div className="empty">
+                <span className="empty__icon">
+                  <List size={20} strokeWidth={1.8} />
+                </span>
+                <span className="empty__title">Лидов нет</span>
+                <p className="empty__text">Измените фильтр или добавьте новый лид кнопкой в шапке.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="table-foot">
+            <span>
+              Показано {listRows.length} из {myLeads.length}
+            </span>
+            {listRows.length !== myLeads.length && (
+              <span className="muted">Скрыто фильтром: {myLeads.length - listRows.length}</span>
+            )}
+            {selected.length > 0 && <span className="muted">Выбрано: {selected.length}</span>}
+          </div>
+        </>
       )}
     </Shell>
   );

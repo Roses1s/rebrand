@@ -712,3 +712,22 @@
     transform: translateY(8px) scale(0.985);
   }
 }
+
+.skeleton-table {
+  padding: 6px 0;
+}
+
+.skeleton-table__row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  height: var(--row-h);
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.skeleton-table__row:last-child {
+  border-bottom: 0;
+}

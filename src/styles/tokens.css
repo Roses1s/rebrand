@@ -45,6 +45,7 @@
   --r-1: 10px;
   --r-2: 14px;
   --r-3: 18px;
+  --r-pill: 999px;
 
   --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;

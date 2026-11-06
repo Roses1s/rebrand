@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, Check, Moon, Sun, Trash2 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { Button } from "../ui/Button";
-import { STAGES } from "../mock/data";
+import { IS_ADMIN, STAGES } from "../mock/data";
 
 const COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#14b8a6", "#ec4899", "#64748b", "#ef4444"];
 const ACCENTS = [
@@ -36,6 +36,13 @@ export function SettingsPage() {
     STAGES.map((stage) => ({ id: stage.id, name: stage.name, color: stage.color })),
   );
   const [saved, setSaved] = useState(false);
+  const [role, setRole] = useState(() => readStored("crm.role", "manager"));
+
+  function switchRole(next) {
+    setRole(next);
+    persist("crm.role", next);
+    window.setTimeout(() => window.location.reload(), 120);
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -141,12 +148,45 @@ export function SettingsPage() {
           <div className="card">
             <div className="card__head">
               <div>
+                <div className="card__title">Роль в макете</div>
+                <div className="card__sub">
+                  {IS_ADMIN ? "Сейчас вы смотрите как администратор" : "Сейчас вы смотрите как менеджер"}
+                </div>
+              </div>
+            </div>
+            <div className="card__body">
+              <div className="seg" role="group" aria-label="Роль в макете">
+                <button type="button" aria-pressed={role !== "admin"} onClick={() => switchRole("manager")}>
+                  Менеджер
+                </button>
+                <button type="button" aria-pressed={role === "admin"} onClick={() => switchRole("admin")}>
+                  Администратор
+                </button>
+              </div>
+              <div className="muted" style={{ fontSize: 11.5, marginTop: 10, lineHeight: 1.5 }}>
+                Роль меняет только оформление макета: у администратора появляется раздел
+                «Администрирование». Права в рабочей CRM проверяются на сервере.
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card__head">
+              <div>
                 <div className="card__title">Демо-данные</div>
                 <div className="card__sub">Вернуть стандартные этапы моей доски</div>
               </div>
             </div>
             <div className="card__body">
-              <Button variant="danger" icon={Trash2}>
+              <Button
+                variant="danger"
+                icon={Trash2}
+                onClick={() => {
+                  setStages(STAGES.map((stage) => ({ id: stage.id, name: stage.name, color: stage.color })));
+                  setSaved(true);
+                  window.setTimeout(() => setSaved(false), 1600);
+                }}
+              >
                 Сбросить мою воронку
               </Button>
             </div>

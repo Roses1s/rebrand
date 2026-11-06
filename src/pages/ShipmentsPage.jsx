@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { ME, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
+import { TableSkeleton } from "../ui/States";
 import { money } from "../lib/format";
 
 const FILTERS = [
@@ -21,6 +22,12 @@ const myShipments = SHIPMENTS.filter((item) => item.ownerId === ME.id);
 export function ShipmentsPage() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoading(false), 260);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const rows = myShipments.filter((item) => filter === "all" || item.status === filter);
   const marginOf = (item) => item.customerPrice - item.carrierPrice;
@@ -67,7 +74,15 @@ export function ShipmentsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => {
+            {loading && (
+              <tr>
+                <td colSpan={8} style={{ padding: 0 }}>
+                  <TableSkeleton rows={5} cols={7} />
+                </td>
+              </tr>
+            )}
+            {!loading &&
+              rows.map((item) => {
               const margin = marginOf(item);
               return (
                 <tr key={item.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/shipments/${item.id}`)}>
@@ -94,7 +109,7 @@ export function ShipmentsPage() {
           </tbody>
         </table>
 
-        {rows.length === 0 && (
+        {!loading && rows.length === 0 && (
           <div className="empty">
             <span className="empty__icon">
               <Package size={20} strokeWidth={1.8} />

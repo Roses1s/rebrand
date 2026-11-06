@@ -626,17 +626,8 @@ body {
 }
 
 @media (max-width: 900px) {
-  .sidebar {
-    width: auto;
-    padding: 0 8px;
-  }
-
   .main {
     padding: 4px 14px 30px;
-  }
-
-  .board {
-    grid-auto-columns: 246px;
   }
 
   .task-board {
@@ -664,5 +655,78 @@ body {
 @media (max-width: 900px) {
   .topbar__head {
     max-width: 100%;
+  }
+}
+
+/* --- Длинные заголовки и мобильные детали -------------------------------- */
+
+.topbar__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card__head > div {
+  min-width: 0;
+}
+
+@media (max-width: 680px) {
+  .lead-head {
+    gap: 12px;
+  }
+
+  .lead-head__logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .lead-head__name {
+    font-size: 19px;
+  }
+
+  .lead-head__actions {
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .money-big {
+    font-size: 24px;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: var(--r-3) var(--r-3) 0 0;
+  }
+
+  .modal__head {
+    padding: 16px 16px 0;
+  }
+
+  .modal__body {
+    padding: 14px 16px 16px;
+  }
+
+  .modal__foot {
+    padding: 0 16px 16px;
+  }
+
+  .bulk-bar {
+    flex-wrap: wrap;
+  }
+
+  .stage-strip {
+    max-width: 100%;
+  }
+
+  .task-card__meta {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 }
