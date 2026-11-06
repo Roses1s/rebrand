@@ -890,3 +890,14 @@
     justify-content: flex-start;
   }
 }
+
+.stage-edit .input--sm {
+  height: 30px;
+  font-size: 11.5px;
+  background: var(--surface);
+}
+
+.stage-edit .col__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

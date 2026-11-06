@@ -19,9 +19,21 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCorners,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 
 import { Shell } from "../app/Shell";
-import { STAGE_META, useLeads } from "../app/store";
+import { useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
 import { ME, OWNER, PRIORITY, TASKS } from "../mock/data";
 import { shortMoney } from "../lib/format";
@@ -38,7 +50,7 @@ function LeadCard({ lead }) {
   const foreign = lead.ownerId !== ME.id;
 
   return (
-    <Link to={`/crm/leads/${lead.id}`} className="lead-card">
+    <Link to={`/crm/leads/${lead.id}`} className="lead-card" draggable={false}>
       <div className="lead-card__title">
         {lead.hot && <Flame size={14} className="fire" strokeWidth={2.2} />}
         <span>{lead.name}</span>
@@ -72,6 +84,75 @@ function LeadCard({ lead }) {
   );
 }
 
+function DraggableLead({ lead }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`drag-wrap${isDragging ? " is-dragging" : ""}`}
+      title="Перетащите карточку на другой этап"
+      {...attributes}
+      {...listeners}
+    >
+      <LeadCard lead={lead} />
+    </div>
+  );
+}
+
+function StageColumn({ stage, stageLeads, dragging, onAdd }) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
+  const sum = sumOf(stageLeads);
+
+  return (
+    <section
+      ref={setNodeRef}
+      className={`col${isOver ? " is-over" : ""}${dragging ? " is-target" : ""}`}
+      aria-label={stage.name}
+    >
+      <div className="col__head">
+        <span className="col__dot" style={{ background: stage.color }} />
+        <span className="col__name">{stage.name}</span>
+        <span className="col__count">{stageLeads.length}</span>
+        <button
+          type="button"
+          className="col__btn"
+          aria-label={`Добавить лид в «${stage.name}»`}
+          title="Добавить лид на этот этап"
+          onClick={onAdd}
+        >
+          <Plus size={15} strokeWidth={2} />
+        </button>
+        <Link
+          to="/settings"
+          className="col__btn"
+          aria-label={`Настроить этап «${stage.name}»`}
+          title="Настроить этапы воронки"
+        >
+          <MoreVertical size={15} strokeWidth={2} />
+        </Link>
+      </div>
+
+      <div className="col__sub" title={`${shortMoney(sum)} · ${stage.hint}`}>
+        {shortMoney(sum)} · {stage.hint}
+      </div>
+      <div className="col__rule" style={{ "--col-color": stage.color }} />
+
+      <div className="col__cards">
+        {stageLeads.map((lead) => (
+          <DraggableLead key={lead.id} lead={lead} />
+        ))}
+
+        {stageLeads.length === 0 && (
+          <div className="col__drop-hint" aria-hidden="true">
+            {dragging ? "Отпустите здесь" : "Пока пусто — перетащите лид или добавьте новый"}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
   const active = sort.key === sortKey;
   const Icon = !active ? ArrowUpDown : sort.dir === "asc" ? ChevronUp : ChevronDown;
@@ -93,7 +174,7 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, addLead, removeLeads } = useLeads();
+  const { leads, stages, addLead, moveLead, removeLeads } = useLeads();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState(() => {
     try {
@@ -104,9 +185,17 @@ export function FunnelPage() {
   });
   const [sort, setSort] = useState({ key: "stage", dir: "asc" });
   const [selected, setSelected] = useState([]);
+  const [activeId, setActiveId] = useState(null);
   const allCheckbox = useRef(null);
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 160, tolerance: 8 } }),
+    useSensor(KeyboardSensor),
+  );
+
   const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id), [leads]);
+  const activeLead = activeId ? myLeads.find((lead) => lead.id === activeId) : null;
 
   function switchView(next) {
     setView(next);
@@ -121,15 +210,25 @@ export function FunnelPage() {
     setSort((prev) => (prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
   }
 
+  function handleDragEnd({ active, over }) {
+    setActiveId(null);
+    if (!over) return;
+    const stageId = Number(over.id);
+    if (!stages.some((stage) => stage.id === stageId)) return;
+    const lead = myLeads.find((item) => item.id === Number(active.id));
+    if (lead && lead.stageId !== stageId) moveLead(lead.id, stageId);
+  }
+
   const kpi = useMemo(() => {
     const sum = sumOf(myLeads);
-    const potential = myLeads.filter((lead) => lead.stageId === 4).length;
+    const potentialStage = stages[3] ?? stages[stages.length - 1];
+    const potential = myLeads.filter((lead) => lead.stageId === potentialStage?.id).length;
     const hot = myLeads.filter((lead) => lead.hot).length;
     return [
       {
         label: "Лидов в работе",
         value: String(myLeads.length),
-        foot: "5 этапов моей воронки",
+        foot: `${stages.length} ${stages.length === 1 ? "этап" : "этапов"} моей воронки`,
         color: "var(--stage-1)",
         icon: "users",
       },
@@ -162,7 +261,7 @@ export function FunnelPage() {
         icon: "clock",
       },
     ];
-  }, [myLeads]);
+  }, [myLeads, stages]);
 
   const visible = (lead) => {
     if (filter === "hot" && !lead.hot) return false;
@@ -266,52 +365,33 @@ export function FunnelPage() {
       </div>
 
       {view === "board" ? (
-        <div className="board">
-          {STAGE_META.map((stage) => {
-            const stageLeads = myLeads.filter((lead) => lead.stageId === stage.id && visible(lead));
-            const sum = sumOf(stageLeads);
-            return (
-              <section key={stage.id} className="col" aria-label={stage.name}>
-                <div className="col__head">
-                  <span className="col__dot" style={{ background: stage.color }} />
-                  <span className="col__name">{stage.name}</span>
-                  <span className="col__count">{stageLeads.length}</span>
-                  <button
-                    type="button"
-                    className="col__btn"
-                    aria-label={`Добавить лид в «${stage.name}»`}
-                    title="Добавить лид на этот этап"
-                    onClick={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
-                  >
-                    <Plus size={15} strokeWidth={2} />
-                  </button>
-                  <button type="button" className="col__btn" aria-label={`Меню этапа «${stage.name}»`}>
-                    <MoreVertical size={15} strokeWidth={2} />
-                  </button>
-                </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={({ active }) => setActiveId(Number(active.id))}
+          onDragCancel={() => setActiveId(null)}
+          onDragEnd={handleDragEnd}
+        >
+          <div className={activeId ? "board board--dragging" : "board"}>
+            {stages.map((stage) => (
+              <StageColumn
+                key={stage.id}
+                stage={stage}
+                dragging={Boolean(activeId)}
+                stageLeads={myLeads.filter((lead) => lead.stageId === stage.id && visible(lead))}
+                onAdd={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
+              />
+            ))}
+          </div>
 
-                <div className="col__sub" title={`${shortMoney(sum)} · ${stage.hint}`}>
-                  {shortMoney(sum)} · {stage.hint}
-                </div>
-                <div className="col__rule" style={{ "--col-color": stage.color }} />
-
-                <div className="col__cards">
-                  {stageLeads.map((lead) => (
-                    <LeadCard key={lead.id} lead={lead} />
-                  ))}
-
-                  {stageLeads.length === 0 && (
-                    <div className="card" style={{ padding: 18, textAlign: "center", color: "var(--ink-3)", fontSize: 12 }}>
-                      {myLeads.some((lead) => lead.stageId === stage.id)
-                        ? "По этому фильтру карточек нет"
-                        : "Пока пусто — добавьте лид"}
-                    </div>
-                  )}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+          <DragOverlay dropAnimation={null}>
+            {activeLead ? (
+              <div className="drag-overlay">
+                <LeadCard lead={activeLead} />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       ) : (
         <>
           {selected.length > 0 && (
@@ -355,7 +435,7 @@ export function FunnelPage() {
               </thead>
               <tbody>
                 {listRows.map((lead) => {
-                  const stage = STAGE_META.find((item) => item.id === lead.stageId) ?? STAGE_META[0];
+                  const stage = stages.find((item) => item.id === lead.stageId) ?? stages[0];
                   const priority = PRIORITY[lead.priority];
                   const isSelected = selected.includes(lead.id);
                   return (
@@ -403,8 +483,8 @@ export function FunnelPage() {
                       </td>
                       <td>
                         <span className="stage-cell">
-                          <span className="bar-row__dot" style={{ background: stage.color }} />
-                          {stage.name}
+                          <span className="bar-row__dot" style={{ background: stage?.color ?? "var(--ink-3)" }} />
+                          {stage?.name ?? "Без этапа"}
                         </span>
                       </td>
                       <td>

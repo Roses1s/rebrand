@@ -20,7 +20,7 @@ import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status, Tag } from "../ui/Tag";
-import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS, STAGES } from "../mock/data";
+import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
 
 const FILES = [
@@ -38,7 +38,7 @@ const HISTORY = [
 
 export function LeadPage() {
   const { id } = useParams();
-  const { leads, moveLead } = useLeads();
+  const { leads, stages, moveLead } = useLeads();
   const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
@@ -114,7 +114,7 @@ export function LeadPage() {
           <h1 className="lead-head__name">{lead.name}</h1>
           <div className="lead-head__meta">
             <span className="mono">ИНН {lead.inn}</span>
-            <Status tone="progress">{STAGES.find((s) => s.id === stageId)?.name}</Status>
+            <Status tone="progress">{stages.find((s) => s.id === stageId)?.name ?? "Без этапа"}</Status>
             <span>{lead.city}</span>
             <span>·</span>
             <span>{lead.created}</span>
@@ -133,7 +133,7 @@ export function LeadPage() {
       </div>
 
       <div className="stage-strip" style={{ marginBottom: 16 }}>
-        {STAGES.map((stage) => (
+        {stages.map((stage) => (
           <button key={stage.id} type="button" aria-pressed={stageId === stage.id} onClick={() => { setStageId(stage.id); moveLead(lead.id, stage.id); }}>
             <span className="stage-strip__dot" style={{ background: stage.color }} />
             {stage.name}
