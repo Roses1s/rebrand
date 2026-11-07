@@ -273,7 +273,6 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
             <Button variant="primary" icon={Plus} className="new-lead-btn" onClick={() => setLeadOpen(true)}>
               <span className="btn__label">Новый лид</span>
             </Button>
-            <Avatar initials={ME.initials} size="lg" title={`${ME.name} · ${ME.role}`} />
           </div>
         </header>
 

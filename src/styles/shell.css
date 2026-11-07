@@ -633,11 +633,6 @@ html[data-theme="dark"] .plan {
     display: none;
   }
 
-  .topbar__actions .avatar--lg {
-    width: 32px;
-    height: 32px;
-    font-size: 11px;
-  }
 }
 
 /* --- Кнопка меню на телефоне -------------------------------------------- */
