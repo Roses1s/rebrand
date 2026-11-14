@@ -729,3 +729,37 @@ body {
     gap: 6px;
   }
 }
+
+/* Поиск по центру верхней строки.
+   Сетка из трёх колонок с одинаковыми боковыми: поле стоит ровно в середине
+   шапки, а не «примерно», как при flex. Ширина поля сжимается на узких
+   экранах, чтобы не наехать на кнопки справа. */
+@media (min-width: 1241px) {
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .topbar__head {
+    margin-right: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .topbar__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar__search {
+    width: clamp(240px, 24vw, 340px);
+    max-width: none;
+    justify-self: center;
+  }
+
+  .topbar__actions {
+    flex: none;
+    justify-self: end;
+  }
+}
