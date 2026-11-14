@@ -20,7 +20,7 @@ import {
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
-import { Avatar, Status } from "../ui/Tag";
+import { Avatar } from "../ui/Tag";
 import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
 import { leadChatter } from "../mock/chatter";
@@ -210,10 +210,6 @@ export function LeadPage() {
           </h1>
           <div className="lead-head__meta">
             <span className="mono">ИНН {draft.inn || "—"}</span>
-            <Status tone="progress">{stages.find((item) => item.id === stageId)?.name ?? "Без этапа"}</Status>
-            <span>{lead.city}</span>
-            <span>·</span>
-            <span>{lead.created}</span>
           </div>
         </div>
 
