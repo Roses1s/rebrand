@@ -422,20 +422,6 @@ body {
   font-size: 10.5px;
 }
 
-.route {
-  height: 23px;
-  padding: 0 8px;
-  font-size: 10.5px;
-}
-
-.cargo {
-  font-size: 10.5px;
-}
-
-.cargo__weight {
-  font-size: 9.5px;
-}
-
 .lead-card__foot {
   gap: 6px;
   padding-top: 7px;

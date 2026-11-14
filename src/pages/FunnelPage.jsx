@@ -13,7 +13,6 @@ import {
   Flame,
   KanbanSquare,
   List,
-  MapPin,
   MoreVertical,
   Package,
   Phone,
@@ -71,17 +70,7 @@ function LeadCard({ lead }) {
         {lead.contact && lead.contact !== "—" ? lead.contact : "Контакт не указан"}
       </div>
 
-      <span className="route">
-        <MapPin size={12} strokeWidth={2} />
-        {lead.route}
-      </span>
-
-      <div className="cargo">
-        <Package size={12} strokeWidth={2} />
-        <span className="cargo__type">{lead.cargo}</span>
-        {lead.weight && lead.weight !== "—" && <span className="cargo__weight">{lead.weight}</span>}
-        <span className={`badge ${priority.cls}`}>{priority.label}</span>
-      </div>
+      <span className={`badge ${priority.cls} lead-card__priority`}>{priority.label}</span>
 
       <div className="lead-card__foot">
         {foreign && <Avatar initials={owner.initials} color={owner.color} size="sm" title={owner.name} />}
