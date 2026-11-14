@@ -31,6 +31,45 @@
   .chatter {
     margin-right: calc(var(--pad-page) * -1);
   }
+
+  /*
+    Страница записи не прокручивается целиком: шапка карточки остаётся на
+    месте, форма и лента прокручиваются каждая в своей колонке — как
+    FormWorkspace в рабочей CRM.
+  */
+  .lead-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 68px);
+    height: calc(100dvh - 68px);
+    margin-bottom: -40px;
+    overflow: hidden;
+  }
+
+  .lead-page .lead-layout {
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .lead-page .lead-layout > * {
+    min-height: 0;
+  }
+
+  /* Левая колонка: форма и вкладки прокручиваются сами. */
+  .lead-page .lead-layout > .stack {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 6px;
+    padding-bottom: 2px;
+  }
+
+  .lead-page .chatter {
+    position: static;
+    height: auto;
+    max-height: none;
+    margin-bottom: 0;
+  }
 }
 
 .chatter button {

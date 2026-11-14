@@ -184,7 +184,8 @@ export function LeadPage() {
 
   return (
     <Shell title="Карточка лида" crumb={`Воронка · ${lead.name}`}>
-      <Link to="/crm" className="back-link">
+      <div className="lead-page">
+        <Link to="/crm" className="back-link">
         <ArrowLeft size={14} strokeWidth={2} />
         К воронке
       </Link>
@@ -417,6 +418,7 @@ export function LeadPage() {
           authorInitials={ME.initials}
           currentUserId={ME.id}
         />
+      </div>
       </div>
     </Shell>
   );
