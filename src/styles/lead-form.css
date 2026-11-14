@@ -59,6 +59,29 @@
   white-space: nowrap;
 }
 
+.lead-save__state--saving {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-ink);
+}
+
+.lead-save__state--saving::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--accent-soft);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: lead-spin 700ms linear infinite;
+}
+
+@keyframes lead-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .lead-save__ok {
   display: inline-flex;
   align-items: center;
@@ -177,5 +200,9 @@
   .lead-title-input,
   .lead-input {
     transition: none;
+  }
+
+  .lead-save__state--saving::before {
+    animation: none;
   }
 }

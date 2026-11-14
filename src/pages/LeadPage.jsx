@@ -2,7 +2,7 @@
  * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
  * Лид коллеги открывается усечённо — только название, ИНН и продавец.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -68,17 +68,60 @@ export function LeadPage() {
   const dirty = Object.keys(saved).some((key) => draft[key] !== saved[key]);
   const set = (key) => (event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }));
 
-  function saveCard() {
-    if (!dirty || !draft.name.trim()) return;
-    const next = { ...draft, name: draft.name.trim() };
+  // Состояние «Сохранение…» живёт ровно столько, сколько нужно, чтобы его
+  // заметили: данные пишутся мгновенно, индикатор гаснет сам.
+  const [saving, setSaving] = useState(false);
+
+  const persist = (next = draft) => {
     updateLead(lead.id, next);
     setDraft(next);
     setSaved(next);
+    setSaving(true);
+    window.setTimeout(() => setSaving(false), 350);
+  };
+
+  function saveCard() {
+    if (!dirty || !draft.name.trim()) return;
+    persist({ ...draft, name: draft.name.trim() });
   }
 
   function discardCard() {
     setDraft(saved);
+    setSaving(false);
   }
+
+  /** Enter — сохранить правку, Esc — вернуть последнюю сохранённую. */
+  function onFieldKeyDown(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      saveCard();
+      event.target.blur();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      discardCard();
+      event.target.blur();
+    }
+  }
+
+  // Автосохранение через 3 секунды после последней правки — как в рабочей CRM.
+  useEffect(() => {
+    if (!dirty || !draft.name.trim()) return undefined;
+    const timer = window.setTimeout(() => persist(draft), 3000);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, dirty, lead?.id]);
+
+  // Уходим со страницы с несохранёнными правками — дописываем их сразу,
+  // чтобы переход на доску не «съел» ввод.
+  const latest = useRef({ id: null, dirty: false, draft: null, update: updateLead });
+  latest.current = { id: lead?.id, dirty, draft, update: updateLead };
+  useEffect(
+    () => () => {
+      const state = latest.current;
+      if (state.dirty && state.draft?.name?.trim()) state.update(state.id, state.draft);
+    },
+    [],
+  );
 
   // Предупреждение о дубле ИНН: как в рабочей CRM, сохранять не мешает.
   const sameInn =
@@ -157,6 +200,7 @@ export function LeadPage() {
               className="lead-title-input"
               value={draft.name}
               onChange={set("name")}
+              onKeyDown={onFieldKeyDown}
               aria-label="Название лида"
               placeholder="Название компании"
               autoComplete="off"
@@ -172,9 +216,13 @@ export function LeadPage() {
         </div>
 
         <div className="lead-head__actions">
-          {dirty ? (
+          {saving ? (
+            <span className="lead-save__state lead-save__state--saving">Сохранение…</span>
+          ) : dirty ? (
             <div className="lead-save">
-              <span className="lead-save__state">Изменено</span>
+              <span className="lead-save__state">
+                {draft.name.trim() ? "Изменено" : "Введите название"}
+              </span>
               <Button size="sm" variant="ghost" onClick={discardCard}>
                 Отменить
               </Button>
@@ -222,7 +270,7 @@ export function LeadPage() {
                 <div className="card__sub">Реквизиты и контакты</div>
               </div>
             </div>
-            <div className="card__body lead-form" style={{ paddingTop: 4 }}>
+            <div className="card__body lead-form" style={{ paddingTop: 4 }} onKeyDown={onFieldKeyDown}>
               <label className="lead-field">
                 <span className="lead-field__label">Компания</span>
                 <input className="lead-input" value={draft.name} onChange={set("name")} placeholder="ООО «Ромашка»" />
