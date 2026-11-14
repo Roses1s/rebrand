@@ -2,7 +2,7 @@
  * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
  * Лид коллеги открывается усечённо — только название, ИНН и продавец.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -24,6 +24,8 @@ import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status, Tag } from "../ui/Tag";
+import { Chatter } from "../ui/Chatter";
+import { leadChatter } from "../mock/chatter";
 import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
 
@@ -33,19 +35,13 @@ const FILES = [
   { name: "Доверенность.jpg", size: "820 КБ", date: "04.11.2026" },
 ];
 
-const HISTORY = [
-  { who: "Мария Соколова", what: "перевела лид на этап «Новый»", when: "сегодня 09:14" },
-  { who: "Мария Соколова", what: "создала заявку ЗВ-2026-0148", when: "05.11 09:12" },
-  { who: "Виталий Нестеров", what: "оставил заметку: «Нужен тент, погрузка со двора»", when: "05.11 08:40" },
-  { who: "Система", what: "получен лид с сайта / формы заявки", when: "04.11 17:02" },
-];
-
 export function LeadPage() {
   const { id } = useParams();
   const { leads, stages, moveLead } = useLeads();
   const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
+  const chatter = useMemo(() => leadChatter(lead), [lead?.id, lead?.stageId]);
 
   if (!lead) {
     return (
@@ -145,7 +141,7 @@ export function LeadPage() {
         ))}
       </div>
 
-      <div className="grid grid--2-1">
+      <div className="lead-layout">
         <div className="stack">
           <div className="card">
             <div className="card__head">
@@ -193,9 +189,6 @@ export function LeadPage() {
               </button>
               <button type="button" role="tab" aria-selected={tab === "files"} onClick={() => setTab("files")}>
                 Файлы ({FILES.length})
-              </button>
-              <button type="button" role="tab" aria-selected={tab === "history"} onClick={() => setTab("history")}>
-                История
               </button>
             </div>
 
@@ -253,120 +246,109 @@ export function LeadPage() {
                 </div>
               )}
 
-              {tab === "history" && (
-                <div className="stack" style={{ gap: 12 }}>
-                  {HISTORY.map((item) => (
-                    <div key={item.when} className="row" style={{ alignItems: "flex-start" }}>
-                      <Avatar initials={item.who.slice(0, 1)} size="sm" />
-                      <div>
-                        <div style={{ fontSize: 12.5 }}>
-                          <b>{item.who}</b> {item.what}
-                        </div>
-                        <div className="muted" style={{ fontSize: 11 }}>
-                          {item.when}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
-        </div>
-
-        <div className="stack">
-          <div className="card">
-            <div className="card__body">
-              <div className="money-label">Бюджет сделки</div>
-              <div className="money-big" style={{ marginTop: 6 }}>
-                {money(lead.price)}
-              </div>
-              <div className="row" style={{ marginTop: 14, gap: 8 }}>
-                <Button variant="success" icon={Phone} style={{ flex: 1 }}>
-                  Позвонить
-                </Button>
-                <Button variant="info" icon={Mail} style={{ flex: 1 }}>
-                  Письмо
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card__head">
-              <div className="card__title">Маршрут</div>
-            </div>
-            <div className="card__body" style={{ paddingTop: 10 }}>
-              <div className="route-card">
-                <div className="route-card__row">
-                  <MapPin size={14} strokeWidth={2} style={{ color: "var(--accent)" }} />
-                  {lead.route}
+          <div className="lead-facts">
+            <div className="card">
+              <div className="card__body">
+                <div className="money-label">Бюджет сделки</div>
+                <div className="money-big" style={{ marginTop: 6 }}>
+                  {money(lead.price)}
                 </div>
-                <div className="route-card__chips">
-                  <span className="route-chip">
-                    <Package size={12} /> {lead.cargo}
+                <div className="row" style={{ marginTop: 14, gap: 8 }}>
+                  <Button variant="success" icon={Phone} style={{ flex: 1 }}>
+                    Позвонить
+                  </Button>
+                  <Button variant="info" icon={Mail} style={{ flex: 1 }}>
+                    Письмо
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card__head">
+                <div className="card__title">Маршрут</div>
+              </div>
+              <div className="card__body" style={{ paddingTop: 10 }}>
+                <div className="route-card">
+                  <div className="route-card__row">
+                    <MapPin size={14} strokeWidth={2} style={{ color: "var(--accent)" }} />
+                    {lead.route}
+                  </div>
+                  <div className="route-card__chips">
+                    <span className="route-chip">
+                      <Package size={12} /> {lead.cargo}
+                    </span>
+                    <span className="route-chip">{lead.weight}</span>
+                    <span className="route-chip">{lead.body}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card__head">
+                <div className="card__title">Детали</div>
+              </div>
+              <div className="card__body" style={{ paddingTop: 4 }}>
+                <div className="field-row">
+                  <span className="field-row__label">Источник</span>
+                  <span className="field-row__value">{lead.source}</span>
+                </div>
+                <div className="field-row">
+                  <span className="field-row__label">Приоритет</span>
+                  <span className="field-row__value">
+                    <span className={`badge ${priority.cls}`}>{priority.label}</span>
                   </span>
-                  <span className="route-chip">{lead.weight}</span>
-                  <span className="route-chip">{lead.body}</span>
+                </div>
+                <div className="field-row">
+                  <span className="field-row__label">Ответственный</span>
+                  <span className="field-row__value row" style={{ justifyContent: "flex-end" }}>
+                    <Avatar initials={owner.initials} color={owner.color} size="sm" />
+                    {owner.name}
+                  </span>
+                </div>
+                <div className="field-row">
+                  <span className="field-row__label">Создан</span>
+                  <span className="field-row__value">{lead.created}</span>
+                </div>
+                <div className="field-row">
+                  <span className="field-row__label">Без движения</span>
+                  <span className="field-row__value" style={{ color: lead.days > 7 ? "var(--danger)" : "var(--ink)" }}>
+                    {lead.days} дн.
+                  </span>
+                </div>
+                <div className="field-row">
+                  <span className="field-row__label">Теги</span>
+                  <span className="field-row__value row" style={{ justifyContent: "flex-end", gap: 5 }}>
+                    <Tag color="var(--stage-3)">Тент</Tag>
+                    <Tag color="var(--stage-5)">Постоянный</Tag>
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="card">
-            <div className="card__head">
-              <div className="card__title">Детали</div>
-            </div>
-            <div className="card__body" style={{ paddingTop: 4 }}>
-              <div className="field-row">
-                <span className="field-row__label">Источник</span>
-                <span className="field-row__value">{lead.source}</span>
+            <div className="card">
+              <div className="card__body">
+                <div className="row" style={{ gap: 8, marginBottom: 10 }}>
+                  <Clock size={15} style={{ color: "var(--ink-3)" }} />
+                  <span style={{ fontSize: 12.5, fontWeight: 600 }}>Последнее действие</span>
+                </div>
+                <p className="muted" style={{ fontSize: 12 }}>
+                  Звонок назначен на {lead.due}. Держите лид в движении — карточки без активности подсвечиваются.
+                </p>
               </div>
-              <div className="field-row">
-                <span className="field-row__label">Приоритет</span>
-                <span className="field-row__value">
-                  <span className={`badge ${priority.cls}`}>{priority.label}</span>
-                </span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Ответственный</span>
-                <span className="field-row__value row" style={{ justifyContent: "flex-end" }}>
-                  <Avatar initials={owner.initials} color={owner.color} size="sm" />
-                  {owner.name}
-                </span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Создан</span>
-                <span className="field-row__value">{lead.created}</span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Без движения</span>
-                <span className="field-row__value" style={{ color: lead.days > 7 ? "var(--danger)" : "var(--ink)" }}>
-                  {lead.days} дн.
-                </span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Теги</span>
-                <span className="field-row__value row" style={{ justifyContent: "flex-end", gap: 5 }}>
-                  <Tag color="var(--stage-3)">Тент</Tag>
-                  <Tag color="var(--stage-5)">Постоянный</Tag>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card__body">
-              <div className="row" style={{ gap: 8, marginBottom: 10 }}>
-                <Clock size={15} style={{ color: "var(--ink-3)" }} />
-                <span style={{ fontSize: 12.5, fontWeight: 600 }}>Последнее действие</span>
-              </div>
-              <p className="muted" style={{ fontSize: 12 }}>
-                Звонок назначен на {lead.due}. Держите лид в движении — карточки без активности подсвечиваются.
-              </p>
             </div>
           </div>
         </div>
+
+        <Chatter
+          key={lead.id}
+          entries={chatter}
+          authorInitials={ME.initials}
+          currentUserId={ME.id}
+        />
       </div>
     </Shell>
   );

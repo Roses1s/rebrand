@@ -79,14 +79,19 @@ src/
   pages/               11 экранов (Funnel, Lead, Clients, Shipments, Shipment,
                        Tasks, Analytics, Accounting, Settings, Admin, Kit)
   ui/                  Button, Field, Tag (Status/Chip/Avatar), Modal,
-                       Segmented, States (Empty/Skeleton/TableSkeleton), cn
-  lib/format.js        money, shortMoney, initials
+                       Segmented, States (Empty/Skeleton/TableSkeleton),
+                       Chatter (лента карточки лида), cn
+  lib/format.js        money, shortMoney, initials, fileSize,
+                       relativeTime, absoluteTime, dayLabel
   mock/data.js         демо-данные в форме API рабочей CRM
-  styles/              tokens, base, ui, shell, board, pages, kit, compact
+  mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
+  styles/              tokens, base, ui, shell, board, pages, kit, compact,
+                       chatter
 ```
 
 Правило: **`compact.css` подключается последним** в `styles/index.css` — он
-переопределяет размеры, не трогая цвета.
+переопределяет размеры, не трогая цвета. `chatter.css` идёт после него и
+держит только свои классы `.chatter*` и раскладку `.lead-layout`/`.lead-facts`.
 
 ## 6. Данные и хранение
 
