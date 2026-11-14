@@ -11,14 +11,6 @@
   align-items: start;
 }
 
-/* Сводные блоки под вкладками: бюджет, маршрут, детали, последнее действие */
-.lead-facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
-  gap: 12px;
-  align-items: start;
-}
-
 /* --- Панель ------------------------------------------------------------- */
 
 .chatter {

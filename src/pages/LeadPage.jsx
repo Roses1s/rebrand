@@ -8,25 +8,22 @@ import {
   ArrowLeft,
   Building2,
   ChevronDown,
-  Clock,
   FileText,
   Mail,
-  MapPin,
   MoreHorizontal,
   Package,
   Paperclip,
   Phone,
   Truck,
-  User,
 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
-import { Avatar, Status, Tag } from "../ui/Tag";
+import { Avatar, Status } from "../ui/Tag";
 import { Chatter } from "../ui/Chatter";
 import { leadChatter } from "../mock/chatter";
-import { ALL_LEADS, ME, OWNER, PRIORITY, SHIPMENTS } from "../mock/data";
+import { ALL_LEADS, ME, OWNER, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
 
 const FILES = [
@@ -95,7 +92,6 @@ export function LeadPage() {
   }
 
   const owner = OWNER(lead.ownerId);
-  const priority = PRIORITY[lead.priority];
   const shipments = SHIPMENTS.filter((item) => item.leadId === lead.id);
 
   return (
@@ -246,99 +242,6 @@ export function LeadPage() {
                 </div>
               )}
 
-            </div>
-          </div>
-          <div className="lead-facts">
-            <div className="card">
-              <div className="card__body">
-                <div className="money-label">Бюджет сделки</div>
-                <div className="money-big" style={{ marginTop: 6 }}>
-                  {money(lead.price)}
-                </div>
-                <div className="row" style={{ marginTop: 14, gap: 8 }}>
-                  <Button variant="success" icon={Phone} style={{ flex: 1 }}>
-                    Позвонить
-                  </Button>
-                  <Button variant="info" icon={Mail} style={{ flex: 1 }}>
-                    Письмо
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card__head">
-                <div className="card__title">Маршрут</div>
-              </div>
-              <div className="card__body" style={{ paddingTop: 10 }}>
-                <div className="route-card">
-                  <div className="route-card__row">
-                    <MapPin size={14} strokeWidth={2} style={{ color: "var(--accent)" }} />
-                    {lead.route}
-                  </div>
-                  <div className="route-card__chips">
-                    <span className="route-chip">
-                      <Package size={12} /> {lead.cargo}
-                    </span>
-                    <span className="route-chip">{lead.weight}</span>
-                    <span className="route-chip">{lead.body}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card__head">
-                <div className="card__title">Детали</div>
-              </div>
-              <div className="card__body" style={{ paddingTop: 4 }}>
-                <div className="field-row">
-                  <span className="field-row__label">Источник</span>
-                  <span className="field-row__value">{lead.source}</span>
-                </div>
-                <div className="field-row">
-                  <span className="field-row__label">Приоритет</span>
-                  <span className="field-row__value">
-                    <span className={`badge ${priority.cls}`}>{priority.label}</span>
-                  </span>
-                </div>
-                <div className="field-row">
-                  <span className="field-row__label">Ответственный</span>
-                  <span className="field-row__value row" style={{ justifyContent: "flex-end" }}>
-                    <Avatar initials={owner.initials} color={owner.color} size="sm" />
-                    {owner.name}
-                  </span>
-                </div>
-                <div className="field-row">
-                  <span className="field-row__label">Создан</span>
-                  <span className="field-row__value">{lead.created}</span>
-                </div>
-                <div className="field-row">
-                  <span className="field-row__label">Без движения</span>
-                  <span className="field-row__value" style={{ color: lead.days > 7 ? "var(--danger)" : "var(--ink)" }}>
-                    {lead.days} дн.
-                  </span>
-                </div>
-                <div className="field-row">
-                  <span className="field-row__label">Теги</span>
-                  <span className="field-row__value row" style={{ justifyContent: "flex-end", gap: 5 }}>
-                    <Tag color="var(--stage-3)">Тент</Tag>
-                    <Tag color="var(--stage-5)">Постоянный</Tag>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card__body">
-                <div className="row" style={{ gap: 8, marginBottom: 10 }}>
-                  <Clock size={15} style={{ color: "var(--ink-3)" }} />
-                  <span style={{ fontSize: 12.5, fontWeight: 600 }}>Последнее действие</span>
-                </div>
-                <p className="muted" style={{ fontSize: 12 }}>
-                  Звонок назначен на {lead.due}. Держите лид в движении — карточки без активности подсвечиваются.
-                </p>
-              </div>
             </div>
           </div>
         </div>
