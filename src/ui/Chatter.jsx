@@ -46,8 +46,7 @@ export function Chatter({
     field.style.height = `${field.scrollHeight}px`;
   }, [text]);
 
-  // Новая запись появляется внизу ленты: подводим к ней, но не дёргаем
-  // прокрутку при открытии карточки и при удалении.
+  // Новые записи появляются сверху: после отправки подводим ленту к началу.
   useEffect(() => {
     if (!scrollPending.current) return;
     scrollPending.current = false;
@@ -55,9 +54,9 @@ export function Chatter({
     if (!feed) return;
     // В части окружений Element.scrollTo нет — тогда просто ставим позицию.
     if (typeof feed.scrollTo === "function") {
-      feed.scrollTo({ top: feed.scrollHeight, behavior: "smooth" });
+      feed.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      feed.scrollTop = feed.scrollHeight;
+      feed.scrollTop = 0;
     }
   }, [list]);
 
@@ -71,8 +70,13 @@ export function Chatter({
         )
       : list;
 
+    // Свежие записи сверху: и дни, и записи внутри дня идут от новых к старым.
+    const sorted = [...rows].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
     const byDay = new Map();
-    for (const entry of rows) {
+    for (const entry of sorted) {
       const key = dayLabel(entry.createdAt);
       byDay.set(key, [...(byDay.get(key) ?? []), entry]);
     }
@@ -105,7 +109,6 @@ export function Chatter({
     if (!body && pending.length === 0) return;
 
     setList((rows) => [
-      ...rows,
       {
         id: `local-${localId++}`,
         type: "note",
@@ -119,6 +122,7 @@ export function Chatter({
         authorName: "Вы",
         authorInitials,
       },
+      ...rows,
     ]);
     setText("");
     setPending([]);
