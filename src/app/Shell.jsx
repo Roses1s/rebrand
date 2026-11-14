@@ -249,7 +249,8 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
             <SearchInput
               value={search ?? query}
               onChange={onSearch ?? setQuery}
-              placeholder="Поиск: компания или груз"
+              placeholder="Поиск"
+              kbd={null}
             />
           </div>
 
