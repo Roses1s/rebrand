@@ -51,8 +51,8 @@ const SETTINGS = [{ to: "/settings", label: "Мои настройки", icon: S
 const ADMIN = [{ to: "/admin", label: "Администрирование", icon: ShieldCheck, count: String(TEAM.length) }];
 
 const TITLES = {
-  "/": ["Воронка лидов", "Моя доска · перетаскивайте карточки между этапами и внутри них"],
-  "/crm": ["Воронка лидов", "Моя доска · перетаскивайте карточки между этапами и внутри них"],
+  "/": ["Воронка лидов", ""],
+  "/crm": ["Воронка лидов", ""],
   "/customers": ["Клиенты", "Мои клиенты и клиенты коллег — чужие карточки без деталей"],
   "/shipments": ["Заявки", "Мои перевозки и статусы отгрузок"],
   "/tasks": ["Задачи", "Мои звонки, письма и напоминания"],
@@ -250,7 +250,7 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
 
           <div className="topbar__head">
             <div className="topbar__title">{title ?? pageTitle}</div>
-            <div className="topbar__sub">{crumb ?? pageSub}</div>
+            {(crumb ?? pageSub) ? <div className="topbar__sub">{crumb ?? pageSub}</div> : null}
           </div>
 
           <div className="topbar__search">
