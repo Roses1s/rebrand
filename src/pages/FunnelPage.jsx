@@ -94,7 +94,6 @@ function SortableLead({ lead }) {
     <div
       ref={setNodeRef}
       className={`drag-wrap${isDragging ? " is-dragging" : ""}`}
-      title="Перетащите карточку на другой этап. С клавиатуры: Space, стрелки, Space"
       {...attributes}
       {...listeners}
     >
