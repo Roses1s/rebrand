@@ -2,12 +2,12 @@
  * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
  * Лид коллеги открывается усечённо — только название, ИНН и продавец.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Building2,
-  ChevronDown,
+  Check,
   FileText,
   Mail,
   MoreHorizontal,
@@ -32,13 +32,59 @@ const FILES = [
   { name: "Доверенность.jpg", size: "820 КБ", date: "04.11.2026" },
 ];
 
+/** Бухгалтеры, из которых выбирают в карточке. В рабочей CRM приходят с сервера. */
+const ACCOUNTANTS = ["Смирнова О. П.", "Ольга Белова", "Пётр Ершов"];
+
+/** Поля карточки, которые менеджер правит руками. */
+function draftOf(lead) {
+  return {
+    name: lead?.name ?? "",
+    inn: lead?.inn ?? "",
+    contact: lead?.contact ?? "",
+    role: lead?.role ?? "",
+    phone: lead?.phone ?? "",
+    email: lead?.email ?? "",
+    accountant: lead?.accountant ?? ACCOUNTANTS[0],
+  };
+}
+
 export function LeadPage() {
   const { id } = useParams();
-  const { leads, stages, moveLead } = useLeads();
+  const { leads, stages, moveLead, updateLead } = useLeads();
   const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
   const chatter = useMemo(() => leadChatter(lead), [lead?.id, lead?.stageId]);
+
+  // Правки живут в черновике: пока их не сохранили, лид и доска не меняются.
+  const [draft, setDraft] = useState(() => draftOf(lead));
+  const [saved, setSaved] = useState(() => draftOf(lead));
+  useEffect(() => {
+    const next = draftOf(lead);
+    setDraft(next);
+    setSaved(next);
+  }, [lead?.id]);
+
+  const dirty = Object.keys(saved).some((key) => draft[key] !== saved[key]);
+  const set = (key) => (event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }));
+
+  function saveCard() {
+    if (!dirty || !draft.name.trim()) return;
+    const next = { ...draft, name: draft.name.trim() };
+    updateLead(lead.id, next);
+    setDraft(next);
+    setSaved(next);
+  }
+
+  function discardCard() {
+    setDraft(saved);
+  }
+
+  // Предупреждение о дубле ИНН: как в рабочей CRM, сохранять не мешает.
+  const sameInn =
+    draft.inn.trim().length >= 10
+      ? leads.filter((item) => item.id !== lead?.id && item.inn === draft.inn.trim())
+      : [];
 
   if (!lead) {
     return (
@@ -91,7 +137,6 @@ export function LeadPage() {
     );
   }
 
-  const owner = OWNER(lead.ownerId);
   const shipments = SHIPMENTS.filter((item) => item.leadId === lead.id);
 
   return (
@@ -107,10 +152,19 @@ export function LeadPage() {
         </span>
 
         <div className="grow">
-          <h1 className="lead-head__name">{lead.name}</h1>
+          <h1 className="lead-head__title">
+            <input
+              className="lead-title-input"
+              value={draft.name}
+              onChange={set("name")}
+              aria-label="Название лида"
+              placeholder="Название компании"
+              autoComplete="off"
+            />
+          </h1>
           <div className="lead-head__meta">
-            <span className="mono">ИНН {lead.inn}</span>
-            <Status tone="progress">{stages.find((s) => s.id === stageId)?.name ?? "Без этапа"}</Status>
+            <span className="mono">ИНН {draft.inn || "—"}</span>
+            <Status tone="progress">{stages.find((item) => item.id === stageId)?.name ?? "Без этапа"}</Status>
             <span>{lead.city}</span>
             <span>·</span>
             <span>{lead.created}</span>
@@ -118,6 +172,28 @@ export function LeadPage() {
         </div>
 
         <div className="lead-head__actions">
+          {dirty ? (
+            <div className="lead-save">
+              <span className="lead-save__state">Изменено</span>
+              <Button size="sm" variant="ghost" onClick={discardCard}>
+                Отменить
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                icon={Check}
+                onClick={saveCard}
+                disabled={!draft.name.trim()}
+              >
+                Сохранить
+              </Button>
+            </div>
+          ) : (
+            <span className="lead-save__ok">
+              <Check size={13} strokeWidth={2.2} /> Сохранено
+            </span>
+          )}
+
           <Button variant="success" icon={Phone}>
             Позвонить
           </Button>
@@ -146,35 +222,76 @@ export function LeadPage() {
                 <div className="card__sub">Реквизиты и контакты</div>
               </div>
             </div>
-            <div className="card__body" style={{ paddingTop: 6 }}>
-              <div className="field-row">
-                <span className="field-row__label">Компания</span>
-                <span className="field-row__value">{lead.name}</span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">ИНН</span>
-                <span className="field-row__value mono">{lead.inn}</span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Контакт</span>
-                <span className="field-row__value">
-                  {lead.contact} · {lead.role}
-                </span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Телефон</span>
-                <span className="field-row__value mono">{lead.phone}</span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">E-mail</span>
-                <span className="field-row__value">{lead.email}</span>
-              </div>
-              <div className="field-row">
-                <span className="field-row__label">Бухгалтер</span>
-                <span className="field-row__value">
-                  Смирнова О. П. <ChevronDown size={13} style={{ verticalAlign: "-2px" }} />
-                </span>
-              </div>
+            <div className="card__body lead-form" style={{ paddingTop: 4 }}>
+              <label className="lead-field">
+                <span className="lead-field__label">Компания</span>
+                <input className="lead-input" value={draft.name} onChange={set("name")} placeholder="ООО «Ромашка»" />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">ИНН</span>
+                <input
+                  className="lead-input lead-input--mono"
+                  value={draft.inn}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={12}
+                  placeholder="10 или 12 цифр"
+                  onChange={(event) =>
+                    setDraft((prev) => ({ ...prev, inn: event.target.value.replace(/\D/g, "") }))
+                  }
+                />
+              </label>
+
+              {sameInn.length > 0 && (
+                <p className="lead-note lead-note--warn" role="alert">
+                  Лид с таким ИНН уже есть: «{sameInn[0].name}». Это предупреждение, сохранить можно.
+                </p>
+              )}
+
+              <label className="lead-field">
+                <span className="lead-field__label">Контакт</span>
+                <input className="lead-input" value={draft.contact} onChange={set("contact")} placeholder="Фамилия Имя" />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">Должность</span>
+                <input className="lead-input" value={draft.role} onChange={set("role")} placeholder="Снабженец" />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">Телефон</span>
+                <input
+                  className="lead-input lead-input--mono"
+                  value={draft.phone}
+                  inputMode="tel"
+                  onChange={set("phone")}
+                  placeholder="+7 900 000-00-00"
+                />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">E-mail</span>
+                <input
+                  className="lead-input"
+                  type="email"
+                  value={draft.email}
+                  onChange={set("email")}
+                  placeholder="name@example.ru"
+                />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">Бухгалтер</span>
+                <select className="lead-input lead-input--select" value={draft.accountant} onChange={set("accountant")}>
+                  {ACCOUNTANTS.map((person) => (
+                    <option key={person} value={person}>
+                      {person}
+                    </option>
+                  ))}
+                  <option value="">Не назначен</option>
+                </select>
+              </label>
             </div>
           </div>
 

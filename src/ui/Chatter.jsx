@@ -52,7 +52,13 @@ export function Chatter({
     if (!scrollPending.current) return;
     scrollPending.current = false;
     const feed = feedRef.current;
-    if (feed) feed.scrollTo({ top: feed.scrollHeight, behavior: "smooth" });
+    if (!feed) return;
+    // В части окружений Element.scrollTo нет — тогда просто ставим позицию.
+    if (typeof feed.scrollTo === "function") {
+      feed.scrollTo({ top: feed.scrollHeight, behavior: "smooth" });
+    } else {
+      feed.scrollTop = feed.scrollHeight;
+    }
   }, [list]);
 
   const groups = useMemo(() => {

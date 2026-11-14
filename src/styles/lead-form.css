@@ -1,0 +1,181 @@
+/* ==========================================================================
+   Редактируемая карточка лида: название в шапке, поля формы, индикатор
+   сохранения и предупреждение о дубле ИНН.
+   Подключается после compact.css, держит только свои классы.
+   ========================================================================== */
+
+.lead-head__title {
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.lead-title-input {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin-left: -8px;
+  padding: 1px 8px 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--ink);
+  transition: background 140ms var(--ease), border-color 140ms var(--ease), box-shadow 140ms var(--ease);
+}
+
+.lead-title-input::placeholder {
+  color: var(--ink-4);
+}
+
+.lead-title-input:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+
+.lead-title-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* --- Индикатор сохранения ------------------------------------------------ */
+
+.lead-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lead-save__state {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--warn);
+  white-space: nowrap;
+}
+
+.lead-save__ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--money);
+  white-space: nowrap;
+}
+
+/* --- Поля формы ---------------------------------------------------------- */
+
+.lead-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.lead-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.lead-field:last-child {
+  border-bottom: 0;
+}
+
+.lead-field__label {
+  flex: none;
+  width: 110px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.lead-input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  transition: background 140ms var(--ease), border-color 140ms var(--ease), box-shadow 140ms var(--ease);
+}
+
+.lead-input::placeholder {
+  color: var(--ink-4);
+}
+
+.lead-input:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+
+.lead-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.lead-input--mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.lead-input--select {
+  padding-right: 4px;
+  cursor: pointer;
+}
+
+/* --- Предупреждение о дубле ИНН ------------------------------------------ */
+
+.lead-note {
+  margin: 6px 0 4px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.lead-note--warn {
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+/* --- Мелкие экраны ------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .lead-head__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .lead-title-input {
+    font-size: 20px;
+  }
+
+  .lead-field__label {
+    width: 92px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead-title-input,
+  .lead-input {
+    transition: none;
+  }
+}

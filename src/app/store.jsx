@@ -157,6 +157,10 @@ export function LeadsProvider({ children }) {
         });
       });
 
+    /** Правка полей карточки: название, ИНН, контакты, бухгалтер. */
+    const updateLead = (id, patch) =>
+      setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...patch } : lead)));
+
     const removeLeads = (ids) =>
       setLeads((prev) => {
         const rest = prev.filter((lead) => !ids.includes(lead.id));
@@ -219,6 +223,7 @@ export function LeadsProvider({ children }) {
       leads,
       stages,
       addLead,
+      updateLead,
       moveLead,
       removeLeads,
       addStage,

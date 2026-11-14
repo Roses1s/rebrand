@@ -86,7 +86,7 @@ src/
   mock/data.js         демо-данные в форме API рабочей CRM
   mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
   styles/              tokens, base, ui, shell, board, pages, kit, compact,
-                       chatter
+                       lead-form, chatter
 ```
 
 Правило: **`compact.css` подключается последним** в `styles/index.css` — он
@@ -102,6 +102,8 @@ src/
 `store.jsx` — единственное место, где меняются лиды и этапы:
 
 - `leads` — лиды менеджера, у каждого `stageId` и `position`;
+- `updateLead(id, patch)` — правка полей карточки (название, ИНН, контакты,
+  бухгалтер), единственная точка сохранения формы лида;
 - `stages` — этапы текущего менеджера: `id`, `name`, `hint`, `color`;
 - `addLead`, `moveLead(id, stageId, index)`, `removeLeads`, `addStage`,
   `updateStage`, `moveStage`, `removeStage`, `resetAll`;
