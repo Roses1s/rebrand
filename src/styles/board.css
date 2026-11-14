@@ -191,7 +191,7 @@
 }
 
 .lead-card__priority {
-  align-self: flex-end;
+  align-self: flex-start;
   flex: none;
 }
 
