@@ -103,17 +103,23 @@
   cursor: default;
 }
 
+/*
+  Шапка ленты выровнена с полосой этапов: у полосы рамка 1 px + отступ 4 px,
+  кнопки этапов 32 px, итого 42 px. Та же высота и тот же отступ сверху —
+  тогда «Лог примечания» стоит ровно на одной линии с пилюлями этапов.
+*/
 .chatter__head {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: none;
-  padding: 10px 16px;
+  min-height: 42px;
+  padding: 5px 16px;
   border-bottom: 1px solid var(--line);
 }
 
 .chatter__mode {
-  height: 30px;
+  height: 32px;
   padding: 0 12px;
   border-radius: 8px;
   background: var(--accent);
@@ -139,8 +145,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   color: var(--ink-3);
   transition: background 140ms var(--ease), color 140ms var(--ease);
