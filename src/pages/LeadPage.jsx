@@ -22,6 +22,7 @@ import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status } from "../ui/Tag";
 import { Chatter } from "../ui/Chatter";
+import { StageBar } from "../ui/StageBar";
 import { leadChatter } from "../mock/chatter";
 import { ALL_LEADS, ME, OWNER, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
@@ -255,22 +256,14 @@ export function LeadPage() {
 
       <div className="lead-layout">
         <div className="stack">
-          <div className="stage-strip">
-            {stages.map((stage) => (
-              <button
-                key={stage.id}
-                type="button"
-                aria-pressed={stageId === stage.id}
-                onClick={() => {
-                  setStageId(stage.id);
-                  moveLead(lead.id, stage.id);
-                }}
-              >
-                <span className="stage-strip__dot" style={{ background: stage.color }} />
-                {stage.name}
-              </button>
-            ))}
-          </div>
+          <StageBar
+            stages={stages}
+            currentId={stageId}
+            onSelect={(nextId) => {
+              setStageId(nextId);
+              moveLead(lead.id, nextId);
+            }}
+          />
 
           <div className="card">
             <div className="card__head">

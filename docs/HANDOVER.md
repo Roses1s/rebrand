@@ -80,13 +80,14 @@ src/
                        Tasks, Analytics, Accounting, Settings, Admin, Kit)
   ui/                  Button, Field, Tag (Status/Chip/Avatar), Modal,
                        Segmented, States (Empty/Skeleton/TableSkeleton),
-                       Chatter (лента карточки лида), cn
+                       Chatter (лента карточки лида), StageBar (полоса
+                       этапов с «…»), cn
   lib/format.js        money, shortMoney, initials, fileSize,
                        relativeTime, absoluteTime, dayLabel
   mock/data.js         демо-данные в форме API рабочей CRM
   mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
   styles/              tokens, base, ui, shell, board, pages, kit, compact,
-                       lead-form, chatter
+                       lead-form, stage-bar, chatter
 ```
 
 Правило: **`compact.css` подключается последним** в `styles/index.css` — он
