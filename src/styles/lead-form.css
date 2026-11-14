@@ -137,15 +137,16 @@
   color: var(--ink-4);
 }
 
+/* Фон меняем только цветом: у списков в фоне живёт стрелка. */
 .lead-input:hover {
   border-color: var(--line);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
 }
 
 .lead-input:focus {
   outline: none;
   border-color: var(--accent);
-  background: var(--surface);
+  background-color: var(--surface);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -153,7 +154,7 @@
 .lead-input--attention,
 .lead-input--attention:hover {
   border-color: var(--accent);
-  background: var(--accent-soft);
+  background-color: var(--accent-soft);
 }
 
 .lead-input--mono {
@@ -162,9 +163,30 @@
   letter-spacing: 0.01em;
 }
 
+/*
+  Списки. Своя стрелка вместо системной: у нативного `<select>` браузер
+  рисует текст внутри служебной рамки и добавляет к нему свои 4 px — из-за
+  этого значения списков уезжали вправо относительно обычных полей.
+  С `appearance: none` отступ остаётся ровно 8 px, как у остальных строк.
+*/
 .lead-input--select {
-  padding-right: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 26px;
   cursor: pointer;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a3a0b5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 10px 6px;
+}
+
+html[data-theme="dark"] .lead-input--select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a7692' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.lead-input--select::-ms-expand {
+  display: none;
 }
 
 /* --- Предупреждение о дубле ИНН ------------------------------------------ */
