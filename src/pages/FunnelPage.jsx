@@ -68,8 +68,7 @@ function LeadCard({ lead }) {
       </div>
 
       <div className="lead-card__sub">
-        {[lead.contact, lead.role].filter((part) => part && part !== "—").join(" · ") ||
-          "Контакт не указан"}
+        {lead.contact && lead.contact !== "—" ? lead.contact : "Контакт не указан"}
       </div>
 
       <span className="route">

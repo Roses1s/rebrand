@@ -25,7 +25,7 @@ import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
 import { Toast } from "../ui/Toast";
 import { leadChatter } from "../mock/chatter";
-import { ALL_LEADS, ME, OWNER, SHIPMENTS } from "../mock/data";
+import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
 import { isEmail, openYandexCompose } from "../lib/mail";
 
@@ -44,9 +44,9 @@ function draftOf(lead) {
     name: lead?.name ?? "",
     inn: lead?.inn ?? "",
     contact: lead?.contact ?? "",
-    role: lead?.role ?? "",
     phone: lead?.phone ?? "",
     email: lead?.email ?? "",
+    edo: lead?.edo ?? "",
     accountant: lead?.accountant ?? ACCOUNTANTS[0],
   };
 }
@@ -348,11 +348,6 @@ export function LeadPage() {
               </label>
 
               <label className="lead-field">
-                <span className="lead-field__label">Должность</span>
-                <input className="lead-input" value={draft.role} onChange={set("role")} placeholder="Снабженец" />
-              </label>
-
-              <label className="lead-field">
                 <span className="lead-field__label">Телефон</span>
                 <input
                   className="lead-input lead-input--mono"
@@ -373,6 +368,22 @@ export function LeadPage() {
                   onChange={set("email")}
                   placeholder="name@example.ru"
                 />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">Оператор ЭДО</span>
+                <select
+                  className="lead-input lead-input--select"
+                  value={draft.edo}
+                  onChange={set("edo")}
+                  aria-label="Оператор ЭДО"
+                >
+                  {EDO_OPERATORS.map((operator) => (
+                    <option key={operator.value} value={operator.value} title={operator.vendor}>
+                      {operator.label}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="lead-field">
