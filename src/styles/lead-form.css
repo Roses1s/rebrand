@@ -149,6 +149,13 @@
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+/* Поле, которое просит заполнить уведомление (например, E-mail для письма). */
+.lead-input--attention,
+.lead-input--attention:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .lead-input--mono {
   font-family: var(--font-mono);
   font-size: 12px;

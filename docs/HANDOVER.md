@@ -81,13 +81,13 @@ src/
   ui/                  Button, Field, Tag (Status/Chip/Avatar), Modal,
                        Segmented, States (Empty/Skeleton/TableSkeleton),
                        Chatter (лента карточки лида), StageBar (полоса
-                       этапов с «…»), cn
+                       этапов с «…»), Toast (уведомление), cn
   lib/format.js        money, shortMoney, initials, fileSize,
                        relativeTime, absoluteTime, dayLabel
   mock/data.js         демо-данные в форме API рабочей CRM
   mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
   styles/              tokens, base, ui, shell, board, pages, kit, compact,
-                       lead-form, stage-bar, chatter
+                       lead-form, stage-bar, chatter, toast
 ```
 
 Правило: **`compact.css` подключается последним** в `styles/index.css` — он

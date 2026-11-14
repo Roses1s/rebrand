@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Уведомление внизу справа
+   ========================================================================== */
+
+.toast {
+  position: fixed;
+  right: var(--pad-page);
+  bottom: 20px;
+  z-index: 95;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(360px, calc(100vw - 28px));
+  padding: 10px 10px 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 220ms var(--ease);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.toast__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+
+.toast__text {
+  flex: 1;
+  min-width: 0;
+  padding-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.toast__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: var(--ink-3);
+  transition:
+    background-color 140ms var(--ease),
+    color 140ms var(--ease);
+}
+
+.toast__close:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+/* --- Тона --------------------------------------------------------------- */
+
+.toast--warn .toast__icon {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.toast--ok .toast__icon {
+  background: var(--money-soft);
+  color: var(--money);
+}
+
+.toast--info .toast__icon {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+@media (max-width: 680px) {
+  .toast {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

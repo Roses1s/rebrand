@@ -2,7 +2,7 @@
  * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
  * Лид коллеги открывается усечённо — только название, ИНН и продавец.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -23,9 +23,11 @@ import { Button, IconButton } from "../ui/Button";
 import { Avatar } from "../ui/Tag";
 import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
+import { Toast } from "../ui/Toast";
 import { leadChatter } from "../mock/chatter";
 import { ALL_LEADS, ME, OWNER, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
+import { isEmail, openYandexCompose } from "../lib/mail";
 
 const FILES = [
   { name: "Договор-2026-148.pdf", size: "1,2 МБ", date: "05.11.2026" },
@@ -123,6 +125,51 @@ export function LeadPage() {
     },
     [],
   );
+
+  // Уведомление внизу экрана: сейчас это только «почта не указана».
+  const [toast, setToast] = useState(null);
+  const dismissToast = useCallback(() => setToast(null), []);
+  const showToast = useCallback((text, tone = "warn") => {
+    setToast({ text, tone });
+  }, []);
+
+  // Поле E-mail подсвечиваем и фокусируем, когда письмо отправить некуда.
+  const emailRef = useRef(null);
+  const [emailHint, setEmailHint] = useState(false);
+  function pointToEmail() {
+    const node = emailRef.current;
+    if (node) {
+      node.scrollIntoView?.({ block: "center", behavior: "smooth" });
+      node.focus({ preventScroll: true });
+    }
+    setEmailHint(true);
+    window.setTimeout(() => setEmailHint(false), 2200);
+  }
+
+  /**
+   * «Письмо» открывает Яндекс Почту с готовым получателем.
+   * Адрес берём только сохранённый: несохранённую правку не отправляем,
+   * иначе письмо уйдёт на адрес, которого в карточке ещё нет.
+   */
+  function writeEmail() {
+    const email = String(saved.email ?? "").trim();
+
+    if (!email) {
+      showToast("Почта не указана. Заполните E-mail в информации о клиенте.");
+      pointToEmail();
+      return;
+    }
+
+    if (!isEmail(email)) {
+      showToast(`«${email}» не похоже на адрес почты. Проверьте E-mail в карточке.`);
+      pointToEmail();
+      return;
+    }
+
+    if (!openYandexCompose(email)) {
+      showToast("Браузер заблокировал вкладку. Разрешите всплывающие окна для сайта.");
+    }
+  }
 
   // Предупреждение о дубле ИНН: как в рабочей CRM, сохранять не мешает.
   const sameInn =
@@ -243,7 +290,7 @@ export function LeadPage() {
           <Button variant="success" icon={Phone}>
             Позвонить
           </Button>
-          <Button variant="info" icon={Mail}>
+          <Button variant="info" icon={Mail} onClick={writeEmail}>
             Письмо
           </Button>
           <IconButton icon={MoreHorizontal} label="Ещё" />
@@ -319,7 +366,8 @@ export function LeadPage() {
               <label className="lead-field">
                 <span className="lead-field__label">E-mail</span>
                 <input
-                  className="lead-input"
+                  ref={emailRef}
+                  className={`lead-input${emailHint ? " lead-input--attention" : ""}`}
                   type="email"
                   value={draft.email}
                   onChange={set("email")}
@@ -416,6 +464,8 @@ export function LeadPage() {
           currentUserId={ME.id}
         />
       </div>
+
+      {toast && <Toast message={toast.text} tone={toast.tone} onClose={dismissToast} />}
       </div>
     </Shell>
   );
