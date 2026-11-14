@@ -161,11 +161,19 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
 
       <aside className="sidebar" id="app-sidebar">
         <div className="brand">
-          <span className="brand__logo" role="img" aria-label="CRM Детроид" title="CRM Детроид" />
-          <div className="brand__text">
-            <div className="brand__name">CRM Детроид</div>
-            <div className="brand__sub">Детроид · транспортная компания</div>
-          </div>
+          {/* Логотип и название ведут на стартовый экран — воронку лидов. */}
+          <NavLink
+            to="/crm"
+            className="brand__link"
+            aria-label="CRM Детроид — открыть воронку лидов"
+            title="На воронку лидов"
+          >
+            <span className="brand__logo" role="img" aria-label="CRM Детроид" />
+            <span className="brand__text">
+              <span className="brand__name">CRM Детроид</span>
+              <span className="brand__sub">Детроид · транспортная компания</span>
+            </span>
+          </NavLink>
           <button
             type="button"
             className="sidebar__close"
