@@ -17,6 +17,8 @@
 .chatter {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
   position: sticky;
   top: 76px;
   height: calc(100vh - 96px);
@@ -246,6 +248,7 @@
   align-items: flex-start;
   gap: 8px;
   flex: none;
+  min-width: 0;
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
 }
@@ -261,6 +264,7 @@
 .chatter__edit {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
@@ -300,6 +304,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   padding: 4px 6px;
   border-top: 1px solid var(--line);
 }
