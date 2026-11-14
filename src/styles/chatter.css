@@ -6,8 +6,11 @@
 
 .lead-layout {
   display: grid;
-  /* Ширина ленты — 34,3 % рабочей области, как в рабочей CRM. */
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 34.3%);
+  /*
+    Ширина ленты: в рабочей CRM 34,3 %, здесь по просьбе владельца чуть шире —
+    37,5 %, чтобы записи читались свободнее.
+  */
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 37.5%);
   gap: 16px;
   align-items: start;
 }
