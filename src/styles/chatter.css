@@ -82,7 +82,6 @@
     top: 0;
     z-index: 3;
     flex: none;
-    margin-bottom: 2px;
     background: var(--surface);
   }
 
@@ -104,17 +103,19 @@
 }
 
 /*
-  Шапка ленты выровнена с полосой этапов: у полосы рамка 1 px + отступ 4 px,
-  кнопки этапов 32 px, итого 42 px. Та же высота и тот же отступ сверху —
-  тогда «Лог примечания» стоит ровно на одной линии с пилюлями этапов.
+  Шапка ленты выровнена по двум линиям сразу:
+  - кнопка «Лог примечания» — на уровне пилюль этапов: у полосы отступ 4 px
+    и рамка 1 px, поэтому сверху тоже 5 px;
+  - линия под шапкой — на уровне верхней границы карточки «Клиент»:
+    полоса этапов 42 px + зазор 14 px = 56 px.
 */
 .chatter__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   flex: none;
-  min-height: 42px;
-  padding: 5px 16px;
+  min-height: 56px;
+  padding: 5px 16px 0;
   border-bottom: 1px solid var(--line);
 }
 
