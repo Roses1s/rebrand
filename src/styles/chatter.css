@@ -75,6 +75,17 @@
     padding-bottom: 2px;
   }
 
+  /* Полоса этапов закреплена сверху колонки: она остаётся на виду,
+     пока листаешь форму, и лента начинается ровно на её уровне. */
+  .lead-page .lead-layout > .stack > .stage-strip {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    flex: none;
+    margin-bottom: 2px;
+    background: var(--surface);
+  }
+
   .lead-page .chatter {
     position: static;
     height: auto;

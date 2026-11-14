@@ -253,17 +253,25 @@ export function LeadPage() {
         </div>
       </div>
 
-      <div className="stage-strip" style={{ marginBottom: 16 }}>
-        {stages.map((stage) => (
-          <button key={stage.id} type="button" aria-pressed={stageId === stage.id} onClick={() => { setStageId(stage.id); moveLead(lead.id, stage.id); }}>
-            <span className="stage-strip__dot" style={{ background: stage.color }} />
-            {stage.name}
-          </button>
-        ))}
-      </div>
-
       <div className="lead-layout">
         <div className="stack">
+          <div className="stage-strip">
+            {stages.map((stage) => (
+              <button
+                key={stage.id}
+                type="button"
+                aria-pressed={stageId === stage.id}
+                onClick={() => {
+                  setStageId(stage.id);
+                  moveLead(lead.id, stage.id);
+                }}
+              >
+                <span className="stage-strip__dot" style={{ background: stage.color }} />
+                {stage.name}
+              </button>
+            ))}
+          </div>
+
           <div className="card">
             <div className="card__head">
               <div>
