@@ -6,20 +6,22 @@
 функций — [`../PARITY.md`](../PARITY.md), живой статус — [`STATUS.md`](STATUS.md)
 (дата, HEAD, что сделано и что дальше).
 
-Проверено на 06.11.2026, ветка `arena/53b90abe-rebrand`; последний учтённый
-коммит — `ab3f0f2`, дальше только документация.
+Проверено на 14.11.2026, ветка `arena/ec87207d-rebrand`. Последний коммит
+приложения — `635ec83` (убрана подсказка при наведении на карточку). Текущая
+синхронизация меняет только документацию; точная отметка кода — в STATUS.md.
 
 ## 1. Что это
 
 Макет **нового интерфейса** для рабочей CRM `Roses1s/crm` (CRM Детроид, транспортная
-компания). Вёрстка собрана с нуля по присланному референсу, функции повторяют
-рабочую систему. Бэкенда нет: данные лежат в `localStorage`.
+компания). Вёрстка собрана с нуля по присланному референсу, часть функций
+рабочей системы повторена локально (готовность — в PARITY.md). Бэкенда нет:
+используются демо-данные, состояние компонентов и `localStorage`.
 
 - Рабочая CRM: FastAPI + PostgreSQL + React 19 + Tailwind v4, живёт на crmdetroid.ru.
 - Этот репозиторий: React 19 + Vite 8 + собственные CSS-токены, чистый макет.
 - Бренд взят из рабочей CRM: логотип `public/logo.svg`, название «CRM Детроид»,
   подпись «Детроид · транспортная компания».
-- Перенос в рабочую CRM — отдельная задача: см. раздел 11.
+- Перенос в рабочую CRM — отдельная задача: см. раздел 12.
 
 ## 2. Запуск
 
@@ -34,11 +36,15 @@ npm run preview
 правки ему нужен блок:
 
 ```powershell
-git pull origin arena/53b90abe-rebrand; npm install; npm run dev
+git pull origin arena/ec87207d-rebrand; npm install; npm run dev
 ```
 
 Если dev-сервер уже запущен — `git pull`, при новых зависимостях `npm install`,
 перезапуск и **Ctrl+Shift+R**.
+
+Крупную задачу сначала согласовать с владельцем: один план из 3–5 шагов,
+дождаться «да», затем выполнять без остановок на каждом техническом шаге.
+Точечные согласованные правки не превращать в новую переработку интерфейса.
 
 ## 3. Стек
 
@@ -90,21 +96,25 @@ src/
                        lead-form, stage-bar, chatter, toast
 ```
 
-Правило: **`compact.css` подключается последним** в `styles/index.css` — он
-переопределяет размеры, не трогая цвета. `chatter.css` идёт после него и
-держит только свои классы `.chatter*` и раскладку `.lead-layout`/`.lead-facts`.
+Порядок в `styles/index.css`: основные стили → `compact.css` → локальные
+`lead-form.css`, `stage-bar.css`, `chatter.css`, `toast.css`. Компактный слой
+переопределяет размеры, не цвета; локальные слои идут после него намеренно.
+`chatter.css` держит `.chatter*` и раскладку `.lead-layout`/`.lead-facts`.
 
 ## 6. Данные и хранение
 
 `src/mock/data.js` экспортирует: `ME`, `IS_ADMIN`, `TEAM`, `PRIORITY`, `STAGES`
 (5 этапов с лидами), `ALL_LEADS`, `OWNER()`, `CLIENTS`, `SHIPMENT_STATUS`,
-`SHIPMENTS`, `TASKS`, `TASK_TYPES`, `ANALYTICS` (по периодам: `inflow`, `sources`).
+`SHIPMENTS`, `TASKS`, `TASK_TYPES`, `EDO_OPERATORS`, `ANALYTICS` (по периодам:
+`inflow`, `sources`). В исходном наборе 18 лидов/клиентов, из них 10 своих;
+своих заявок — 3, задач — 7.
 
 `store.jsx` — единственное место, где меняются лиды и этапы:
 
-- `leads` — лиды менеджера, у каждого `stageId` и `position`;
+- `leads` — записи под ключом менеджера, у каждой `stageId` и `position`;
+  исходный демо-набор включает и лиды коллег, доска отбирает только `ownerId === ME.id`;
 - `updateLead(id, patch)` — правка полей карточки (название, ИНН, контакты,
-  бухгалтер), единственная точка сохранения формы лида. Карточка вызывает его
+  оператор ЭДО, бухгалтер), единственная точка сохранения формы лида. Карточка вызывает его
   из автосохранения (3 с), по Enter и по кнопке «Сохранить», а также при уходе
   со страницы с несохранёнными правками;
 - `stages` — этапы текущего менеджера: `id`, `name`, `hint`, `color`;
@@ -128,7 +138,26 @@ src/
 Сброс: «Настройки → Сбросить мою воронку» (`resetAll`). Роль: там же, страница
 перезагружается, потому что `IS_ADMIN` читается при импорте `data.js`.
 
+Задачи и заметки чаттера живут в состоянии компонентов, без записи в
+localStorage, и сбрасываются при размонтировании или перезагрузке. «Клиенты»
+читают статический `CLIENTS`, а не `useLeads`: правка лида автоматически
+не обновляет этот список. Это ограничения макета, не работающего API.
+
 ## 7. Механика воронки
+
+**Карточки и KPI:**
+
+- `LeadCard` общий для доски и `DragOverlay`: название, контакт, приоритет, сумма,
+  срок. Приоритет — слева под контактом (`.lead-card__priority`, `flex-start`);
+- направление, материал и тоннаж скрыты только на карточках, но остаются в данных
+  и в списке; `title` с подсказкой о переносе убран, атрибуты dnd-kit сохранены;
+- KPI «Сумма воронки» и сводка «Моя доска» считают `sumOf(myLeads)`:
+  `Number(lead.price) || 0` по всем своим лидам, независимо от фильтров;
+- источник — `crm.leads.<id>.v1`, при отсутствии сохранения — демо из `STAGES`.
+  В исходном наборе 1 579 000 ₽, `shortMoney` выводит 1,6 млн ₽; это ожидаемые
+  суммы, не выручка/прибыль/оплаты. `FUNNEL_KPI` из mock не используется экраном;
+- новый лид из диалога получает `price` из «Ожидаемая сумма, ₽»; «+» в колонке
+  сразу создаёт «Новый лид» с нулевой суммой.
 
 **Перетаскивание** (`FunnelPage.jsx`):
 
@@ -202,35 +231,105 @@ src/
 npm run build
 ```
 
-Серверный рендер всех страниц (ловит падения в разметке без браузера):
+Серверный рендер всех 11 экранов в обеих ролях. Рецепт для Bash в песочнице:
+он создаёт отдельную временную папку, удаляет её при выходе и не добавляет
+постоянных тестов или зависимостей. Вместе со списком и отсутствующими/чужими
+записями выполняются 30 рендеров.
 
 ```bash
-cat > src/ssr-smoke.jsx <<'EOF'
+(
+set -euo pipefail
+mkdir -p .cache
+check_dir=$(mktemp -d .cache/ssr-XXXXXX)
+trap 'rm -rf "$check_dir"' EXIT
+cat > "$check_dir/smoke.jsx" <<'EOF'
+import assert from "node:assert/strict";
 import { renderToString } from "react-dom/server";
-import { MemoryRouter } from "react-router-dom";
-import { LeadsProvider } from "./app/store";
-import { FunnelPage } from "./pages/FunnelPage";
-export const run = () =>
-  renderToString(
-    <MemoryRouter><LeadsProvider><FunnelPage /></LeadsProvider></MemoryRouter>,
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { LeadsProvider } from "../../src/app/store";
+import { ME } from "../../src/mock/data";
+import { FunnelPage } from "../../src/pages/FunnelPage";
+import { LeadPage } from "../../src/pages/LeadPage";
+import { ClientsPage } from "../../src/pages/ClientsPage";
+import { ShipmentsPage } from "../../src/pages/ShipmentsPage";
+import { ShipmentPage } from "../../src/pages/ShipmentPage";
+import { TasksPage } from "../../src/pages/TasksPage";
+import { AnalyticsPage } from "../../src/pages/AnalyticsPage";
+import { AccountingPage } from "../../src/pages/AccountingPage";
+import { SettingsPage } from "../../src/pages/SettingsPage";
+import { AdminPage } from "../../src/pages/AdminPage";
+import { KitPage } from "../../src/pages/KitPage";
+const screens = [
+  ["/crm", FunnelPage, "/crm"], ["/crm/leads/:id", LeadPage, "/crm/leads/1"],
+  ["/customers", ClientsPage, "/customers"], ["/shipments", ShipmentsPage, "/shipments"],
+  ["/shipments/:id", ShipmentPage, "/shipments/147"], ["/tasks", TasksPage, "/tasks"],
+  ["/analytics", AnalyticsPage, "/analytics"], ["/accounting", AccountingPage, "/accounting"],
+  ["/settings", SettingsPage, "/settings"], ["/admin", AdminPage, "/admin"],
+  ["/kit", KitPage, "/kit"],
+];
+function render(path) {
+  const html = renderToString(
+    <MemoryRouter initialEntries={[path]}><LeadsProvider><Routes>
+      {screens.map(([pattern, Screen]) => <Route key={pattern} path={pattern} element={<Screen />} />)}
+    </Routes></LeadsProvider></MemoryRouter>,
   );
+  assert.ok(html.includes('<main class="main">'), path);
+  console.log(`PASS ${process.env.CHECK_ROLE} ${path}`);
+  return html;
+}
+export function run() {
+  assert.equal(ME.isAdmin, process.env.CHECK_ROLE === "admin");
+  for (const [, , path] of screens) {
+    const html = render(path);
+    if (path === "/crm") {
+      assert.ok(!html.includes("Перетащите карточку на другой этап"));
+      assert.ok(html.includes("lead-card__priority"));
+    }
+    if (path === "/admin") assert.ok(html.includes(ME.isAdmin ? "Доступ бухгалтеров" : "Доступ только у администратора"));
+  }
+  assert.ok(render("/crm/leads/3").includes("Лид коллеги."));
+  assert.ok(render("/crm/leads/999999").includes("Лид не найден"));
+  assert.ok(render("/shipments/999999").includes("Заявка не найдена"));
+  window.localStorage.setItem("crm.funnel.view", "list");
+  assert.ok(render("/crm").includes('class="table leads-table"'));
+}
 EOF
-npx vite build --ssr src/ssr-smoke.jsx --outDir .ssr-out --emptyOutDir true
-node --input-type=module -e "import('./.ssr-out/ssr-smoke.js').then(m => console.log(m.run().length))"
-rm -rf .ssr-out src/ssr-smoke.jsx
+npx vite build --ssr "$check_dir/smoke.jsx" --outDir "$check_dir/ssr-out" --emptyOutDir true
+for role in manager admin; do
+  CHECK_ROLE="$role" CHECK_MODULE="./$check_dir/ssr-out/smoke.js" node --input-type=module <<'EOF'
+const storage = new Map([["crm.role", process.env.CHECK_ROLE]]);
+globalThis.window = { localStorage: {
+  getItem(key) { return storage.get(key) ?? null; },
+  setItem(key, value) { storage.set(key, String(value)); },
+} };
+(await import(process.env.CHECK_MODULE)).run();
+EOF
+done
+)
 ```
 
-Маршруты при запущенном dev-сервере:
+SSR не запускает эффекты и не проверяет CSS глазами: в клиентах и заявках
+рендерится начальный скелетон. Интерактивность, автосохранение и внешний вид
+нужно отдельно проверять в браузере; успешный HTTP 200 выдаёт только оболочку SPA.
+
+Маршруты при запущенном `npm run dev` (в песочнице сервер должен слушать
+`0.0.0.0:5173`; это уже задано в vite.config.js):
 
 ```bash
-for r in crm crm/leads/1 customers shipments tasks analytics accounting settings admin kit; do
-  printf "%s: " "$r"; curl -s -o /dev/null -w "%{http_code}\n" --max-time 5 "http://localhost:5173/$r";
+(
+set -euo pipefail
+for r in / /crm /crm/leads/1 /crm/leads/3 /customers /shipments /shipments/147 /tasks /analytics /accounting /settings /admin /kit; do
+  code=$(curl --silent --show-error --fail --output /dev/null --write-out '%{http_code}' --max-time 10 "http://127.0.0.1:5173$r")
+  printf '%s: %s\n' "$r" "$code"
+  test "$code" = 200
 done
+)
 ```
 
 Ручной чек-лист для владельца: перетаскивание мышью/пальцем/клавиатурой;
 пустая колонка; порядок внутри этапа; создание и удаление этапа; смена роли;
-тёмная тема; телефон; перезагрузка сохраняет данные.
+тёмная тема; телефон; перезагрузка сохраняет лиды, этапы, их порядок и настройки
+(но не задачи и новые заметки).
 
 ## 12. Что дальше
 
@@ -255,7 +354,9 @@ done
 
 ## 13. Git
 
-Ветка сессии: `arena/53b90abe-rebrand`, пушить только в неё.
+Ветка этой сессии: `arena/ec87207d-rebrand`, пушить только в неё. Перед работой
+проверять `git rev-parse --abbrev-ref HEAD`; старые отметки ветвей не являются
+разрешением переключиться или создать другую ветку.
 
 Ключевые точки истории:
 
@@ -272,4 +373,18 @@ done
 | `a5b7fa0` | бренд CRM Детроид |
 | `5681175` | комментарии и README |
 
-Откат — обычным `git revert <коммит>`; `reset --hard` не применять.
+Откат — только по подтверждённому запросу владельца, обычным
+`git revert <коммит>`; `reset --hard` не применять.
+
+Завершение сессии:
+
+- Обновить STATUS: дата, учтённый HEAD, сделанное, решения, ограничения и бэклог.
+  Уточнять смысл SHA; коммит самого документа — `git log -1 -- docs/STATUS.md`.
+- Если менялся код, фиксировать STATUS вместе с ним. README — описание и запуск,
+  HANDOVER — устройство и проверки, PLAN — принятые решения, PARITY — готовность.
+  Поддерживать их факты, но не редактировать передаточный промт без запроса.
+- Перед коммитом — зелёная сборка, SSR и `curl`; после push — проверить SHA и
+  чистоту дерева. Короткий отчёт в 5–7 строк: ветка, работающие возможности,
+  соответствие HEAD/STATUS и последующие коммиты, следующий шаг, риски.
+- Приложить владельцу команду обновления/запуска из раздела 2; непроверенную
+  визуальную часть назвать явно. Бэклог — не разрешение запускать новые функции.
