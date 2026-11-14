@@ -412,6 +412,7 @@ export function FunnelPage() {
 
   return (
     <Shell>
+      <div className="funnel">
       <div className="kpi-grid" style={{ marginBottom: 18 }}>
         {kpi.map((item) => {
           const Icon = ICONS[item.icon];
@@ -648,6 +649,7 @@ export function FunnelPage() {
           </div>
         </>
       )}
+      </div>
     </Shell>
   );
 }

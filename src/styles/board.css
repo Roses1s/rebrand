@@ -413,3 +413,37 @@
   font-weight: 600;
   color: var(--accent);
 }
+
+/* --- Воронка во всю высоту экрана ---------------------------------------
+   Доска растягивается до низа окна: горизонтальная прокрутка стоит внизу
+   страницы, а не сразу под карточками. Колонки при этом тоже тянутся —
+   пустое место под карточками остаётся зоной своего этапа. */
+
+@media (min-width: 901px) {
+  .main:has(> .funnel) {
+    padding-bottom: 0;
+  }
+
+  .funnel {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--topbar-h) - 4px);
+  }
+
+  .funnel > .board {
+    flex: 1 1 auto;
+    min-height: 220px;
+    align-items: stretch;
+    padding-bottom: 0;
+  }
+
+  .funnel .col {
+    min-height: 0;
+  }
+
+  .funnel .col__cards {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+}
