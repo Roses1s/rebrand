@@ -24,8 +24,9 @@ import { Avatar } from "../ui/Tag";
 import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
 import { Toast } from "../ui/Toast";
+import { QuickCreateShipmentDialog } from "../ui/QuickCreateShipmentDialog";
 import { leadChatter } from "../mock/chatter";
-import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, PRIORITY, SHIPMENTS } from "../mock/data";
+import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, PRIORITY } from "../mock/data";
 import { money } from "../lib/format";
 import { isEmail, openYandexCompose } from "../lib/mail";
 
@@ -54,9 +55,10 @@ function draftOf(lead) {
 
 export function LeadPage() {
   const { id } = useParams();
-  const { leads, stages, moveLead, updateLead } = useLeads();
+  const { leads, stages, shipments: allShipments, moveLead, updateLead, addShipment } = useLeads();
   const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
+  const [shipmentCreateOpen, setShipmentCreateOpen] = useState(false);
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
   const chatter = useMemo(() => leadChatter(lead), [lead?.id, lead?.stageId]);
 
@@ -229,7 +231,7 @@ export function LeadPage() {
     );
   }
 
-  const shipments = SHIPMENTS.filter((item) => item.leadId === lead.id);
+  const shipments = allShipments.filter((item) => item.leadId === lead.id);
 
   return (
     <Shell title="Карточка лида" crumb={`Воронка · ${lead.name}`}>
@@ -300,14 +302,19 @@ export function LeadPage() {
 
       <div className="lead-layout">
         <div className="stack">
-          <StageBar
-            stages={stages}
-            currentId={stageId}
-            onSelect={(nextId) => {
-              setStageId(nextId);
-              moveLead(lead.id, nextId);
-            }}
-          />
+          <div className="lead-stagebar">
+            <StageBar
+              stages={stages}
+              currentId={stageId}
+              onSelect={(nextId) => {
+                setStageId(nextId);
+                moveLead(lead.id, nextId);
+              }}
+            />
+            <Button variant="primary" size="sm" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
+              Создать заявку
+            </Button>
+          </div>
 
           <div className="card">
             <div className="card__head">
@@ -436,7 +443,7 @@ export function LeadPage() {
                     </span>
                     <span className="empty__title">Заявок пока нет</span>
                     <p className="empty__text">Создайте первую заявку — она появится здесь и в общем списке.</p>
-                    <Button size="sm" variant="primary">
+                    <Button size="sm" variant="primary" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
                       Создать заявку
                     </Button>
                   </div>
@@ -493,6 +500,13 @@ export function LeadPage() {
         />
       </div>
 
+      {shipmentCreateOpen && (
+        <QuickCreateShipmentDialog
+          lead={lead}
+          onCreate={addShipment}
+          onClose={() => setShipmentCreateOpen(false)}
+        />
+      )}
       {toast && <Toast message={toast.text} tone={toast.tone} onClose={dismissToast} />}
       </div>
     </Shell>

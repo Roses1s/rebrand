@@ -45,22 +45,22 @@ import {
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
-import { ME, OWNER, PRIORITY, SHIPMENTS, TASKS } from "../mock/data";
+import { ME, OWNER, PRIORITY, TASKS } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
 
 const ICONS = { users: Users, wallet: Wallet, target: Target, flame: Flame, clock: Clock };
 const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
 
-const marginOf = (lead) => leadShipmentMargin(lead.id, SHIPMENTS);
-const sumMarginsOf = (leads) => leads.reduce((total, lead) => total + marginOf(lead), 0);
+const marginOf = (lead, shipments) => leadShipmentMargin(lead.id, shipments);
+const sumMarginsOf = (leads, shipments) => leads.reduce((total, lead) => total + marginOf(lead, shipments), 0);
 const overdueTasks = TASKS.filter((task) => task.ownerId === ME.id && task.status === "overdue").length;
 
-function LeadCard({ lead }) {
+function LeadCard({ lead, shipments }) {
   const priority = PRIORITY[lead.priority];
   const owner = OWNER(lead.ownerId);
   const foreign = lead.ownerId !== ME.id;
-  const margin = marginOf(lead);
+  const margin = marginOf(lead, shipments);
 
   return (
     <Link to={`/crm/leads/${lead.id}`} className="lead-card" draggable={false}>
@@ -89,7 +89,7 @@ function LeadCard({ lead }) {
   );
 }
 
-function SortableLead({ lead }) {
+function SortableLead({ lead, shipments }) {
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: lead.id,
     data: { stageId: lead.stageId },
@@ -102,14 +102,14 @@ function SortableLead({ lead }) {
       {...attributes}
       {...listeners}
     >
-      <LeadCard lead={lead} />
+      <LeadCard lead={lead} shipments={shipments} />
     </div>
   );
 }
 
-function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
+function StageColumn({ stage, stageLeads, shipments, dragging, dropIndex, onAdd }) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
-  const sum = sumMarginsOf(stageLeads);
+  const sum = sumMarginsOf(stageLeads, shipments);
   // В пустой колонке подсказкой служит слот, линия там лишняя.
   const showLine = dragging && dropIndex != null && stageLeads.length > 0;
 
@@ -150,7 +150,7 @@ function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
           {stageLeads.map((lead, index) => (
             <Fragment key={lead.id}>
               {showLine && dropIndex === index && <div className="drop-line" aria-hidden="true" />}
-              <SortableLead lead={lead} />
+              <SortableLead lead={lead} shipments={shipments} />
             </Fragment>
           ))}
 
@@ -193,7 +193,7 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, stages, openLeadDialog, moveLead, removeLeads, addStage } = useLeads();
+  const { leads, stages, shipments, openLeadDialog, moveLead, removeLeads, addStage } = useLeads();
   const [filter, setFilter] = useState("all");
   const [addingStage, setAddingStage] = useState(false);
   const [stageName, setStageName] = useState("");
@@ -316,7 +316,7 @@ export function FunnelPage() {
   }
 
   const kpi = useMemo(() => {
-    const sum = sumMarginsOf(myLeads);
+    const sum = sumMarginsOf(myLeads, shipments);
     const potentialStage = stages[3] ?? stages[stages.length - 1];
     const potential = myLeads.filter((lead) => lead.stageId === potentialStage?.id).length;
     const hot = myLeads.filter((lead) => lead.hot).length;
@@ -357,7 +357,7 @@ export function FunnelPage() {
         icon: "clock",
       },
     ];
-  }, [myLeads, stages]);
+  }, [myLeads, shipments, stages]);
 
   const visible = (lead) => {
     if (filter === "hot" && !lead.hot) return false;
@@ -371,7 +371,7 @@ export function FunnelPage() {
     return [...rows].sort((a, b) => {
       switch (sort.key) {
         case "margin":
-          return (marginOf(a) - marginOf(b)) * dir;
+          return (marginOf(a, shipments) - marginOf(b, shipments)) * dir;
         case "stage":
           return (a.stageId - b.stageId) * dir;
         case "contact":
@@ -384,7 +384,7 @@ export function FunnelPage() {
           return a.name.localeCompare(b.name, "ru") * dir;
       }
     });
-  }, [myLeads, filter, sort]);
+  }, [myLeads, shipments, filter, sort]);
 
   const allSelected = listRows.length > 0 && listRows.every((lead) => selected.includes(lead.id));
   const someSelected = selected.length > 0 && !allSelected;
@@ -454,7 +454,7 @@ export function FunnelPage() {
 
         <div className="toolbar__right">
           <span className="muted toolbar__sum">
-            Моя доска · маржа {shortMoney(sumMarginsOf(myLeads))}
+            Моя доска · маржа {shortMoney(sumMarginsOf(myLeads, shipments))}
           </span>
 
           <div className="view-switch" role="group" aria-label="Вид списка лидов">
@@ -499,6 +499,7 @@ export function FunnelPage() {
                 <StageColumn
                   key={stage.id}
                   stage={stage}
+                  shipments={shipments}
                   dragging={activeId != null}
                   stageLeads={stageLeads}
                   dropIndex={dropIndex}
@@ -550,7 +551,7 @@ export function FunnelPage() {
           <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.22, 0.8, 0.28, 1)" }}>
             {activeLead ? (
               <div className="drag-overlay" style={activeWidth ? { width: activeWidth } : undefined}>
-                <LeadCard lead={activeLead} />
+                <LeadCard lead={activeLead} shipments={shipments} />
               </div>
             ) : null}
           </DragOverlay>
@@ -659,7 +660,7 @@ export function FunnelPage() {
                       <td>
                         <span className={`badge ${priority.cls}`}>{priority.label}</span>
                       </td>
-                      <td className="cell-money">{shortMoney(marginOf(lead))}</td>
+                      <td className="cell-money">{shortMoney(marginOf(lead, shipments))}</td>
                       <td>
                         <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
                       </td>

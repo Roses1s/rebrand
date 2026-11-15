@@ -3,9 +3,10 @@ import { useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Segmented } from "../ui/Segmented";
 import { Avatar } from "../ui/Tag";
-import { ANALYTICS, ME, SHIPMENTS, STAGES } from "../mock/data";
+import { ANALYTICS, ME } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
 
@@ -14,11 +15,6 @@ const PERIODS = [
   { value: "month", label: "Месяц" },
   { value: "quarter", label: "Квартал" },
 ];
-
-const myLeads = STAGES.flatMap((stage) => stage.leads).filter((lead) => lead.ownerId === ME.id);
-const myLeadIds = new Set(myLeads.map((lead) => lead.id));
-const myShipments = SHIPMENTS.filter((shipment) => myLeadIds.has(shipment.leadId));
-const marginOf = (lead) => leadShipmentMargin(lead.id, SHIPMENTS);
 
 /** Период влияет на поступление лидов и конверсию, но не на фактическую маржу заявок. */
 const PERIOD_INFO = {
@@ -76,35 +72,40 @@ function InflowChart({ data }) {
 }
 
 export function AnalyticsPage() {
+  const { leads, stages, shipments } = useLeads();
   const [period, setPeriod] = useState("month");
+  const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id), [leads]);
+  const myLeadIds = useMemo(() => new Set(myLeads.map((lead) => lead.id)), [myLeads]);
+  const myShipments = useMemo(() => shipments.filter((shipment) => myLeadIds.has(shipment.leadId)), [myLeadIds, shipments]);
+  const marginOf = (lead) => leadShipmentMargin(lead.id, shipments);
 
   const stats = useMemo(() => {
     const margin = myLeads.reduce((total, lead) => total + marginOf(lead), 0);
-    const potential = myLeads.filter((lead) => lead.stageId === 4).length;
+    const potential = myLeads.filter((lead) => lead.stageId === stages[3]?.id).length;
     const marginLeads = myLeads.filter((lead) => marginOf(lead) !== 0).length;
     const avg = myLeads.length ? Math.round(margin / myLeads.length) : 0;
     return { margin, potential, marginLeads, avg };
-  }, []);
+  }, [myLeads, shipments, stages]);
 
   const funnel = useMemo(() => {
-    const max = Math.max(...STAGES.map((stage) => stage.leads.filter((l) => l.ownerId === ME.id).length)) || 1;
-    return STAGES.map((stage) => {
-      const leads = stage.leads.filter((lead) => lead.ownerId === ME.id);
+    const max = Math.max(...stages.map((stage) => myLeads.filter((lead) => lead.stageId === stage.id).length)) || 1;
+    return stages.map((stage) => {
+      const stageLeads = myLeads.filter((lead) => lead.stageId === stage.id);
       return {
         name: stage.name,
         color: stage.color,
-        count: leads.length,
-        margin: leads.reduce((total, lead) => total + marginOf(lead), 0),
-        width: Math.round((leads.length / max) * 92) + 8,
+        count: stageLeads.length,
+        margin: stageLeads.reduce((total, lead) => total + marginOf(lead), 0),
+        width: Math.round((stageLeads.length / max) * 92) + 8,
       };
     });
-  }, []);
+  }, [myLeads, shipments, stages]);
 
   const topDeals = useMemo(
     () => [...myLeads].filter((lead) => marginOf(lead) !== 0).sort((a, b) => marginOf(b) - marginOf(a)).slice(0, 4),
-    [],
+    [myLeads, shipments],
   );
-  const maxDeal = marginOf(topDeals[0]) || 1;
+  const maxDeal = topDeals.length ? marginOf(topDeals[0]) || 1 : 1;
 
   const inflow = ANALYTICS[period].inflow;
   const sources = ANALYTICS[period].sources;

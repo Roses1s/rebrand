@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { Check, Database, HardDrive, Lock, Plus, ShieldCheck, UserPlus, Users } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Tag";
-import { ALL_LEADS, ME, SHIPMENTS, TEAM } from "../mock/data";
+import { ME, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
 
@@ -33,6 +34,7 @@ function Switch({ checked, onChange, label }) {
 }
 
 export function AdminPage() {
+  const { leads, shipments } = useLeads();
   const [accountants, setAccountants] = useState([
     { id: 1, name: "Ольга Белова", email: "belova@transline.ru", invoices: true, bank: true, online: true },
     { id: 2, name: "Пётр Ершов", email: "ershov@transline.ru", invoices: true, bank: false, online: false },
@@ -60,16 +62,16 @@ export function AdminPage() {
     );
   }
 
-  const totalMargin = ALL_LEADS.reduce((sum, lead) => sum + leadShipmentMargin(lead.id, SHIPMENTS), 0);
+  const totalMargin = leads.reduce((sum, lead) => sum + leadShipmentMargin(lead.id, shipments), 0);
   const kpi = [
     { label: "Сотрудников", value: String(TEAM.length), foot: "в отделе продаж", color: "var(--stage-1)" },
     {
       label: "Лидов в работе",
-      value: String(ALL_LEADS.length),
+      value: String(leads.length),
       foot: `маржа ${shortMoney(totalMargin)}`,
       color: "var(--stage-4)",
     },
-    { label: "Заявок", value: String(SHIPMENTS.length), foot: "за текущий месяц", color: "var(--stage-3)" },
+    { label: "Заявок", value: String(shipments.length), foot: "за текущий месяц", color: "var(--stage-3)" },
     { label: "Доступ к деньгам", value: String(accountants.length), foot: "бухгалтеров", color: "var(--stage-2)" },
   ];
 
@@ -109,7 +111,7 @@ export function AdminPage() {
             </thead>
             <tbody>
               {TEAM.map((person, index) => {
-                const personLeads = ALL_LEADS.filter((lead) => lead.ownerId === person.id);
+                const personLeads = leads.filter((lead) => lead.ownerId === person.id);
                 return (
                   <tr key={person.id}>
                     <td>

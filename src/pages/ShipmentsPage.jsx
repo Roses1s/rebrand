@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 
 import { Shell } from "../app/Shell";
-import { ME, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
+import { useLeads } from "../app/store";
+import { ME, SHIPMENT_STATUS } from "../mock/data";
 import { TableSkeleton } from "../ui/States";
 import { money } from "../lib/format";
 import { shipmentMargin } from "../lib/margin";
@@ -19,10 +20,10 @@ const FILTERS = [
 
 const TONE = { new: "new", checked: "progress", loaded: "done", unloaded: "done" };
 
-const myShipments = SHIPMENTS.filter((item) => item.ownerId === ME.id);
-
 export function ShipmentsPage() {
   const navigate = useNavigate();
+  const { shipments } = useLeads();
+  const myShipments = shipments.filter((item) => item.ownerId === ME.id);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
@@ -100,8 +101,8 @@ export function ShipmentsPage() {
                   </td>
                   <td className="cell-money">{money(item.customerPrice)}</td>
                   <td className="cell-money muted">{money(item.carrierPrice)}</td>
-                  <td className={`cell-money ${margin >= 0 ? "cell-money--plus" : "cell-money--minus"}`}>
-                    {margin >= 0 ? "+" : "−"} {money(Math.abs(margin))}
+                  <td className={`cell-money ${margin == null || margin >= 0 ? "cell-money--plus" : "cell-money--minus"}`}>
+                    {margin == null ? "—" : `${margin >= 0 ? "+" : "−"} ${money(Math.abs(margin))}`}
                   </td>
                   <td className="cell-sub">{item.created}</td>
                 </tr>

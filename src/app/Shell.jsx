@@ -29,15 +29,13 @@ import { Field, Input, SearchInput } from "../ui/Field";
 import { Modal } from "../ui/Modal";
 import { Avatar } from "../ui/Tag";
 import { useLeads } from "./store";
-import { ALL_LEADS, ME, SHIPMENTS, TASKS, TEAM } from "../mock/data";
-
-const myShipments = SHIPMENTS.filter((item) => item.ownerId === ME.id);
+import { ALL_LEADS, ME, TASKS, TEAM } from "../mock/data";
 const myTasks = TASKS.filter((task) => task.ownerId === ME.id);
 
 const SALES = [
   { to: "/crm", label: "Воронка лидов", icon: KanbanSquare },
   { to: "/customers", label: "Клиенты", icon: Users, count: String(ALL_LEADS.length) },
-  { to: "/shipments", label: "Заявки", icon: LayoutGrid, count: String(myShipments.length) },
+  { to: "/shipments", label: "Заявки", icon: LayoutGrid },
   { to: "/tasks", label: "Задачи", icon: CheckSquare },
 ];
 
@@ -108,7 +106,7 @@ function NavGroup({ items, collapsed }) {
 export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { leads, leadDialog, addLead, openLeadDialog, closeLeadDialog } = useLeads();
+  const { leads, shipments, leadDialog, addLead, openLeadDialog, closeLeadDialog } = useLeads();
   const [theme, setTheme] = useStored("crm.theme", "light");
   // Свёрнутая панель: остаются только иконки. Выбор запоминается.
   const [sidebar, setSidebar] = useStored("crm.sidebar", "open");
@@ -126,15 +124,20 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   }, [pathname]);
 
   const myLeads = leads.filter((lead) => lead.ownerId === ME.id);
+  const myShipments = shipments.filter((shipment) => shipment.ownerId === ME.id);
   const openTasks = myTasks.filter((task) => task.status !== "done").length;
   const overdue = myTasks.filter((task) => task.status === "overdue").length;
 
   const sales = SALES.map((item) =>
     item.to === "/crm"
       ? { ...item, count: String(myLeads.length) }
-      : item.to === "/tasks"
-        ? { ...item, count: String(openTasks) }
-        : item,
+      : item.to === "/customers"
+        ? { ...item, count: String(leads.length) }
+        : item.to === "/shipments"
+          ? { ...item, count: String(myShipments.length) }
+          : item.to === "/tasks"
+            ? { ...item, count: String(openTasks) }
+            : item,
   );
 
   const [pageTitle, pageSub] = TITLES[pathname] ?? [title ?? "CRM", ""];

@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { CalendarDays, Check, FileText, Mail, Phone, Plus, Target } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Button } from "../ui/Button";
 import { Avatar, Chip } from "../ui/Tag";
 import { Field, Input, Select } from "../ui/Field";
 import { Modal } from "../ui/Modal";
-import { ME, SHIPMENTS, TASKS, TASK_TYPES } from "../mock/data";
+import { ME, TASKS, TASK_TYPES } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
 
@@ -24,6 +25,7 @@ const ICONS = { phone: Phone, mail: Mail, calendar: CalendarDays, file: FileText
 const myTasks = TASKS.filter((task) => task.ownerId === ME.id);
 
 export function TasksPage() {
+  const { shipments } = useLeads();
   const [tasks, setTasks] = useState(myTasks);
   const [type, setType] = useState("all");
   const [open, setOpen] = useState(false);
@@ -151,7 +153,7 @@ export function TasksPage() {
                       </Link>
 
                       <span title="Маржа заявок лида" style={{ marginLeft: "auto", fontSize: 12, fontWeight: 650 }}>
-                        {shortMoney(leadShipmentMargin(task.leadId, SHIPMENTS))}
+                        {shortMoney(leadShipmentMargin(task.leadId, shipments))}
                       </span>
                       <Avatar initials={ME.initials} size="sm" title={ME.name} />
                     </div>

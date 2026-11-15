@@ -4,6 +4,7 @@
  * поэтому это та же формула, которая показывается на экранах заявок.
  */
 export function shipmentMargin(shipment) {
+  if (shipment.customerPrice == null || shipment.carrierPrice == null) return null;
   const customerPrice = Number(shipment.customerPrice);
   const carrierPrice = Number(shipment.carrierPrice);
 

@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { ME, STAGES } from "../mock/data";
+import { ME, SHIPMENTS, STAGES } from "../mock/data";
 
 const LeadsContext = createContext(null);
 
 const STAGES_KEY = `crm.stages.${ME.id}.v1`;
 const LEADS_KEY = `crm.leads.${ME.id}.v1`;
+const SHIPMENTS_KEY = `crm.shipments.${ME.id}.v1`;
 
 export const STAGE_COLORS = [
   "#3b82f6",
@@ -22,6 +23,7 @@ const DEFAULT_STAGES = STAGES.map(({ id, name, color, hint }) => ({ id, name, co
 const DEFAULT_LEADS = STAGES.flatMap((stage) =>
   stage.leads.map((lead, index) => ({ ...lead, position: index })),
 );
+const DEFAULT_SHIPMENTS = SHIPMENTS.map((shipment) => ({ ...shipment }));
 
 function load(key, fallback) {
   try {
@@ -63,11 +65,20 @@ function loadState() {
       });
   });
 
-  return { stages, leads };
+  const shipments = load(SHIPMENTS_KEY, DEFAULT_SHIPMENTS);
+  return { stages, leads, shipments };
 }
 
 function nextStageId(stages) {
   return stages.reduce((max, stage) => Math.max(max, stage.id), 0) + 1;
+}
+
+function nextShipmentId(shipments) {
+  return shipments.reduce((max, shipment) => Math.max(max, shipment.id), 0) + 1;
+}
+
+function shipmentNumber(id) {
+  return `ЗВ-2026-${String(id).padStart(4, "0")}`;
 }
 
 /**
@@ -80,6 +91,7 @@ export function LeadsProvider({ children }) {
   const [initial] = useState(loadState);
   const [stages, setStages] = useState(initial.stages);
   const [leads, setLeads] = useState(initial.leads);
+  const [shipments, setShipments] = useState(initial.shipments);
   // Окно создания общее: «+» в колонке передаёт сюда её этап,
   // чтобы новый лид прошёл ту же обязательную форму, что и кнопка в шапке.
   const [leadDialog, setLeadDialog] = useState(null);
@@ -91,6 +103,10 @@ export function LeadsProvider({ children }) {
   useEffect(() => {
     save(LEADS_KEY, leads);
   }, [leads]);
+
+  useEffect(() => {
+    save(SHIPMENTS_KEY, shipments);
+  }, [shipments]);
 
   const value = useMemo(() => {
     const addLead = (draft) =>
@@ -129,6 +145,61 @@ export function LeadsProvider({ children }) {
 
     const openLeadDialog = (stageId = null) => setLeadDialog({ stageId: stageId ?? stages[0]?.id ?? null });
     const closeLeadDialog = () => setLeadDialog(null);
+
+    /**
+     * Быстрое создание заявки из сохранённой карточки лида. В макете цены
+     * дозаполняют в карточке, а остальные полные реквизиты остаются заглушками.
+     */
+    const addShipment = ({ lead, loadingCity, unloadingCity, loadingDate, unloadingDate, carrierName, carrierInn, carrierContact }) => {
+      const id = nextShipmentId(shipments);
+      const shipment = {
+        id,
+        number: shipmentNumber(id),
+        leadId: lead.id,
+        client: lead.name,
+        route: `${loadingCity} → ${unloadingCity}`,
+        status: "new",
+        customerPrice: null,
+        carrierPrice: null,
+        tax: "Без НДС",
+        ownerId: lead.ownerId,
+        created: "только что",
+        loading: {
+          city: loadingCity,
+          address: "—",
+          date: loadingDate,
+          time: "—",
+          contact: lead.contact || "—",
+          phone: lead.phone || "—",
+        },
+        unloading: {
+          city: unloadingCity,
+          address: "—",
+          date: unloadingDate,
+          time: "—",
+          contact: lead.contact || "—",
+          phone: lead.phone || "—",
+        },
+        carrier: {
+          name: carrierName,
+          inn: carrierInn,
+          contact: carrierContact,
+          phone: "",
+          vehicle: "— не указан —",
+          plate: "",
+          trailer: "",
+          driver: "",
+          driverPhone: "",
+        },
+        cargo: { type: "—", weight: "—", volume: "—", body: "—", packaging: "—" },
+        comment: "",
+      };
+      setShipments((prev) => [...prev, shipment]);
+      return shipment;
+    };
+
+    const updateShipment = (id, patch) =>
+      setShipments((prev) => prev.map((shipment) => (shipment.id === id ? { ...shipment, ...patch } : shipment)));
 
     /**
      * Перенос лида на этап с конкретной позицией.
@@ -229,8 +300,11 @@ export function LeadsProvider({ children }) {
     return {
       leads,
       stages,
+      shipments,
       leadDialog,
       addLead,
+      addShipment,
+      updateShipment,
       openLeadDialog,
       closeLeadDialog,
       updateLead,
@@ -242,7 +316,7 @@ export function LeadsProvider({ children }) {
       removeStage,
       resetAll,
     };
-  }, [leads, stages, leadDialog]);
+  }, [leads, stages, shipments, leadDialog]);
 
   return <LeadsContext.Provider value={value}>{children}</LeadsContext.Provider>;
 }

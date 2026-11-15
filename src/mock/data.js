@@ -414,9 +414,9 @@ export const CLIENTS = ALL_LEADS.map((item) => ({
 
 export const SHIPMENT_STATUS = {
   new: { label: "Новая", tone: "new" },
-  checked: { label: "Проверена", tone: "progress" },
-  loaded: { label: "Загружена", tone: "done" },
-  unloaded: { label: "Выгружена", tone: "done" },
+  checked: { label: "Проверена и подписана заявка", tone: "progress" },
+  loaded: { label: "Машина загрузилась", tone: "done" },
+  unloaded: { label: "Машина выгрузилась", tone: "done" },
 };
 
 export const SHIPMENTS = [

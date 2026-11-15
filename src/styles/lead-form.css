@@ -92,6 +92,33 @@
   white-space: nowrap;
 }
 
+/* --- Быстрое создание заявки -------------------------------------------- */
+
+.lead-stagebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lead-stagebar .stage-strip {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.modal-copy {
+  margin: 0 0 2px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.modal-error {
+  margin: -2px 0 0;
+  font-size: 12px;
+  color: var(--danger);
+}
+
 /* --- Поля формы ---------------------------------------------------------- */
 
 .lead-form {
@@ -212,6 +239,15 @@ html[data-theme="dark"] .lead-input--select {
     flex-wrap: wrap;
     justify-content: flex-start;
     margin-left: 0;
+  }
+
+  .lead-stagebar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lead-stagebar .btn {
+    align-self: flex-start;
   }
 }
 

@@ -1,5 +1,4 @@
 /** Карточка заявки: статус-степпер, деньги, перевозчик, груз и вложения. */
-import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -15,25 +14,26 @@ import {
 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status } from "../ui/Tag";
-import { OWNER, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
+import { OWNER, SHIPMENT_STATUS } from "../mock/data";
 import { money } from "../lib/format";
 import { shipmentMargin } from "../lib/margin";
 
 const STEPS = [
   { key: "new", label: "Новая" },
-  { key: "checked", label: "Проверена" },
-  { key: "loaded", label: "Загружена" },
-  { key: "unloaded", label: "Выгружена" },
+  { key: "checked", label: "Проверена и подписана заявка" },
+  { key: "loaded", label: "Машина загрузилась" },
+  { key: "unloaded", label: "Машина выгрузилась" },
 ];
 
 const TONE = { new: "new", checked: "progress", loaded: "done", unloaded: "done" };
 
 export function ShipmentPage() {
   const { id } = useParams();
-  const shipment = SHIPMENTS.find((item) => item.id === Number(id));
-  const [status, setStatus] = useState(shipment?.status ?? "new");
+  const { shipments, updateShipment } = useLeads();
+  const shipment = shipments.find((item) => item.id === Number(id));
 
   if (!shipment) {
     return (
@@ -48,8 +48,16 @@ export function ShipmentPage() {
     );
   }
 
+  const status = shipment.status;
   const owner = OWNER(shipment.ownerId);
   const margin = shipmentMargin(shipment);
+
+  function setPrice(key) {
+    return (event) => {
+      const raw = event.target.value.trim();
+      updateShipment(shipment.id, { [key]: raw === "" ? null : Number(raw) });
+    };
+  }
 
   return (
     <Shell title="Карточка заявки" crumb={`Заявки · ${shipment.number}`}>
@@ -84,7 +92,12 @@ export function ShipmentPage() {
 
       <div className="stage-strip" style={{ marginBottom: 16 }}>
         {STEPS.map((step) => (
-          <button key={step.key} type="button" aria-pressed={status === step.key} onClick={() => setStatus(step.key)}>
+          <button
+            key={step.key}
+            type="button"
+            aria-pressed={status === step.key}
+            onClick={() => updateShipment(shipment.id, { status: step.key })}
+          >
             {step.label}
           </button>
         ))}
@@ -195,19 +208,37 @@ export function ShipmentPage() {
           <div className="card">
             <div className="card__body">
               <div className="money-label">Маржа по заявке</div>
-              <div className="money-big" style={{ marginTop: 6, color: margin >= 0 ? "var(--money)" : "var(--danger)" }}>
-                {margin >= 0 ? "+" : "−"} {money(Math.abs(margin))}
+              <div className="money-big" style={{ marginTop: 6, color: margin == null || margin >= 0 ? "var(--money)" : "var(--danger)" }}>
+                {margin == null ? "—" : `${margin >= 0 ? "+" : "−"} ${money(Math.abs(margin))}`}
               </div>
 
               <div style={{ marginTop: 16 }}>
-                <div className="field-row">
+                <label className="field-row">
                   <span className="field-row__label">Клиенту</span>
-                  <span className="field-row__value mono">{money(shipment.customerPrice)}</span>
-                </div>
-                <div className="field-row">
+                  <input
+                    className="shipment-price-input mono"
+                    aria-label="Цена клиенту"
+                    inputMode="decimal"
+                    type="number"
+                    min="0"
+                    placeholder="Не указана"
+                    value={shipment.customerPrice ?? ""}
+                    onChange={setPrice("customerPrice")}
+                  />
+                </label>
+                <label className="field-row">
                   <span className="field-row__label">Перевозчику</span>
-                  <span className="field-row__value mono">{money(shipment.carrierPrice)}</span>
-                </div>
+                  <input
+                    className="shipment-price-input mono"
+                    aria-label="Цена перевозчику"
+                    inputMode="decimal"
+                    type="number"
+                    min="0"
+                    placeholder="Не указана"
+                    value={shipment.carrierPrice ?? ""}
+                    onChange={setPrice("carrierPrice")}
+                  />
+                </label>
                 <div className="field-row">
                   <span className="field-row__label">Налог</span>
                   <span className="field-row__value">{shipment.tax}</span>

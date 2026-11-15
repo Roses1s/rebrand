@@ -7,22 +7,29 @@ import { useNavigate } from "react-router-dom";
 import { Building2, Lock, Search } from "lucide-react";
 
 import { Shell } from "../app/Shell";
+import { useLeads } from "../app/store";
 import { Avatar } from "../ui/Tag";
 import { TableSkeleton } from "../ui/States";
-import { CLIENTS, ME, OWNER, SHIPMENTS } from "../mock/data";
+import { ME, OWNER } from "../mock/data";
 import { money } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
 
-const MY_COUNT = CLIENTS.filter((client) => client.ownerId === ME.id).length;
-
-const SEGMENTS = [
-  { value: "all", label: "Все", count: CLIENTS.length },
-  { value: "mine", label: "Мои", count: MY_COUNT },
-  { value: "lost", label: "Проигранные", count: 0 },
-];
-
 export function ClientsPage() {
   const navigate = useNavigate();
+  const { leads, stages, shipments } = useLeads();
+  const clients = useMemo(
+    () =>
+      leads.map((lead) => ({
+        ...lead,
+        stageName: stages.find((stage) => stage.id === lead.stageId)?.name ?? "Без этапа",
+      })),
+    [leads, stages],
+  );
+  const segments = [
+    { value: "all", label: "Все", count: clients.length },
+    { value: "mine", label: "Мои", count: clients.filter((client) => client.ownerId === ME.id).length },
+    { value: "lost", label: "Проигранные", count: 0 },
+  ];
   const [segment, setSegment] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,7 +41,7 @@ export function ClientsPage() {
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return CLIENTS.filter((client) => {
+    return clients.filter((client) => {
       if (segment === "lost") return false;
       if (segment === "mine" && client.ownerId !== ME.id) return false;
       if (!query) return true;
@@ -43,12 +50,12 @@ export function ClientsPage() {
         .toLowerCase()
         .includes(query);
     });
-  }, [segment, search]);
+  }, [clients, segment, search]);
 
   return (
     <Shell search={search} onSearch={setSearch}>
       <div className="toolbar">
-        {SEGMENTS.map((item) => (
+        {segments.map((item) => (
           <button
             key={item.value}
             type="button"
@@ -141,7 +148,7 @@ export function ClientsPage() {
                       <span style={{ fontSize: 12.5 }}>{owner.name.split(" ")[0]}</span>
                     </div>
                   </td>
-                  <td className="cell-money">{money(leadShipmentMargin(client.id, SHIPMENTS))}</td>
+                  <td className="cell-money">{money(leadShipmentMargin(client.id, shipments))}</td>
                   <td className="cell-sub">{client.created}</td>
                 </tr>
               );
