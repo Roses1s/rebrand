@@ -114,7 +114,7 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
-  const [draft, setDraft] = useState({ name: "", contact: "", phone: "", city: "Москва", price: "", priority: "mid" });
+  const [draft, setDraft] = useState({ name: "", contact: "", phone: "", city: "Москва", priority: "mid" });
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -145,12 +145,11 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
       contact: draft.contact.trim() || "—",
       phone: draft.phone.trim() || "—",
       city: draft.city.trim() || "—",
-      price: Number(draft.price) || 0,
       priority: draft.priority,
       hot: draft.priority === "high",
       due: "сегодня",
     });
-    setDraft({ name: "", contact: "", phone: "", city: "Москва", price: "", priority: "mid" });
+    setDraft({ name: "", contact: "", phone: "", city: "Москва", priority: "mid" });
     setLeadOpen(false);
     navigate("/crm");
   }
@@ -327,14 +326,6 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
         </Field>
         <Field label="Город">
           <Input value={draft.city} onChange={(event) => setDraft({ ...draft, city: event.target.value })} />
-        </Field>
-        <Field label="Ожидаемая сумма, ₽">
-          <Input
-            inputMode="numeric"
-            placeholder="120000"
-            value={draft.price}
-            onChange={(event) => setDraft({ ...draft, price: event.target.value.replace(/\D/g, "") })}
-          />
         </Field>
         <Field label="Приоритет" hint="Лид появится на первом этапе «Новый»">
           <Select value={draft.priority} onChange={(event) => setDraft({ ...draft, priority: event.target.value })}>

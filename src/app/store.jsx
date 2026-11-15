@@ -110,7 +110,6 @@ export function LeadsProvider({ children }) {
             route: "Москва → Москва",
             cargo: "Сборный груз",
             weight: "—",
-            price: 0,
             priority: "mid",
             hot: false,
             late: false,

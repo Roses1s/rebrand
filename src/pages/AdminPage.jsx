@@ -8,6 +8,7 @@ import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Tag";
 import { ALL_LEADS, ME, SHIPMENTS, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
+import { leadShipmentMargin } from "../lib/margin";
 
 const BACKUPS = [
   { date: "06.11.2026, 03:00", size: "182 МБ", status: "успешно", tone: "done" },
@@ -59,12 +60,13 @@ export function AdminPage() {
     );
   }
 
+  const totalMargin = ALL_LEADS.reduce((sum, lead) => sum + leadShipmentMargin(lead.id, SHIPMENTS), 0);
   const kpi = [
     { label: "Сотрудников", value: String(TEAM.length), foot: "в отделе продаж", color: "var(--stage-1)" },
     {
       label: "Лидов в работе",
       value: String(ALL_LEADS.length),
-      foot: shortMoney(ALL_LEADS.reduce((sum, lead) => sum + lead.price, 0)),
+      foot: `маржа ${shortMoney(totalMargin)}`,
       color: "var(--stage-4)",
     },
     { label: "Заявок", value: String(SHIPMENTS.length), foot: "за текущий месяц", color: "var(--stage-3)" },

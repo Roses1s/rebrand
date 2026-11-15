@@ -52,14 +52,15 @@ import { leadShipmentMargin } from "../lib/margin";
 const ICONS = { users: Users, wallet: Wallet, target: Target, flame: Flame, clock: Clock };
 const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
 
-const sumOf = (leads) => leads.reduce((total, lead) => total + (Number(lead.price) || 0), 0);
+const marginOf = (lead) => leadShipmentMargin(lead.id, SHIPMENTS);
+const sumMarginsOf = (leads) => leads.reduce((total, lead) => total + marginOf(lead), 0);
 const overdueTasks = TASKS.filter((task) => task.ownerId === ME.id && task.status === "overdue").length;
 
 function LeadCard({ lead }) {
   const priority = PRIORITY[lead.priority];
   const owner = OWNER(lead.ownerId);
   const foreign = lead.ownerId !== ME.id;
-  const margin = leadShipmentMargin(lead.id, SHIPMENTS);
+  const margin = marginOf(lead);
 
   return (
     <Link to={`/crm/leads/${lead.id}`} className="lead-card" draggable={false}>
@@ -108,7 +109,7 @@ function SortableLead({ lead }) {
 
 function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
-  const sum = sumOf(stageLeads);
+  const sum = sumMarginsOf(stageLeads);
   // В пустой колонке подсказкой служит слот, линия там лишняя.
   const showLine = dragging && dropIndex != null && stageLeads.length > 0;
 
@@ -139,8 +140,8 @@ function StageColumn({ stage, stageLeads, dragging, dropIndex, onAdd }) {
         </div>
       </div>
 
-      <div className="col__sub" title={`${shortMoney(sum)} · ${stage.hint}`}>
-        {shortMoney(sum)} · {stage.hint}
+      <div className="col__sub" title={`Маржа ${shortMoney(sum)} · ${stage.hint}`}>
+        Маржа {shortMoney(sum)} · {stage.hint}
       </div>
       <div className="col__rule" style={{ "--col-color": stage.color }} />
 
@@ -312,7 +313,7 @@ export function FunnelPage() {
   }
 
   const kpi = useMemo(() => {
-    const sum = sumOf(myLeads);
+    const sum = sumMarginsOf(myLeads);
     const potentialStage = stages[3] ?? stages[stages.length - 1];
     const potential = myLeads.filter((lead) => lead.stageId === potentialStage?.id).length;
     const hot = myLeads.filter((lead) => lead.hot).length;
@@ -325,9 +326,9 @@ export function FunnelPage() {
         icon: "users",
       },
       {
-        label: "Сумма воронки",
+        label: "Маржа заявок",
         value: shortMoney(sum),
-        foot: myLeads.length ? `средний чек ${shortMoney(Math.round(sum / myLeads.length))}` : "лидов пока нет",
+        foot: myLeads.length ? `средняя маржа ${shortMoney(Math.round(sum / myLeads.length))}` : "лидов пока нет",
         color: "var(--stage-4)",
         icon: "wallet",
       },
@@ -366,8 +367,8 @@ export function FunnelPage() {
     const dir = sort.dir === "asc" ? 1 : -1;
     return [...rows].sort((a, b) => {
       switch (sort.key) {
-        case "price":
-          return (a.price - b.price) * dir;
+        case "margin":
+          return (marginOf(a) - marginOf(b)) * dir;
         case "stage":
           return (a.stageId - b.stageId) * dir;
         case "contact":
@@ -443,7 +444,7 @@ export function FunnelPage() {
 
         <div className="toolbar__right">
           <span className="muted toolbar__sum">
-            Моя доска · {shortMoney(sumOf(myLeads))}
+            Моя доска · маржа {shortMoney(sumMarginsOf(myLeads))}
           </span>
 
           <div className="view-switch" role="group" aria-label="Вид списка лидов">
@@ -542,7 +543,7 @@ export function FunnelPage() {
                   <SortHead label="Этап" sortKey="stage" sort={sort} onSort={toggleSort} width={170} />
                   <th>Маршрут</th>
                   <SortHead label="Приоритет" sortKey="priority" sort={sort} onSort={toggleSort} width={110} />
-                  <SortHead label="Сумма" sortKey="price" sort={sort} onSort={toggleSort} align="right" width={120} />
+                  <SortHead label="Маржа" sortKey="margin" sort={sort} onSort={toggleSort} align="right" width={120} />
                   <SortHead label="Срок" sortKey="due" sort={sort} onSort={toggleSort} width={110} />
                 </tr>
               </thead>
@@ -609,7 +610,7 @@ export function FunnelPage() {
                       <td>
                         <span className={`badge ${priority.cls}`}>{priority.label}</span>
                       </td>
-                      <td className="cell-money">{shortMoney(lead.price)}</td>
+                      <td className="cell-money">{shortMoney(marginOf(lead))}</td>
                       <td>
                         <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
                       </td>

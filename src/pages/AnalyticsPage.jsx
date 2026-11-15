@@ -5,8 +5,9 @@ import { ArrowUpRight } from "lucide-react";
 import { Shell } from "../app/Shell";
 import { Segmented } from "../ui/Segmented";
 import { Avatar } from "../ui/Tag";
-import { ANALYTICS, ME, STAGES } from "../mock/data";
+import { ANALYTICS, ME, SHIPMENTS, STAGES } from "../mock/data";
 import { shortMoney } from "../lib/format";
+import { leadShipmentMargin } from "../lib/margin";
 
 const PERIODS = [
   { value: "week", label: "Неделя" },
@@ -15,12 +16,15 @@ const PERIODS = [
 ];
 
 const myLeads = STAGES.flatMap((stage) => stage.leads).filter((lead) => lead.ownerId === ME.id);
+const myLeadIds = new Set(myLeads.map((lead) => lead.id));
+const myShipments = SHIPMENTS.filter((shipment) => myLeadIds.has(shipment.leadId));
+const marginOf = (lead) => leadShipmentMargin(lead.id, SHIPMENTS);
 
-/** Как период влияет на цифры: доля месяца. */
-const PERIOD_FACTOR = {
-  week: { factor: 0.27, label: "за неделю", conversion: 19 },
-  month: { factor: 1, label: "за месяц", conversion: 24 },
-  quarter: { factor: 2.86, label: "за квартал", conversion: 27 },
+/** Период влияет на поступление лидов и конверсию, но не на фактическую маржу заявок. */
+const PERIOD_INFO = {
+  week: { label: "за неделю", conversion: 19 },
+  month: { label: "за месяц", conversion: 24 },
+  quarter: { label: "за квартал", conversion: 27 },
 };
 
 function InflowChart({ data }) {
@@ -75,10 +79,11 @@ export function AnalyticsPage() {
   const [period, setPeriod] = useState("month");
 
   const stats = useMemo(() => {
-    const sum = myLeads.reduce((total, lead) => total + lead.price, 0);
+    const margin = myLeads.reduce((total, lead) => total + marginOf(lead), 0);
     const potential = myLeads.filter((lead) => lead.stageId === 4).length;
-    const avg = Math.round(sum / myLeads.length);
-    return { sum, potential, avg };
+    const marginLeads = myLeads.filter((lead) => marginOf(lead) !== 0).length;
+    const avg = myLeads.length ? Math.round(margin / myLeads.length) : 0;
+    return { margin, potential, marginLeads, avg };
   }, []);
 
   const funnel = useMemo(() => {
@@ -89,27 +94,27 @@ export function AnalyticsPage() {
         name: stage.name,
         color: stage.color,
         count: leads.length,
-        sum: leads.reduce((total, lead) => total + lead.price, 0),
+        margin: leads.reduce((total, lead) => total + marginOf(lead), 0),
         width: Math.round((leads.length / max) * 92) + 8,
       };
     });
   }, []);
 
-  const topDeals = useMemo(() => [...myLeads].sort((a, b) => b.price - a.price).slice(0, 4), []);
-  const maxDeal = topDeals[0]?.price ?? 1;
+  const topDeals = useMemo(
+    () => [...myLeads].filter((lead) => marginOf(lead) !== 0).sort((a, b) => marginOf(b) - marginOf(a)).slice(0, 4),
+    [],
+  );
+  const maxDeal = marginOf(topDeals[0]) || 1;
 
   const inflow = ANALYTICS[period].inflow;
   const sources = ANALYTICS[period].sources;
-
-  const periodInfo = PERIOD_FACTOR[period] ?? PERIOD_FACTOR.month;
-  const periodSum = Math.round(stats.sum * periodInfo.factor);
-  const margin = Math.round(periodSum * 0.26);
+  const periodInfo = PERIOD_INFO[period] ?? PERIOD_INFO.month;
 
   const kpi = [
     {
-      label: "Сумма воронки",
-      value: shortMoney(periodSum),
-      foot: `${Math.round(myLeads.length * periodInfo.factor)} лидов ${periodInfo.label}`,
+      label: "Маржа заявок",
+      value: shortMoney(stats.margin),
+      foot: `${myShipments.length} ${myShipments.length === 1 ? "заявка" : "заявок"} по моим лидам`,
       color: "var(--stage-4)",
     },
     {
@@ -118,8 +123,13 @@ export function AnalyticsPage() {
       foot: `в потенциальных ${periodInfo.label}`,
       color: "var(--stage-5)",
     },
-    { label: "Средний чек", value: shortMoney(stats.avg), foot: "по моим лидам", color: "var(--stage-1)" },
-    { label: "Маржа", value: shortMoney(margin), foot: `план ${shortMoney(Math.round(periodSum * 0.3))}`, color: "var(--stage-2)" },
+    { label: "Средняя маржа", value: shortMoney(stats.avg), foot: "на один лид", color: "var(--stage-1)" },
+    {
+      label: "Лиды с заявками",
+      value: String(stats.marginLeads),
+      foot: `${myLeads.length ? Math.round((stats.marginLeads / myLeads.length) * 100) : 0}% моей воронки`,
+      color: "var(--stage-2)",
+    },
   ];
 
   return (
@@ -152,7 +162,7 @@ export function AnalyticsPage() {
             <div className="card__head">
               <div>
                 <div className="card__title">Моя воронка</div>
-                <div className="card__sub">Лиды и сумма по этапам</div>
+                <div className="card__sub">Лиды и маржа заявок по этапам</div>
               </div>
             </div>
             <div className="card__body">
@@ -166,7 +176,7 @@ export function AnalyticsPage() {
                     <span className="bar-row__fill" style={{ width: `${stage.width}%`, background: stage.color }} />
                   </span>
                   <span className="bar-row__value">
-                    {stage.count} · {shortMoney(stage.sum)}
+                    {stage.count} · {shortMoney(stage.margin)}
                   </span>
                 </div>
               ))}
@@ -199,24 +209,27 @@ export function AnalyticsPage() {
           <div className="card">
             <div className="card__head">
               <div>
-                <div className="card__title">Крупные сделки</div>
-                <div className="card__sub">Мои лиды по сумме</div>
+                <div className="card__title">Лиды с заявками</div>
+                <div className="card__sub">Мои лиды по марже заявок</div>
               </div>
             </div>
             <div className="card__body" style={{ paddingTop: 6 }}>
-              {topDeals.map((deal) => (
-                <div key={deal.id} className="mgr-row">
-                  <Avatar initials={deal.name.replace(/[^А-Яа-яA-Za-z]/g, "").slice(0, 2)} size="sm" />
-                  <div style={{ minWidth: 0 }}>
-                    <div className="mgr-row__name truncate">{deal.name}</div>
-                    <div className="mgr-row__sub truncate">{deal.route}</div>
+              {topDeals.map((deal) => {
+                const margin = marginOf(deal);
+                return (
+                  <div key={deal.id} className="mgr-row">
+                    <Avatar initials={deal.name.replace(/[^А-Яа-яA-Za-z]/g, "").slice(0, 2)} size="sm" />
+                    <div style={{ minWidth: 0 }}>
+                      <div className="mgr-row__name truncate">{deal.name}</div>
+                      <div className="mgr-row__sub truncate">{deal.route}</div>
+                    </div>
+                    <span className="mgr-bar">
+                      <span className="mgr-bar__fill" style={{ width: `${Math.round((margin / maxDeal) * 100)}%` }} />
+                    </span>
+                    <span className="mgr-row__sum">{shortMoney(margin)}</span>
                   </div>
-                  <span className="mgr-bar">
-                    <span className="mgr-bar__fill" style={{ width: `${Math.round((deal.price / maxDeal) * 100)}%` }} />
-                  </span>
-                  <span className="mgr-row__sum">{shortMoney(deal.price)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

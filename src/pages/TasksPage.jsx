@@ -8,8 +8,9 @@ import { Button } from "../ui/Button";
 import { Avatar, Chip } from "../ui/Tag";
 import { Field, Input, Select } from "../ui/Field";
 import { Modal } from "../ui/Modal";
-import { ME, TASKS, TASK_TYPES } from "../mock/data";
+import { ME, SHIPMENTS, TASKS, TASK_TYPES } from "../mock/data";
 import { shortMoney } from "../lib/format";
+import { leadShipmentMargin } from "../lib/margin";
 
 const COLUMNS = [
   { status: "overdue", title: "Просрочено", color: "var(--danger)" },
@@ -52,7 +53,6 @@ export function TasksPage() {
         leadId: 1,
         time: "завтра 10:00",
         phone: "+7 900 000-00-00",
-        amount: 0,
         ownerId: ME.id,
         status: "upcoming",
       },
@@ -150,8 +150,8 @@ export function TasksPage() {
                         Открыть лид
                       </Link>
 
-                      <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 650 }}>
-                        {task.amount ? shortMoney(task.amount) : "—"}
+                      <span title="Маржа заявок лида" style={{ marginLeft: "auto", fontSize: 12, fontWeight: 650 }}>
+                        {shortMoney(leadShipmentMargin(task.leadId, SHIPMENTS))}
                       </span>
                       <Avatar initials={ME.initials} size="sm" title={ME.name} />
                     </div>

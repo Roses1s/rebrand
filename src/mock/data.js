@@ -72,7 +72,6 @@ function lead(partial) {
     cargo: "Пиломатериалы",
     weight: "20 т",
     body: "Тент 92 м³",
-    price: 100000,
     priority: "mid",
     hot: false,
     late: false,
@@ -96,7 +95,6 @@ export const STAGES = [
         route: "Москва → Казань",
         cargo: "Пиломатериалы",
         weight: "20 т",
-        price: 185000,
         priority: "high",
         hot: true,
         due: "завтра 00:02",
@@ -114,7 +112,6 @@ export const STAGES = [
         route: "Тула → Нижний Новгород",
         cargo: "Металлоконструкции",
         weight: "12 т",
-        price: 94000,
         priority: "mid",
         due: "завтра 22:02",
         ownerId: 1,
@@ -131,7 +128,6 @@ export const STAGES = [
         route: "Самара → Ростов-на-Дону",
         cargo: "Зерно в биг-бэгах",
         weight: "22 т",
-        price: 142000,
         priority: "low",
         due: "4 нояб.",
         ownerId: 3,
@@ -149,7 +145,6 @@ export const STAGES = [
         route: "Санкт-Петербург → Мурманск",
         cargo: "Профнастил",
         weight: "16 т",
-        price: 158000,
         priority: "mid",
         due: "5 нояб.",
         ownerId: 3,
@@ -171,7 +166,6 @@ export const STAGES = [
         route: "Пермь → Екатеринбург",
         cargo: "Химия (не опас.)",
         weight: "18 т",
-        price: 76000,
         priority: "high",
         hot: true,
         due: "завтра 03:02",
@@ -188,7 +182,6 @@ export const STAGES = [
         route: "Киров → Москва",
         cargo: "Мебель в упаковке",
         weight: "8 т",
-        price: 68000,
         priority: "mid",
         due: "04 нояб.",
         ownerId: 2,
@@ -205,7 +198,6 @@ export const STAGES = [
         route: "Калининград → Москва",
         cargo: "Электроника",
         weight: "6 т",
-        price: 128000,
         priority: "mid",
         due: "11 нояб.",
         ownerId: 1,
@@ -226,7 +218,6 @@ export const STAGES = [
         route: "Москва → Краснодар",
         cargo: "Продукты, +2 °C",
         weight: "20 т",
-        price: 215000,
         priority: "high",
         hot: true,
         due: "07 нояб.",
@@ -244,7 +235,6 @@ export const STAGES = [
         route: "Казань → Новосибирск",
         cargo: "Станки, оборудование",
         weight: "15 т",
-        price: 310000,
         priority: "high",
         due: "08 нояб.",
         ownerId: 1,
@@ -261,7 +251,6 @@ export const STAGES = [
         route: "Мытищи → Воронеж",
         cargo: "Полимеры",
         weight: "19 т",
-        price: 118000,
         priority: "mid",
         due: "09 нояб.",
         ownerId: 4,
@@ -277,7 +266,6 @@ export const STAGES = [
         route: "Екатеринбург → Самара",
         cargo: "Натуральный камень",
         weight: "22 т",
-        price: 82000,
         priority: "low",
         due: "12 нояб.",
         ownerId: 4,
@@ -298,7 +286,6 @@ export const STAGES = [
         route: "Челябинск → Санкт-Петербург",
         cargo: "Металлопрокат",
         weight: "24 т",
-        price: 268000,
         priority: "high",
         due: "завтра 04:02",
         ownerId: 1,
@@ -314,7 +301,6 @@ export const STAGES = [
         route: "Краснодар → Сочи",
         cargo: "Стройматериалы",
         weight: "20 т",
-        price: 97000,
         priority: "mid",
         due: "08 нояб.",
         ownerId: 1,
@@ -330,7 +316,6 @@ export const STAGES = [
         route: "Одинцово → Смоленск",
         cargo: "Удобрения",
         weight: "21 т",
-        price: 64000,
         priority: "low",
         due: "10 нояб.",
         ownerId: 3,
@@ -346,7 +331,6 @@ export const STAGES = [
         route: "Новосибирск → Тюмень",
         cargo: "Консервы",
         weight: "18 т",
-        price: 89000,
         priority: "low",
         due: "14 нояб.",
         ownerId: 2,
@@ -367,7 +351,6 @@ export const STAGES = [
         route: "Москва → Санкт-Петербург",
         cargo: "Бытовая техника",
         weight: "17 т",
-        price: 132000,
         priority: "high",
         hot: true,
         due: "сегодня 18:00",
@@ -384,7 +367,6 @@ export const STAGES = [
         route: "Новосибирск → Кемерово",
         cargo: "Уголь",
         weight: "25 т",
-        price: 74000,
         priority: "mid",
         due: "сегодня 20:00",
         ownerId: 1,
@@ -400,7 +382,6 @@ export const STAGES = [
         route: "Владивосток → Хабаровск",
         cargo: "Контейнеры",
         weight: "20 т",
-        price: 96000,
         priority: "low",
         due: "13 нояб.",
         ownerId: 4,
@@ -414,13 +395,6 @@ export const STAGES = [
 export const ALL_LEADS = STAGES.flatMap((stage) => stage.leads);
 export const OWNER = (id) => U[id] ?? TEAM[0];
 
-export const FUNNEL_KPI = [
-  { label: "Лидов в работе", value: "20", foot: "5 этапов воронки", color: "var(--stage-1)", icon: "users" },
-  { label: "Сумма воронки", value: "2,9 млн ₽", foot: "средний чек 146 тыс ₽", color: "var(--stage-4)", icon: "wallet" },
-  { label: "Потенциальные", value: "4", foot: "конверсия 20%", color: "var(--stage-5)", icon: "target" },
-  { label: "Горячие лиды", value: "8", foot: "высокий приоритет", color: "var(--stage-2)", icon: "flame" },
-  { label: "Просрочено", value: "1", foot: "задач требуют звонка", color: "var(--danger)", icon: "clock" },
-];
 
 export const CLIENTS = ALL_LEADS.map((item) => ({
   id: item.id,
@@ -435,7 +409,6 @@ export const CLIENTS = ALL_LEADS.map((item) => ({
   stageName: STAGES.find((stage) => stage.id === item.stageId)?.name,
   stageColor: STAGES.find((stage) => stage.id === item.stageId)?.color,
   ownerId: item.ownerId,
-  price: item.price,
   created: item.created,
 }));
 
@@ -540,17 +513,17 @@ export const SHIPMENTS = [
 ];
 
 export const TASKS = [
-  { id: 1, type: "call", title: "Повторный звонок", company: "ООО «МебельГрад»", leadId: 6, time: "04 нояб., 10:00", phone: "+7 950 332-80-44", amount: 68000, ownerId: 2, status: "overdue" },
-  { id: 2, type: "call", title: "Квалифицировать лид", company: "АО «Агро-Поволжье»", leadId: 3, time: "сегодня 23:02", phone: "+7 977 015-83-49", amount: 320000, ownerId: 1, status: "today" },
-  { id: 3, type: "call", title: "Первичный звонок", company: "ООО «СтройТрансСервис»", leadId: 1, time: "завтра 00:02", phone: "+7 915 204-18-73", amount: 185000, ownerId: 2, status: "upcoming" },
-  { id: 4, type: "email", title: "Звонок: подтвердить условия", company: "ООО «ПолимерПак»", leadId: 10, time: "завтра 01:02", phone: "+7 926 773-50-18", amount: 149000, ownerId: 1, status: "upcoming" },
-  { id: 5, type: "call", title: "Перезвонить после 16:00", company: "ООО «ХимПром Логистика»", leadId: 5, time: "завтра 03:02", phone: "+7 912 440-71-15", amount: 76000, ownerId: 1, status: "upcoming" },
-  { id: 6, type: "quote", title: "Финальная ставка по маршруту", company: "АО «УралМеталлСнаб»", leadId: 12, time: "завтра 04:02", phone: "+7 922 811-09-54", amount: 268000, ownerId: 1, status: "upcoming" },
-  { id: 7, type: "quote", title: "Отправить расчёт ставки", company: "ИП Кузнецов А. В.", leadId: 2, time: "завтра 09:00", phone: "+7 903 771-22-09", amount: 94000, ownerId: 4, status: "upcoming" },
-  { id: 8, type: "meeting", title: "Встреча в офисе", company: "ГК «ФудЛайн»", leadId: 8, time: "07 нояб., 12:00", phone: "+7 985 712-66-01", amount: 215000, ownerId: 1, status: "upcoming" },
-  { id: 9, type: "email", title: "Отправить договор", company: "ООО «ТехноИмпорт»", leadId: 9, time: "08 нояб., 10:00", phone: "+7 917 330-95-62", amount: 310000, ownerId: 3, status: "upcoming" },
-  { id: 10, type: "call", title: "Проверить выгрузку", company: "ООО «Логистика Плюс»", leadId: 16, time: "вчера 16:00", phone: "+7 495 320-11-09", amount: 132000, ownerId: 1, status: "done" },
-  { id: 11, type: "email", title: "Выслать закрывающие документы", company: "ГК «ФудЛайн»", leadId: 8, time: "вчера 11:30", phone: "+7 985 712-66-01", amount: 215000, ownerId: 1, status: "done" },
+  { id: 1, type: "call", title: "Повторный звонок", company: "ООО «МебельГрад»", leadId: 6, time: "04 нояб., 10:00", phone: "+7 950 332-80-44", ownerId: 2, status: "overdue" },
+  { id: 2, type: "call", title: "Квалифицировать лид", company: "АО «Агро-Поволжье»", leadId: 3, time: "сегодня 23:02", phone: "+7 977 015-83-49", ownerId: 1, status: "today" },
+  { id: 3, type: "call", title: "Первичный звонок", company: "ООО «СтройТрансСервис»", leadId: 1, time: "завтра 00:02", phone: "+7 915 204-18-73", ownerId: 2, status: "upcoming" },
+  { id: 4, type: "email", title: "Звонок: подтвердить условия", company: "ООО «ПолимерПак»", leadId: 10, time: "завтра 01:02", phone: "+7 926 773-50-18", ownerId: 1, status: "upcoming" },
+  { id: 5, type: "call", title: "Перезвонить после 16:00", company: "ООО «ХимПром Логистика»", leadId: 5, time: "завтра 03:02", phone: "+7 912 440-71-15", ownerId: 1, status: "upcoming" },
+  { id: 6, type: "quote", title: "Финальная ставка по маршруту", company: "АО «УралМеталлСнаб»", leadId: 12, time: "завтра 04:02", phone: "+7 922 811-09-54", ownerId: 1, status: "upcoming" },
+  { id: 7, type: "quote", title: "Отправить расчёт ставки", company: "ИП Кузнецов А. В.", leadId: 2, time: "завтра 09:00", phone: "+7 903 771-22-09", ownerId: 4, status: "upcoming" },
+  { id: 8, type: "meeting", title: "Встреча в офисе", company: "ГК «ФудЛайн»", leadId: 8, time: "07 нояб., 12:00", phone: "+7 985 712-66-01", ownerId: 1, status: "upcoming" },
+  { id: 9, type: "email", title: "Отправить договор", company: "ООО «ТехноИмпорт»", leadId: 9, time: "08 нояб., 10:00", phone: "+7 917 330-95-62", ownerId: 3, status: "upcoming" },
+  { id: 10, type: "call", title: "Проверить выгрузку", company: "ООО «Логистика Плюс»", leadId: 16, time: "вчера 16:00", phone: "+7 495 320-11-09", ownerId: 1, status: "done" },
+  { id: 11, type: "email", title: "Выслать закрывающие документы", company: "ГК «ФудЛайн»", leadId: 8, time: "вчера 11:30", phone: "+7 985 712-66-01", ownerId: 1, status: "done" },
 ];
 
 export const TASK_TYPES = {
@@ -562,8 +535,8 @@ export const TASK_TYPES = {
 
 /**
  * Аналитика по периодам: только то, что нельзя вывести из доски менеджера.
- * Воронка, конверсия, средний чек и маржа считаются в AnalyticsPage
- * из его собственных лидов.
+ * Воронка, конверсия и маржа заявок считаются в AnalyticsPage
+ * по собственным лидам и связанным с ними заявкам.
  */
 export const ANALYTICS = {
   week: {

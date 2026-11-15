@@ -9,8 +9,9 @@ import { Building2, Lock, Search } from "lucide-react";
 import { Shell } from "../app/Shell";
 import { Avatar } from "../ui/Tag";
 import { TableSkeleton } from "../ui/States";
-import { CLIENTS, ME, OWNER } from "../mock/data";
+import { CLIENTS, ME, OWNER, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
+import { leadShipmentMargin } from "../lib/margin";
 
 const MY_COUNT = CLIENTS.filter((client) => client.ownerId === ME.id).length;
 
@@ -82,7 +83,7 @@ export function ClientsPage() {
               <th>Направление</th>
               <th>Этап</th>
               <th>Менеджер</th>
-              <th style={{ textAlign: "right" }}>Бюджет</th>
+              <th style={{ textAlign: "right" }}>Маржа</th>
               <th>Создан</th>
             </tr>
           </thead>
@@ -140,7 +141,7 @@ export function ClientsPage() {
                       <span style={{ fontSize: 12.5 }}>{owner.name.split(" ")[0]}</span>
                     </div>
                   </td>
-                  <td className="cell-money">{money(client.price)}</td>
+                  <td className="cell-money">{money(leadShipmentMargin(client.id, SHIPMENTS))}</td>
                   <td className="cell-sub">{client.created}</td>
                 </tr>
               );
