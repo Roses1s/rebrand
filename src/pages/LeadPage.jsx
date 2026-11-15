@@ -25,7 +25,7 @@ import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
 import { Toast } from "../ui/Toast";
 import { leadChatter } from "../mock/chatter";
-import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, SHIPMENTS } from "../mock/data";
+import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, PRIORITY, SHIPMENTS } from "../mock/data";
 import { money } from "../lib/format";
 import { isEmail, openYandexCompose } from "../lib/mail";
 
@@ -48,6 +48,7 @@ function draftOf(lead) {
     email: lead?.email ?? "",
     edo: lead?.edo ?? "",
     accountant: lead?.accountant ?? ACCOUNTANTS[0],
+    priority: lead?.priority ?? "mid",
   };
 }
 
@@ -368,6 +369,22 @@ export function LeadPage() {
                   onChange={set("email")}
                   placeholder="name@example.ru"
                 />
+              </label>
+
+              <label className="lead-field">
+                <span className="lead-field__label">Приоритет</span>
+                <select
+                  className="lead-input lead-input--select"
+                  value={draft.priority}
+                  onChange={set("priority")}
+                  aria-label="Приоритет лида"
+                >
+                  {Object.entries(PRIORITY).map(([value, priority]) => (
+                    <option key={value} value={value}>
+                      {priority.label}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="lead-field">
