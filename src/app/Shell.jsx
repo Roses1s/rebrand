@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 import { Button, IconButton } from "../ui/Button";
-import { Field, Input, SearchInput, Select } from "../ui/Field";
+import { Field, Input, SearchInput } from "../ui/Field";
 import { Modal } from "../ui/Modal";
 import { Avatar } from "../ui/Tag";
 import { useLeads } from "./store";
@@ -49,6 +49,8 @@ const REPORTS = [
 const SETTINGS = [{ to: "/settings", label: "Мои настройки", icon: Settings }];
 
 const ADMIN = [{ to: "/admin", label: "Администрирование", icon: ShieldCheck, count: String(TEAM.length) }];
+
+const EMPTY_LEAD_DRAFT = { name: "", inn: "", contact: "", phone: "", email: "" };
 
 const TITLES = {
   "/": ["Воронка лидов", ""],
@@ -106,15 +108,14 @@ function NavGroup({ items, collapsed }) {
 export function Shell({ title, crumb, actions, search, onSearch, children }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { leads, addLead } = useLeads();
+  const { leads, leadDialog, addLead, openLeadDialog, closeLeadDialog } = useLeads();
   const [theme, setTheme] = useStored("crm.theme", "light");
   // Свёрнутая панель: остаются только иконки. Выбор запоминается.
   const [sidebar, setSidebar] = useStored("crm.sidebar", "open");
   const collapsed = sidebar === "collapsed";
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [leadOpen, setLeadOpen] = useState(false);
-  const [draft, setDraft] = useState({ name: "", contact: "", phone: "", city: "Москва", priority: "mid" });
+  const [draft, setDraft] = useState(EMPTY_LEAD_DRAFT);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -137,20 +138,21 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
   );
 
   const [pageTitle, pageSub] = TITLES[pathname] ?? [title ?? "CRM", ""];
+  const canCreateLead = [draft.name, draft.inn, draft.contact, draft.phone, draft.email].every((value) => value.trim());
 
   function submitLead() {
-    if (!draft.name.trim()) return;
+    if (!canCreateLead) return;
     addLead({
       name: draft.name.trim(),
-      contact: draft.contact.trim() || "—",
-      phone: draft.phone.trim() || "—",
-      city: draft.city.trim() || "—",
-      priority: draft.priority,
-      hot: draft.priority === "high",
+      inn: draft.inn,
+      contact: draft.contact.trim(),
+      phone: draft.phone.trim(),
+      email: draft.email.trim(),
+      stageId: leadDialog?.stageId ?? undefined,
       due: "сегодня",
     });
-    setDraft({ name: "", contact: "", phone: "", city: "Москва", priority: "mid" });
-    setLeadOpen(false);
+    setDraft(EMPTY_LEAD_DRAFT);
+    closeLeadDialog();
     navigate("/crm");
   }
 
@@ -278,7 +280,7 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             />
             {actions}
-            <Button variant="primary" icon={Plus} className="new-lead-btn" onClick={() => setLeadOpen(true)}>
+            <Button variant="primary" icon={Plus} className="new-lead-btn" onClick={() => openLeadDialog()}>
               <span className="btn__label">Новый лид</span>
             </Button>
           </div>
@@ -288,15 +290,15 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
       </div>
 
       <Modal
-        open={leadOpen}
+        open={Boolean(leadDialog)}
         title="Новый лид"
-        onClose={() => setLeadOpen(false)}
+        onClose={closeLeadDialog}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setLeadOpen(false)}>
+            <Button variant="ghost" onClick={closeLeadDialog}>
               Отмена
             </Button>
-            <Button variant="primary" onClick={submitLead}>
+            <Button variant="primary" onClick={submitLead} disabled={!canCreateLead}>
               Создать лид
             </Button>
           </>
@@ -305,34 +307,51 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
         <Field label="Компания">
           <Input
             autoFocus
+            required
+            autoComplete="organization"
             placeholder="ООО «Ромашка»"
             value={draft.name}
             onChange={(event) => setDraft({ ...draft, name: event.target.value })}
           />
         </Field>
-        <Field label="Контактное лицо">
+        <Field label="ИНН">
           <Input
+            required
+            inputMode="numeric"
+            maxLength={12}
+            placeholder="7700000000"
+            value={draft.inn}
+            onChange={(event) => setDraft({ ...draft, inn: event.target.value.replace(/\D/g, "").slice(0, 12) })}
+          />
+        </Field>
+        <Field label="Контакт логиста">
+          <Input
+            required
+            autoComplete="name"
             placeholder="Иван Петров"
             value={draft.contact}
             onChange={(event) => setDraft({ ...draft, contact: event.target.value })}
           />
         </Field>
-        <Field label="Телефон">
+        <Field label="Телефон логиста">
           <Input
+            required
+            type="tel"
+            autoComplete="tel"
             placeholder="+7 900 000-00-00"
             value={draft.phone}
             onChange={(event) => setDraft({ ...draft, phone: event.target.value })}
           />
         </Field>
-        <Field label="Город">
-          <Input value={draft.city} onChange={(event) => setDraft({ ...draft, city: event.target.value })} />
-        </Field>
-        <Field label="Приоритет" hint="Лид появится на первом этапе «Новый»">
-          <Select value={draft.priority} onChange={(event) => setDraft({ ...draft, priority: event.target.value })}>
-            <option value="high">Высокий</option>
-            <option value="mid">Средний</option>
-            <option value="low">Низкий</option>
-          </Select>
+        <Field label="E-mail">
+          <Input
+            required
+            type="email"
+            autoComplete="email"
+            placeholder="logist@company.ru"
+            value={draft.email}
+            onChange={(event) => setDraft({ ...draft, email: event.target.value })}
+          />
         </Field>
       </Modal>
     </div>

@@ -193,7 +193,7 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, stages, addLead, moveLead, removeLeads } = useLeads();
+  const { leads, stages, openLeadDialog, moveLead, removeLeads } = useLeads();
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState(() => {
     try {
@@ -492,7 +492,7 @@ export function FunnelPage() {
                   dragging={activeId != null}
                   stageLeads={stageLeads}
                   dropIndex={dropIndex}
-                  onAdd={() => addLead({ name: "Новый лид", city: "Москва", stageId: stage.id })}
+                  onAdd={() => openLeadDialog(stage.id)}
                 />
               );
             })}

@@ -80,6 +80,9 @@ export function LeadsProvider({ children }) {
   const [initial] = useState(loadState);
   const [stages, setStages] = useState(initial.stages);
   const [leads, setLeads] = useState(initial.leads);
+  // Окно создания общее: «+» в колонке передаёт сюда её этап,
+  // чтобы новый лид прошёл ту же обязательную форму, что и кнопка в шапке.
+  const [leadDialog, setLeadDialog] = useState(null);
 
   useEffect(() => {
     save(STAGES_KEY, stages);
@@ -123,6 +126,9 @@ export function LeadsProvider({ children }) {
           ...prev,
         ];
       });
+
+    const openLeadDialog = (stageId = null) => setLeadDialog({ stageId: stageId ?? stages[0]?.id ?? null });
+    const closeLeadDialog = () => setLeadDialog(null);
 
     /**
      * Перенос лида на этап с конкретной позицией.
@@ -221,7 +227,10 @@ export function LeadsProvider({ children }) {
     return {
       leads,
       stages,
+      leadDialog,
       addLead,
+      openLeadDialog,
+      closeLeadDialog,
       updateLead,
       moveLead,
       removeLeads,
@@ -231,7 +240,7 @@ export function LeadsProvider({ children }) {
       removeStage,
       resetAll,
     };
-  }, [leads, stages]);
+  }, [leads, stages, leadDialog]);
 
   return <LeadsContext.Provider value={value}>{children}</LeadsContext.Provider>;
 }
