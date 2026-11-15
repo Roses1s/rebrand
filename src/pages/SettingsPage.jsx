@@ -194,7 +194,7 @@ export function SettingsPage() {
                 <div className="card__title">Моя воронка</div>
                 <div className="card__sub">Этапы принадлежат менеджеру: название, цвет, подсказка и порядок</div>
               </div>
-              <Button size="sm" icon={saved ? Check : Plus} onClick={addStage}>
+              <Button size="sm" icon={saved ? Check : Plus} onClick={() => addStage()}>
                 {saved ? "Сохранено" : "Этап"}
               </Button>
             </div>
@@ -272,7 +272,7 @@ export function SettingsPage() {
                 </div>
               ))}
 
-              <Button variant="soft" size="sm" icon={Plus} onClick={addStage}>
+              <Button variant="soft" size="sm" icon={Plus} onClick={() => addStage()}>
                 Добавить этап
               </Button>
             </div>

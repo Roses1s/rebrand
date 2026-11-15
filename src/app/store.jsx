@@ -183,14 +183,16 @@ export function LeadsProvider({ children }) {
         return rest.map((lead) => ({ ...lead, position: positions.get(lead.id) ?? lead.position }));
       });
 
-    const addStage = () =>
+    /** Новый этап создаётся из настроек или прямо в конце канбана. */
+    const addStage = (name = "Новый этап") =>
       setStages((prev) => {
+        const stageName = typeof name === "string" ? name.trim() : "";
         const id = nextStageId(prev);
         return [
           ...prev,
           {
             id,
-            name: "Новый этап",
+            name: stageName || "Новый этап",
             color: STAGE_COLORS[prev.length % STAGE_COLORS.length],
             hint: "Опишите этап",
           },

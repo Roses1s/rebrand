@@ -193,8 +193,10 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, stages, openLeadDialog, moveLead, removeLeads } = useLeads();
+  const { leads, stages, openLeadDialog, moveLead, removeLeads, addStage } = useLeads();
   const [filter, setFilter] = useState("all");
+  const [addingStage, setAddingStage] = useState(false);
+  const [stageName, setStageName] = useState("");
   const [view, setView] = useState(() => {
     try {
       return window.localStorage.getItem("crm.funnel.view") ?? "board";
@@ -208,6 +210,7 @@ export function FunnelPage() {
   const [activeWidth, setActiveWidth] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
   const suppressClick = useRef(false);
+  const stageCreatorCancelled = useRef(false);
   const allCheckbox = useRef(null);
 
   const sensors = useSensors(
@@ -403,6 +406,13 @@ export function FunnelPage() {
     setSelected([]);
   }
 
+  function closeStageCreator({ save = false } = {}) {
+    const name = stageName.trim();
+    if (save && name) addStage(name);
+    setStageName("");
+    setAddingStage(false);
+  }
+
   return (
     <Shell>
       <div className="funnel">
@@ -496,6 +506,45 @@ export function FunnelPage() {
                 />
               );
             })}
+
+            <div className="stage-creator">
+              {addingStage ? (
+                <input
+                  autoFocus
+                  className="stage-creator__input"
+                  aria-label="Название нового этапа"
+                  placeholder="Название этапа"
+                  value={stageName}
+                  onChange={(event) => setStageName(event.target.value)}
+                  onBlur={() => {
+                    if (!stageCreatorCancelled.current) closeStageCreator({ save: true });
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      event.currentTarget.blur();
+                    }
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      stageCreatorCancelled.current = true;
+                      closeStageCreator();
+                    }
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="stage-creator__button"
+                  onClick={() => {
+                    stageCreatorCancelled.current = false;
+                    setAddingStage(true);
+                  }}
+                >
+                  <Plus size={16} strokeWidth={2} />
+                  Добавить этап
+                </button>
+              )}
+            </div>
           </div>
 
           <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.22, 0.8, 0.28, 1)" }}>
