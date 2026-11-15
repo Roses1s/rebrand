@@ -36,7 +36,7 @@ npm run preview
 правки ему нужен блок:
 
 ```powershell
-git pull origin arena/ec87207d-rebrand; npm install; npm run dev
+git pull origin arena/4c2e5e44-rebrand; npm install; npm run dev
 ```
 
 Если dev-сервер уже запущен — `git pull`, при новых зависимостях `npm install`,
@@ -90,6 +90,7 @@ src/
                        этапов с «…»), Toast (уведомление), cn
   lib/format.js        money, shortMoney, initials, fileSize,
                        relativeTime, absoluteTime, dayLabel
+  lib/margin.js        маржа заявки и сумма маржи связанных с лидом заявок
   mock/data.js         демо-данные в форме API рабочей CRM
   mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
   styles/              tokens, base, ui, shell, board, pages, kit, compact,
@@ -147,8 +148,12 @@ localStorage, и сбрасываются при размонтировании 
 
 **Карточки и KPI:**
 
-- `LeadCard` общий для доски и `DragOverlay`: название, контакт, приоритет, сумма,
-  срок. Приоритет — слева под контактом (`.lead-card__priority`, `flex-start`);
+- `LeadCard` общий для доски и `DragOverlay`: название, контакт, приоритет, маржа
+  связанных заявок, срок. `leadShipmentMargin(lead.id, SHIPMENTS)` складывает
+  `customerPrice − carrierPrice` только у заявок с тем же `leadId`; без заявок — 0 ₽.
+  В макете нет отдельных ставок НДС и вычета, поэтому формула совпадает с его
+  экранами заявок, но упрощена относительно рабочей CRM. Приоритет — слева под
+  контактом (`.lead-card__priority`, `flex-start`);
 - направление, материал и тоннаж скрыты только на карточках, но остаются в данных
   и в списке; `title` с подсказкой о переносе убран, атрибуты dnd-kit сохранены;
 - KPI «Сумма воронки» и сводка «Моя доска» считают `sumOf(myLeads)`:
@@ -354,7 +359,7 @@ done
 
 ## 13. Git
 
-Ветка этой сессии: `arena/ec87207d-rebrand`, пушить только в неё. Перед работой
+Ветка этой сессии: `arena/4c2e5e44-rebrand`, пушить только в неё. Перед работой
 проверять `git rev-parse --abbrev-ref HEAD`; старые отметки ветвей не являются
 разрешением переключиться или создать другую ветку.
 

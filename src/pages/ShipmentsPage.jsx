@@ -7,6 +7,7 @@ import { Shell } from "../app/Shell";
 import { ME, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
 import { TableSkeleton } from "../ui/States";
 import { money } from "../lib/format";
+import { shipmentMargin } from "../lib/margin";
 
 const FILTERS = [
   { value: "all", label: "Все" },
@@ -31,7 +32,6 @@ export function ShipmentsPage() {
   }, []);
 
   const rows = myShipments.filter((item) => filter === "all" || item.status === filter);
-  const marginOf = (item) => item.customerPrice - item.carrierPrice;
 
   return (
     <Shell>
@@ -84,7 +84,7 @@ export function ShipmentsPage() {
             )}
             {!loading &&
               rows.map((item) => {
-              const margin = marginOf(item);
+              const margin = shipmentMargin(item);
               return (
                 <tr key={item.id} style={{ cursor: "pointer" }} onClick={() => navigate(`/shipments/${item.id}`)}>
                   <td className="mono" style={{ fontSize: 12 }}>

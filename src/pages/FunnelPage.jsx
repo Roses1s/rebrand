@@ -45,8 +45,9 @@ import {
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
-import { ME, OWNER, PRIORITY, TASKS } from "../mock/data";
+import { ME, OWNER, PRIORITY, SHIPMENTS, TASKS } from "../mock/data";
 import { shortMoney } from "../lib/format";
+import { leadShipmentMargin } from "../lib/margin";
 
 const ICONS = { users: Users, wallet: Wallet, target: Target, flame: Flame, clock: Clock };
 const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
@@ -58,6 +59,7 @@ function LeadCard({ lead }) {
   const priority = PRIORITY[lead.priority];
   const owner = OWNER(lead.ownerId);
   const foreign = lead.ownerId !== ME.id;
+  const margin = leadShipmentMargin(lead.id, SHIPMENTS);
 
   return (
     <Link to={`/crm/leads/${lead.id}`} className="lead-card" draggable={false}>
@@ -74,7 +76,9 @@ function LeadCard({ lead }) {
 
       <div className="lead-card__foot">
         {foreign && <Avatar initials={owner.initials} color={owner.color} size="sm" title={owner.name} />}
-        <span className="price">{shortMoney(lead.price)}</span>
+        <span className="price" title="Маржа по заявкам" aria-label={`Маржа по заявкам: ${shortMoney(margin)}`}>
+          {shortMoney(margin)}
+        </span>
         <span className="lead-card__right">
           <Phone size={13} strokeWidth={2} style={{ color: "var(--ink-3)" }} />
           <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>

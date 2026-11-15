@@ -19,6 +19,7 @@ import { Button, IconButton } from "../ui/Button";
 import { Avatar, Status } from "../ui/Tag";
 import { OWNER, SHIPMENTS, SHIPMENT_STATUS } from "../mock/data";
 import { money } from "../lib/format";
+import { shipmentMargin } from "../lib/margin";
 
 const STEPS = [
   { key: "new", label: "Новая" },
@@ -48,7 +49,7 @@ export function ShipmentPage() {
   }
 
   const owner = OWNER(shipment.ownerId);
-  const margin = shipment.customerPrice - shipment.carrierPrice;
+  const margin = shipmentMargin(shipment);
 
   return (
     <Shell title="Карточка заявки" crumb={`Заявки · ${shipment.number}`}>
