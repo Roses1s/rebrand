@@ -12,12 +12,10 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronsLeft,
-  ExternalLink,
   Clock,
   Flame,
   KanbanSquare,
   List,
-  MoreHorizontal,
   MoreVertical,
   Package,
   Phone,
@@ -52,7 +50,6 @@ import { useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
 import { StarRating } from "../ui/StarRating";
 import { TagList } from "../ui/TagChip";
-import { Menu } from "../ui/Menu";
 import { EmployeeSuggestions } from "../ui/EmployeeSuggestions";
 import { ME, OWNER, TASKS, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
@@ -67,11 +64,12 @@ const overdueTasks = TASKS.filter((task) => task.ownerId === ME.id && task.statu
 
 /**
  * Карточка лида. Сама карточка — не ссылка: ссылка растянута на всю площадь
- * через заголовок (`lead-card__link::after`), а звёзды и меню «⋯» лежат над ней.
+ * через заголовок (`lead-card__link::after`), а звёзды лежат над ней.
+ * Меню «⋯» на карточке убрано по решению владельца (16.11): карточка просто открывается.
  * Так кнопки не вложены в `<a>`, клик по пустому месту по-прежнему открывает лид.
  * `onPriority` есть только на доске; в призраке перетаскивания звёзды не кликаются.
  */
-function LeadCard({ lead, shipments, tags, onPriority, menu = false }) {
+function LeadCard({ lead, shipments, tags, onPriority }) {
   const owner = OWNER(lead.ownerId);
   const margin = marginOf(lead, shipments);
 
@@ -83,17 +81,6 @@ function LeadCard({ lead, shipments, tags, onPriority, menu = false }) {
           {lead.name}
         </Link>
       </div>
-
-      {menu && (
-        <Menu
-          label="Меню карточки"
-          icon={MoreHorizontal}
-          className="lead-card__menu"
-          buttonClassName="lead-card__menu-btn"
-          items={[{ label: "Открыть", to: `/crm/leads/${lead.id}`, icon: ExternalLink }]}
-          renderLink={({ key, ...props }) => <Link key={key} {...props} />}
-        />
-      )}
 
       <div className="lead-card__sub">
         {lead.contact && lead.contact !== "—" ? lead.contact : "Контакт не указан"}
@@ -136,7 +123,7 @@ function SortableLead({ lead, shipments, tags, onPriority }) {
       {...attributes}
       {...listeners}
     >
-      <LeadCard lead={lead} shipments={shipments} tags={tags} onPriority={onPriority} menu />
+      <LeadCard lead={lead} shipments={shipments} tags={tags} onPriority={onPriority} />
     </div>
   );
 }

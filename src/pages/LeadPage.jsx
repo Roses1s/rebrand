@@ -399,7 +399,14 @@ export function LeadPage() {
 
       <div className="lead-layout">
         <div className="stack">
+          {/* «Создать заявку» — перед этапами; проигрыш — только в «Действия»
+              (решение владельца 16.11). У проигранного лида справа «Восстановить». */}
           <div className="lead-stagebar">
+            {!lead.lost && (
+              <Button variant="primary" size="sm" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
+                Создать заявку
+              </Button>
+            )}
             <StageBar
               stages={stages}
               currentId={stageId}
@@ -409,7 +416,7 @@ export function LeadPage() {
                 moveLead(lead.id, nextId);
               }}
             />
-            {lead.lost ? (
+            {lead.lost && (
               <Button
                 variant="primary"
                 size="sm"
@@ -418,15 +425,6 @@ export function LeadPage() {
               >
                 {isOwner ? "Восстановить" : "Взять себе"}
               </Button>
-            ) : (
-              <>
-                <Button variant="primary" size="sm" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
-                  Создать заявку
-                </Button>
-                <Button variant="ghost" size="sm" icon={XCircle} className="btn--lose" onClick={() => setDialog("lose")}>
-                  Проигрыш
-                </Button>
-              </>
             )}
           </div>
 

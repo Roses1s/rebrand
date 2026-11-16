@@ -47,6 +47,18 @@ textarea {
   color: inherit;
 }
 
+/* Раскрытый список рисует система. Без явного фона Windows ставит белый,
+   и в тёмной теме светлый текст пунктов пропадает — берём цвета темы. */
+select option,
+select optgroup {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+select option:disabled {
+  color: var(--ink-3);
+}
+
 button {
   cursor: pointer;
   background: none;

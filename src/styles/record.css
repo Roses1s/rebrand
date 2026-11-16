@@ -122,14 +122,10 @@ fieldset:disabled .stars--editable .stars__star {
   margin-top: 4px;
 }
 
-/* --- Карточка лида: ссылка на всю площадь, меню, ответственный ------------ */
+/* --- Карточка лида: ссылка на всю площадь, ответственный ------------------ */
 
 .lead-card {
   position: relative;
-}
-
-.lead-card__title {
-  padding-right: 22px;
 }
 
 .lead-card__link {
@@ -157,53 +153,14 @@ fieldset:disabled .stars--editable .stars__star {
 }
 
 /* Интерактивное поверх растянутой ссылки. */
-.lead-card .stars,
-.lead-card__menu {
+.lead-card .stars {
   position: relative;
   z-index: 1;
-}
-
-.lead-card .stars {
   align-self: flex-start;
 }
 
 .lead-card .tag-list {
   margin-top: -2px;
-}
-
-.lead-card__menu {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-}
-
-.lead-card__menu-btn {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  color: var(--ink-3);
-  opacity: 0;
-  transition: opacity 120ms var(--ease), background-color 120ms var(--ease);
-}
-
-.lead-card:hover .lead-card__menu-btn,
-.lead-card__menu-btn:focus-visible,
-.lead-card__menu-btn[aria-expanded="true"] {
-  opacity: 1;
-}
-
-.lead-card__menu-btn:hover {
-  background: var(--surface-3);
-  color: var(--ink);
-}
-
-/* На сенсорных экранах наведения нет — меню видно всегда. */
-@media (hover: none) {
-  .lead-card__menu-btn {
-    opacity: 1;
-  }
 }
 
 /* Ответственный — квадрат 20px с инициалами, как на доске рабочей CRM. */
@@ -224,10 +181,6 @@ fieldset:disabled .stars--editable .stars__star {
   width: 24px;
   height: 24px;
   font-size: 9.5px;
-}
-
-.drag-overlay .lead-card__menu {
-  display: none;
 }
 
 /* Ошибка сохранения приоритета под карточкой (витрина состояний). */
