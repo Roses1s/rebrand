@@ -113,7 +113,7 @@ src/
 
 `src/mock/data.js` экспортирует: `ME`, `IS_ADMIN`, `TEAM`, `PRIORITY_MAX` (3),
 `TAGS` (5 общих демо-тегов), `LOSS_REASONS` (3 причины проигрыша), `STAGES`
-(5 этапов с лидами), `ALL_LEADS`, `OWNER()`, `CLIENTS`, `SHIPMENT_STATUS`,
+(5 этапов с лидами), `ALL_LEADS`, `OWNER()`, `SHIPMENT_STATUS`,
 `SHIPMENTS`, `TASKS`, `TASK_TYPES`, `EDO_OPERATORS`, `ANALYTICS` (по периодам:
 `inflow`, `sources`). В исходном наборе 20 лидов/клиентов, из них 11 своих;
 два проигранных — 19 «ВолгаАгро» (свой) и 20 «Пермь-Кабель» (коллеги), так что

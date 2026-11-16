@@ -328,7 +328,8 @@ npm run preview
 
 Порядок подключения задан в `src/styles/index.css`.
 
-Шрифты: Inter Tight для заголовков, Inter для интерфейса, JetBrains Mono для чисел и ИНН.
+Шрифты: Inter для интерфейса и заголовков, JetBrains Mono для чисел и ИНН. Сейчас они
+грузятся с Google Fonts; в рабочей CRM так нельзя — см. `docs/PORTING.md`, раздел 2.1.
 
 ## Структура
 
