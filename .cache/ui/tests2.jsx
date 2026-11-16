@@ -84,3 +84,33 @@ t("воронка: маржа по заявкам на карточке лида
   assert.ok(card.querySelector(".price").getAttribute("aria-label").includes("48"), card.querySelector(".price").getAttribute("aria-label"));
   await unmount();
 });
+t("доска: на карточке нет «⋯», клик по карточке открывает лид", async () => {
+  await mount("/crm");
+  assert.equal($$('[aria-label="Меню карточки"]').length, 0);
+  assert.equal($$(".lead-card .menu").length, 0);
+  const link = $(".lead-card__link"); const href = link.getAttribute("href");
+  await click(link); assert.equal(loc.path, href);
+});
+t("доска: клик по звезде не открывает лид", async () => {
+  await mount("/crm");
+  const star = $(".lead-card").querySelector('[aria-label^="Приоритет 1"], [aria-label="Снять приоритет 1"]');
+  await click(star); assert.equal(loc.path, "/crm");
+});
+t("лид: «Создать заявку» перед этапами, кнопки «Проигрыш» у этапов нет", async () => {
+  await mount("/crm/leads/1");
+  const bar = $(".lead-stagebar");
+  const first = bar.firstElementChild;
+  assert.ok(first.tagName === "BUTTON" && first.textContent.includes("Создать заявку"), first.className);
+  assert.ok(first.nextElementSibling.classList.contains("stage-strip"));
+  assert.ok(![...bar.querySelectorAll("button")].some((b) => b.textContent.trim() === "Проигрыш"));
+  await click($('.lead-head__actions .menu > button'));
+  assert.ok(byText('[role="menuitem"]', "Отметить проигрышем"), "в «Действия» нет проигрыша");
+});
+t("лид проигранный: «Создать заявку» нет, «Восстановить» справа от этапов", async () => {
+  await mount("/crm/leads/19");
+  const bar = $(".lead-stagebar");
+  assert.ok(bar.firstElementChild.classList.contains("stage-strip"));
+  assert.ok(bar.lastElementChild.textContent.includes("Восстановить"));
+  assert.ok(![...bar.querySelectorAll("button")].some((b) => b.textContent.includes("Создать заявку")));
+  await unmount();
+});
