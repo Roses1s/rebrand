@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Выпадающее меню «⋯»: кнопка и список действий под ней.
+ * Выпадающее меню: кнопка и список действий под ней. Сейчас это меню
+ * «Действия» в шапке карточки лида (передать, отметить проигрышем, удалить).
  * Закрывается кликом мимо, Esc и после выбора пункта.
  *
  * `items`: { label, onSelect?, to?, danger?, disabled?, icon? } — пункт с `to`
  * рендерится ссылкой через `renderLink`, чтобы меню не зависело от роутера.
- * События не уходят наверх: меню живёт и на перетаскиваемой карточке.
+ * События не уходят наверх, чтобы клик по меню не срабатывал у родителя.
  */
 export function Menu({ label, icon: Icon, items, align = "right", className = "", buttonClassName = "icon-btn", renderLink }) {
   const [open, setOpen] = useState(false);

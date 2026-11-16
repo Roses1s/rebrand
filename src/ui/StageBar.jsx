@@ -1,5 +1,5 @@
 /**
- * Полоса этапов карточки лида.
+ * Полоса этапов: этапы воронки в карточке лида и статусы в карточке заявки.
  *
  * Показывает не больше `VISIBLE_COUNT` этапов, окно центрируется по текущему:
  * текущий этап всегда в середине видимой части. Скрытые слева и справа
@@ -15,8 +15,11 @@ import { useEffect, useRef, useState } from "react";
 /** Сколько этапов держим видимыми; остальные уходят под «…». */
 const VISIBLE_COUNT = 6;
 
-/** disabled — карточка только для чтения (например, проигранный лид). */
-export function StageBar({ stages = [], currentId, onSelect, disabled = false }) {
+/**
+ * disabled — карточка только для чтения (например, проигранный лид).
+ * label — подпись группы для экранных читалок.
+ */
+export function StageBar({ stages = [], currentId, onSelect, disabled = false, label = "Этапы лида" }) {
   const [open, setOpen] = useState(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
@@ -94,7 +97,7 @@ export function StageBar({ stages = [], currentId, onSelect, disabled = false })
 
   return (
     <>
-      <div className={`stage-strip${disabled ? " stage-strip--disabled" : ""}`} role="group" aria-label="Этапы лида">
+      <div className={`stage-strip${disabled ? " stage-strip--disabled" : ""}`} role="group" aria-label={label}>
         {before.length > 0 && more("before", before)}
 
         {visible.map((stage) => (

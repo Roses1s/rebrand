@@ -109,10 +109,10 @@ function shipmentNumber(id) {
 }
 
 /**
- * Макетное хранилище менеджера: этапы воронки и лиды.
- * Живёт в localStorage под ключом пользователя, поэтому у каждого своя доска,
- * порядок карточек и настройка этапов. Бэкенда нет — всё восстанавливается
- * из этих же ключей после перезагрузки.
+ * Макетное хранилище: этапы воронки, лиды, заявки и теги.
+ * Этапы, лиды и заявки живут в localStorage под ключом пользователя, поэтому
+ * у каждого своя доска, порядок карточек и настройка этапов; теги общие.
+ * Бэкенда нет — всё восстанавливается из этих же ключей после перезагрузки.
  */
 export function LeadsProvider({ children }) {
   const [initial] = useState(loadState);
@@ -184,10 +184,9 @@ export function LeadsProvider({ children }) {
     const closeLeadDialog = () => setLeadDialog(null);
 
     /**
-     * Быстрое создание заявки из сохранённой карточки лида. В макете цены
-     * дозаполняют в карточке, а остальные полные реквизиты остаются заглушками.
+     * Быстрая заявка из карточки лида: клиент и ответственный берутся из лида,
+     * статус «Новая». Цены, адреса и груз дозаполняются в карточке заявки.
      */
-    /** Быстрая заявка из карточки лида: клиент и ответственный берутся из лида. */
     const addShipment = ({ lead, loadingCity, unloadingCity, loadingDate, unloadingDate, carrierName, carrierInn, carrierContact }) => {
       const id = nextShipmentId(shipments);
       const shipment = normalizeShipment({
@@ -270,7 +269,7 @@ export function LeadsProvider({ children }) {
         });
       });
 
-    /** Правка полей карточки: название, ИНН, контакты, бухгалтер. */
+    /** Правка полей лида: название, ИНН, контакты, приоритет, ЭДО, бухгалтер, теги. */
     const updateLead = (id, patch) =>
       setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, ...patch } : lead)));
 

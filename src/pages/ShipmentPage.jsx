@@ -290,6 +290,7 @@ export function ShipmentPage() {
             <div className="lead-stagebar">
               <StageBar
                 stages={SHIPMENT_STEPS}
+                label="Этапы заявки"
                 currentId={shipment.status}
                 onSelect={(status) => updateShipment(shipment.id, { status })}
               />

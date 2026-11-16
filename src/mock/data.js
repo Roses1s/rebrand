@@ -1,7 +1,10 @@
 /**
- * Макетные данные в форме, близкой к API рабочей CRM.
- * Имена полей намеренно совпадают с настоящими: lead.logist_contact,
- * lead.inn, shipment.customer_price и т.д.
+ * Демо-данные макета: команда, этапы и лиды, теги, справочники (ЭДО, причины
+ * проигрыша), заявки, задачи, аналитика.
+ * Заявки по форме совпадают с ответом API рабочей CRM (camelCase:
+ * customerPrice, loadingCities, carrierTax — см. lib/shipment.js); лиды —
+ * упрощённая форма макета. Всё, что правит пользователь, живёт поверх этих
+ * данных в localStorage (app/store.jsx).
  */
 
 import { SHIPMENT_STEPS } from "../lib/shipment";

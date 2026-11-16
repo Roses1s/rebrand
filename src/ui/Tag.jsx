@@ -1,6 +1,6 @@
 import { cn } from "./cn";
 
-/** Метка клиента: точка цвета + название. */
+/** Метка: точка цвета + название (витрина /kit). Теги лида — TagChip. */
 export function Tag({ children, color = "var(--ink-3)", className }) {
   return (
     <span className={cn("tag", className)} style={{ "--tag-color": color }}>
