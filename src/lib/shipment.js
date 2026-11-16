@@ -70,11 +70,6 @@ export function formatShipmentDate(value) {
   return hours ? `${day}.${month}.${year} ${hours}:${minutes}` : `${day}.${month}.${year}`;
 }
 
-/** «2026-11-05» → «05.11.2026»; пустая дата — прочерк. */
-export function formatDay(value) {
-  return value ? formatShipmentDate(value) : "—";
-}
-
 /** «05.11.2026» или «05.11.2026 09:12» из старых сохранений → ISO-вид для полей ввода. */
 function fromRuDate(value, withTime = false) {
   const match = /^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/.exec(value ?? "");

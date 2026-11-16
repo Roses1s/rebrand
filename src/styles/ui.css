@@ -343,21 +343,6 @@
   white-space: nowrap;
 }
 
-.badge--high {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-
-.badge--mid {
-  background: var(--warn-soft);
-  color: var(--warn);
-}
-
-.badge--low {
-  background: var(--surface-3);
-  color: var(--ink-3);
-}
-
 /* --- Чипы и сегменты ---------------------------------------------------- */
 
 .chip {

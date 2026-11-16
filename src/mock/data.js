@@ -466,22 +466,6 @@ export const ALL_LEADS = STAGES.flatMap((stage) => stage.leads);
 export const OWNER = (id) => U[id] ?? TEAM[0];
 
 
-export const CLIENTS = ALL_LEADS.map((item) => ({
-  id: item.id,
-  name: item.name,
-  city: item.city,
-  contact: item.contact,
-  phone: item.phone,
-  route: item.route,
-  cargo: item.cargo,
-  weight: item.weight,
-  stageId: item.stageId,
-  stageName: STAGES.find((stage) => stage.id === item.stageId)?.name,
-  stageColor: STAGES.find((stage) => stage.id === item.stageId)?.color,
-  ownerId: item.ownerId,
-  created: item.created,
-}));
-
 /** Статусы заявки: подписи и цвета — из одного источника, `SHIPMENT_STEPS`. */
 export const SHIPMENT_STATUS = Object.fromEntries(
   SHIPMENT_STEPS.map((step) => [step.id, { label: step.name, tone: step.tone }]),

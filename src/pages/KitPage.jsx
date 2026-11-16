@@ -115,7 +115,7 @@ export function KitPage() {
         </div>
       </Section>
 
-      <Section title="Типографика" note="Inter Tight · Inter · JetBrains Mono">
+      <Section title="Типографика" note="Inter · JetBrains Mono">
         <div className="type-row">
           <span className="type-row__meta">44 / display</span>
           <span className="display" style={{ fontSize: 44 }}>₽ 2 431 900</span>
@@ -126,7 +126,7 @@ export function KitPage() {
         </div>
         <div className="type-row">
           <span className="type-row__meta">17 / h2</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600 }}>
+          <span style={{ fontSize: 17, fontWeight: 600 }}>
             Заявки на перевозку
           </span>
         </div>

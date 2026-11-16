@@ -192,21 +192,6 @@
   text-overflow: ellipsis;
 }
 
-.team__dot {
-  margin-left: auto;
-  width: 7px;
-  height: 7px;
-  border-radius: 99px;
-  background: #22c55e;
-  flex: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, #22c55e 18%, transparent);
-}
-
-.team__dot--off {
-  background: var(--ink-4);
-  box-shadow: none;
-}
-
 /* План месяца */
 
 .plan {
@@ -464,10 +449,6 @@ html[data-theme="dark"] .plan {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.row--between {
-  justify-content: space-between;
 }
 
 .row--wrap {
@@ -810,7 +791,6 @@ html[data-theme="dark"] .plan {
   }
 
   .app--collapsed .team__text,
-  .app--collapsed .team__dot,
   .app--collapsed .team__exit {
     display: none;
   }
