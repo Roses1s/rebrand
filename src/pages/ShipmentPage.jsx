@@ -66,7 +66,7 @@ function Group({ title, children, extra }) {
   );
 }
 
-function DeleteShipmentDialog({ number, onCancel, onConfirm }) {
+export function DeleteShipmentDialog({ number, onCancel, onConfirm }) {
   return (
     <Modal
       open

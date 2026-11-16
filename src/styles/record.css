@@ -1355,3 +1355,161 @@ button.client-tile:focus-visible {
   font-size: 12px;
   color: var(--ink-2);
 }
+
+/* --- Панель управления: меню разделов слева, как в рабочей CRM ------------ */
+
+.kpi-grid.kpi-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .admin-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
+.admin-nav {
+  position: sticky;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+
+.admin-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-1);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 550;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-nav__item:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.admin-nav__item[aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.table tr.is-muted td {
+  color: var(--ink-3);
+}
+
+/* Пометка «сверх CRM»: что есть в макете, но не в рабочей системе. */
+.extra-mark {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px dashed var(--line-strong, var(--line));
+  border-radius: var(--r-pill);
+  color: var(--ink-3);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-stats__label {
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.admin-stats__value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.admin-meter {
+  height: 6px;
+  margin: 14px 0 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.admin-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.admin-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.admin-note--info {
+  padding: 8px 10px;
+  border-radius: var(--r-1);
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.backup-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.backup-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.backup-list li:last-child {
+  border-bottom: 0;
+}
