@@ -1,11 +1,12 @@
 /** Настройки: тема, акцент, плотность, роль в макете и редактор этапов воронки. */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowDown, ArrowUp, Check, Moon, Plus, Sun, Trash2 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
 import { Button } from "../ui/Button";
 import { STAGE_COLORS, useLeads } from "../app/store";
 import { IS_ADMIN, ME } from "../mock/data";
+import { usePref } from "../lib/prefs";
 
 const ACCENTS = [
   { value: "indigo", color: "#6c5ce7", label: "Индиго" },
@@ -31,26 +32,12 @@ function persist(key, value) {
 
 export function SettingsPage() {
   const { stages, leads, addStage, updateStage, moveStage, removeStage, resetAll } = useLeads();
-  const [theme, setTheme] = useState(() => readStored("crm.theme", "light"));
-  const [accent, setAccent] = useState(() => readStored("crm.accent", "indigo"));
-  const [density, setDensity] = useState(() => readStored("crm.density", "comfort"));
+  // Тема, акцент и плотность — общие с верхней строкой (lib/prefs.js).
+  const [theme, setTheme] = usePref("crm.theme", "light");
+  const [accent, setAccent] = usePref("crm.accent", "indigo");
+  const [density, setDensity] = usePref("crm.density", "comfort");
   const [role, setRole] = useState(() => readStored("crm.role", "manager"));
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    persist("crm.theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
-    document.documentElement.dataset.accent = accent;
-    persist("crm.accent", accent);
-  }, [accent]);
-
-  useEffect(() => {
-    document.documentElement.dataset.density = density;
-    persist("crm.density", density);
-  }, [density]);
 
   function flash() {
     setSaved(true);

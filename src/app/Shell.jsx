@@ -30,6 +30,7 @@ import { Modal } from "../ui/Modal";
 import { Avatar } from "../ui/Tag";
 import { useLeads } from "./store";
 import { ALL_LEADS, ME, TASKS, TEAM } from "../mock/data";
+import { usePref } from "../lib/prefs";
 const myTasks = TASKS.filter((task) => task.ownerId === ME.id);
 
 const SALES = [
@@ -111,17 +112,13 @@ export function Shell({ title, crumb, actions, search, onSearch, searchSuggestio
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { leads, shipments, leadDialog, addLead, openLeadDialog, closeLeadDialog } = useLeads();
-  const [theme, setTheme] = useStored("crm.theme", "light");
+  const [theme, setTheme] = usePref("crm.theme", "light");
   // Свёрнутая панель: остаются только иконки. Выбор запоминается.
   const [sidebar, setSidebar] = useStored("crm.sidebar", "open");
   const collapsed = sidebar === "collapsed";
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [draft, setDraft] = useState(EMPTY_LEAD_DRAFT);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     setMenuOpen(false);
