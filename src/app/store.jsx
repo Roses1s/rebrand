@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { ME, SHIPMENTS, STAGES } from "../mock/data";
+import { ME, PRIORITY_MAX, SHIPMENTS, STAGES, TAGS } from "../mock/data";
 
 const LeadsContext = createContext(null);
 
 const STAGES_KEY = `crm.stages.${ME.id}.v1`;
 const LEADS_KEY = `crm.leads.${ME.id}.v1`;
 const SHIPMENTS_KEY = `crm.shipments.${ME.id}.v1`;
+// Теги общие для компании, поэтому ключ без номера менеджера.
+const TAGS_KEY = "crm.tags.v1";
 
 export const STAGE_COLORS = [
   "#3b82f6",
@@ -24,6 +26,27 @@ const DEFAULT_LEADS = STAGES.flatMap((stage) =>
   stage.leads.map((lead, index) => ({ ...lead, position: index })),
 );
 const DEFAULT_SHIPMENTS = SHIPMENTS.map((shipment) => ({ ...shipment }));
+const DEFAULT_TAGS = TAGS.map((tag) => ({ ...tag }));
+
+/** Старые сохранения хранили приоритет словом — переводим в звёзды 0–3. */
+const LEGACY_PRIORITY = { high: 3, mid: 2, low: 1 };
+
+export function toPriority(value) {
+  if (typeof value === "string" && value in LEGACY_PRIORITY) return LEGACY_PRIORITY[value];
+  const number = Number(value);
+  return Number.isInteger(number) && number >= 0 && number <= PRIORITY_MAX ? number : 0;
+}
+
+/** Приводит лид из любого сохранения к текущей форме, ничего не теряя. */
+function normalizeLead(lead) {
+  return {
+    ...lead,
+    priority: toPriority(lead.priority),
+    tagIds: Array.isArray(lead.tagIds) ? lead.tagIds : [],
+    lost: Boolean(lead.lost),
+    lossReason: lead.lossReason ?? "",
+  };
+}
 
 function load(key, fallback) {
   try {
@@ -48,9 +71,10 @@ function save(key, value) {
 function loadState() {
   const stages = load(STAGES_KEY, DEFAULT_STAGES);
   const known = new Set(stages.map((stage) => stage.id));
-  const leads = load(LEADS_KEY, DEFAULT_LEADS).map((lead) =>
-    known.has(lead.stageId) ? { ...lead } : { ...lead, stageId: stages[0].id },
-  );
+  const leads = load(LEADS_KEY, DEFAULT_LEADS).map((stored) => {
+    const lead = normalizeLead(stored);
+    return known.has(lead.stageId) ? lead : { ...lead, stageId: stages[0].id };
+  });
 
   const byStage = new Map();
   leads.forEach((lead) => {
@@ -66,7 +90,8 @@ function loadState() {
   });
 
   const shipments = load(SHIPMENTS_KEY, DEFAULT_SHIPMENTS);
-  return { stages, leads, shipments };
+  const tags = load(TAGS_KEY, DEFAULT_TAGS);
+  return { stages, leads, shipments, tags };
 }
 
 function nextStageId(stages) {
@@ -92,6 +117,7 @@ export function LeadsProvider({ children }) {
   const [stages, setStages] = useState(initial.stages);
   const [leads, setLeads] = useState(initial.leads);
   const [shipments, setShipments] = useState(initial.shipments);
+  const [tags, setTags] = useState(initial.tags);
   // Окно создания общее: «+» в колонке передаёт сюда её этап,
   // чтобы новый лид прошёл ту же обязательную форму, что и кнопка в шапке.
   const [leadDialog, setLeadDialog] = useState(null);
@@ -107,6 +133,10 @@ export function LeadsProvider({ children }) {
   useEffect(() => {
     save(SHIPMENTS_KEY, shipments);
   }, [shipments]);
+
+  useEffect(() => {
+    save(TAGS_KEY, tags);
+  }, [tags]);
 
   const value = useMemo(() => {
     const addLead = (draft) =>
@@ -129,9 +159,12 @@ export function LeadsProvider({ children }) {
             route: "Москва → Москва",
             cargo: "Сборный груз",
             weight: "—",
-            priority: "mid",
+            priority: 0,
             hot: false,
             late: false,
+            lost: false,
+            lossReason: "",
+            tagIds: [],
             due: "сегодня",
             created: "только что",
             stageId: targetStage,
@@ -143,7 +176,9 @@ export function LeadsProvider({ children }) {
         ];
       });
 
-    const openLeadDialog = (stageId = null) => setLeadDialog({ stageId: stageId ?? stages[0]?.id ?? null });
+    // ownerId — чья доска: администратор может завести лид прямо на доске сотрудника.
+    const openLeadDialog = (stageId = null, ownerId = ME.id) =>
+      setLeadDialog({ stageId: stageId ?? stages[0]?.id ?? null, ownerId });
     const closeLeadDialog = () => setLeadDialog(null);
 
     /**
@@ -292,15 +327,82 @@ export function LeadsProvider({ children }) {
       setStages((prev) => prev.filter((stage) => stage.id !== id));
     };
 
+    /** Первая позиция этапа: лид, вернувшийся на доску, встаёт наверх. */
+    const topOf = (list, stageId) =>
+      list.filter((lead) => lead.stageId === stageId).reduce((min, lead) => Math.min(min, lead.position ?? 0), 0) - 1;
+
+    /** Проигрыш: лид уходит с доски, причина обязательна и видна в карточке. */
+    const loseLead = (id, reason) => updateLead(id, { lost: true, lossReason: reason });
+
+    /**
+     * Возврат из проигрыша. Владелец «Восстанавливает» лид у себя, коллега
+     * «Берёт себе» — тогда лид переходит к нему, как в рабочей CRM.
+     */
+    const restoreLead = (id, { takeOver = false } = {}) =>
+      setLeads((prev) =>
+        prev.map((lead) => {
+          if (lead.id !== id) return lead;
+          const owner = takeOver ? ME.id : lead.ownerId;
+          const others = prev.filter((item) => item.ownerId === owner && !item.lost);
+          return { ...lead, lost: false, lossReason: "", ownerId: owner, position: topOf(others, lead.stageId) };
+        }),
+      );
+
+    /** Передача коллеге: вместе с лидом уходят заявки; проигранный лид возвращается на доску. */
+    const transferLead = (id, ownerId) => {
+      const firstStage = stages[0]?.id ?? 1;
+      setLeads((prev) =>
+        prev.map((lead) =>
+          lead.id === id
+            ? {
+                ...lead,
+                ownerId,
+                lost: false,
+                lossReason: "",
+                stageId: firstStage,
+                position: topOf(prev.filter((item) => item.ownerId === ownerId), firstStage),
+              }
+            : lead,
+        ),
+      );
+      setShipments((prev) => prev.map((shipment) => (shipment.leadId === id ? { ...shipment, ownerId } : shipment)));
+    };
+
+    /** Удаление без возврата: вместе с лидом стираются его заявки. */
+    const deleteLead = (id) => {
+      removeLeads([id]);
+      setShipments((prev) => prev.filter((shipment) => shipment.leadId !== id));
+    };
+
+    /** Новый общий тег; совпадающее имя не дублируем, а возвращаем существующий. */
+    const addTag = (name, color) => {
+      const clean = name.trim();
+      const existing = tags.find((tag) => tag.name.toLowerCase() === clean.toLowerCase());
+      if (existing) return existing;
+      const tag = { id: tags.reduce((max, item) => Math.max(max, item.id), 0) + 1, name: clean, color };
+      setTags((prev) => [...prev, tag]);
+      return tag;
+    };
+
+    /** Удаление тега (только администратор) снимает его со всех карточек. */
+    const removeTag = (id) => {
+      setTags((prev) => prev.filter((tag) => tag.id !== id));
+      setLeads((prev) =>
+        prev.map((lead) => (lead.tagIds?.includes(id) ? { ...lead, tagIds: lead.tagIds.filter((tagId) => tagId !== id) } : lead)),
+      );
+    };
+
     const resetAll = () => {
       setStages(DEFAULT_STAGES);
       setLeads(DEFAULT_LEADS);
+      setTags(DEFAULT_TAGS);
     };
 
     return {
       leads,
       stages,
       shipments,
+      tags,
       leadDialog,
       addLead,
       addShipment,
@@ -308,6 +410,12 @@ export function LeadsProvider({ children }) {
       openLeadDialog,
       closeLeadDialog,
       updateLead,
+      loseLead,
+      restoreLead,
+      transferLead,
+      deleteLead,
+      addTag,
+      removeTag,
       moveLead,
       removeLeads,
       addStage,
@@ -316,7 +424,7 @@ export function LeadsProvider({ children }) {
       removeStage,
       resetAll,
     };
-  }, [leads, stages, shipments, leadDialog]);
+  }, [leads, stages, shipments, tags, leadDialog]);
 
   return <LeadsContext.Provider value={value}>{children}</LeadsContext.Provider>;
 }

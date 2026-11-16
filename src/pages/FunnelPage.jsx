@@ -1,18 +1,23 @@
 /**
  * Воронка лидов — стартовый экран менеджера.
- * KPI считаются по своим лидам; переключатель «канбан / список»:
+ * KPI считаются по лидам доски; переключатель «канбан / список»:
  * канбан с перетаскиванием на @dnd-kit, список с сортировкой и массовыми действиями.
+ * Администратор может открыть доску сотрудника (`?board=<id>`), как в рабочей CRM.
+ * Проигранные лиды на доске и в списке не показываются.
  */
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowUpDown,
   ChevronDown,
   ChevronUp,
+  ChevronsLeft,
+  ExternalLink,
   Clock,
   Flame,
   KanbanSquare,
   List,
+  MoreHorizontal,
   MoreVertical,
   Package,
   Phone,
@@ -45,51 +50,79 @@ import {
 import { Shell } from "../app/Shell";
 import { useLeads } from "../app/store";
 import { Avatar, Chip } from "../ui/Tag";
-import { ME, OWNER, PRIORITY, TASKS } from "../mock/data";
+import { StarRating } from "../ui/StarRating";
+import { TagList } from "../ui/TagChip";
+import { Menu } from "../ui/Menu";
+import { ME, OWNER, TASKS, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
+import { useFoldedStages } from "../lib/folded";
 
 const ICONS = { users: Users, wallet: Wallet, target: Target, flame: Flame, clock: Clock };
-const PRIORITY_RANK = { high: 3, mid: 2, low: 1 };
 
 const marginOf = (lead, shipments) => leadShipmentMargin(lead.id, shipments);
 const sumMarginsOf = (leads, shipments) => leads.reduce((total, lead) => total + marginOf(lead, shipments), 0);
 const overdueTasks = TASKS.filter((task) => task.ownerId === ME.id && task.status === "overdue").length;
 
-function LeadCard({ lead, shipments }) {
-  const priority = PRIORITY[lead.priority];
+/**
+ * Карточка лида. Сама карточка — не ссылка: ссылка растянута на всю площадь
+ * через заголовок (`lead-card__link::after`), а звёзды и меню «⋯» лежат над ней.
+ * Так кнопки не вложены в `<a>`, клик по пустому месту по-прежнему открывает лид.
+ * `onPriority` есть только на доске; в призраке перетаскивания звёзды не кликаются.
+ */
+function LeadCard({ lead, shipments, tags, onPriority, menu = false }) {
   const owner = OWNER(lead.ownerId);
-  const foreign = lead.ownerId !== ME.id;
   const margin = marginOf(lead, shipments);
 
   return (
-    <Link to={`/crm/leads/${lead.id}`} className="lead-card" draggable={false}>
+    <div className="lead-card">
       <div className="lead-card__title">
         {lead.hot && <Flame size={14} className="fire" strokeWidth={2.2} />}
-        <span>{lead.name}</span>
+        <Link to={`/crm/leads/${lead.id}`} className="lead-card__link" draggable={false}>
+          {lead.name}
+        </Link>
       </div>
+
+      {menu && (
+        <Menu
+          label="Меню карточки"
+          icon={MoreHorizontal}
+          className="lead-card__menu"
+          buttonClassName="lead-card__menu-btn"
+          items={[{ label: "Открыть", to: `/crm/leads/${lead.id}`, icon: ExternalLink }]}
+          renderLink={({ key, ...props }) => <Link key={key} {...props} />}
+        />
+      )}
 
       <div className="lead-card__sub">
         {lead.contact && lead.contact !== "—" ? lead.contact : "Контакт не указан"}
       </div>
 
-      <span className={`badge ${priority.cls} lead-card__priority`}>{priority.label}</span>
+      <TagList ids={lead.tagIds} tags={tags} />
+
+      <StarRating value={lead.priority} onChange={onPriority} className="lead-card__priority" />
 
       <div className="lead-card__foot">
-        {foreign && <Avatar initials={owner.initials} color={owner.color} size="sm" title={owner.name} />}
         <span className="price" title="Маржа по заявкам" aria-label={`Маржа по заявкам: ${shortMoney(margin)}`}>
           {shortMoney(margin)}
         </span>
         <span className="lead-card__right">
           <Phone size={13} strokeWidth={2} style={{ color: "var(--ink-3)" }} />
           <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
+          <Avatar
+            initials={owner.initials}
+            color={owner.color}
+            size="sm"
+            title={`Ответственный: ${owner.name}`}
+            className="lead-card__owner"
+          />
         </span>
       </div>
-    </Link>
+    </div>
   );
 }
 
-function SortableLead({ lead, shipments }) {
+function SortableLead({ lead, shipments, tags, onPriority }) {
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: lead.id,
     data: { stageId: lead.stageId },
@@ -102,12 +135,35 @@ function SortableLead({ lead, shipments }) {
       {...attributes}
       {...listeners}
     >
-      <LeadCard lead={lead} shipments={shipments} />
+      <LeadCard lead={lead} shipments={shipments} tags={tags} onPriority={onPriority} menu />
     </div>
   );
 }
 
-function StageColumn({ stage, stageLeads, shipments, dragging, dropIndex, onAdd }) {
+/**
+ * Свёрнутый этап: узкая полоса с вертикальным названием и счётчиком, как в
+ * рабочей CRM. Клик разворачивает; на полосу можно бросить карточку — она
+ * встанет в конец этапа.
+ */
+function FoldedColumn({ stage, count, onUnfold }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      className={`col col--folded${isOver ? " is-over" : ""}`}
+      style={{ "--col-color": stage.color }}
+      onClick={onUnfold}
+      aria-label={`Развернуть этап «${stage.name}», лидов: ${count}`}
+      title="Развернуть этап"
+    >
+      <span className="col--folded__name">{stage.name}</span>
+      <span className="col__count">{count}</span>
+    </button>
+  );
+}
+
+function StageColumn({ stage, stageLeads, shipments, tags, dragging, dropIndex, onAdd, onFold, onPriority, canEditStages }) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
   const sum = sumMarginsOf(stageLeads, shipments);
   // В пустой колонке подсказкой служит слот, линия там лишняя.
@@ -129,14 +185,25 @@ function StageColumn({ stage, stageLeads, shipments, dragging, dropIndex, onAdd 
           >
             <Plus size={15} strokeWidth={2} />
           </button>
-          <Link
-            to="/settings"
+          <button
+            type="button"
             className="col__btn"
-            aria-label={`Настроить этап «${stage.name}»`}
-            title="Настроить этапы воронки"
+            aria-label={`Свернуть этап «${stage.name}»`}
+            title="Свернуть этап"
+            onClick={onFold}
           >
-            <MoreVertical size={15} strokeWidth={2} />
-          </Link>
+            <ChevronsLeft size={15} strokeWidth={2} />
+          </button>
+          {canEditStages && (
+            <Link
+              to="/settings"
+              className="col__btn"
+              aria-label={`Настроить этап «${stage.name}»`}
+              title="Настроить этапы воронки"
+            >
+              <MoreVertical size={15} strokeWidth={2} />
+            </Link>
+          )}
         </div>
       </div>
 
@@ -150,7 +217,7 @@ function StageColumn({ stage, stageLeads, shipments, dragging, dropIndex, onAdd 
           {stageLeads.map((lead, index) => (
             <Fragment key={lead.id}>
               {showLine && dropIndex === index && <div className="drop-line" aria-hidden="true" />}
-              <SortableLead lead={lead} shipments={shipments} />
+              <SortableLead lead={lead} shipments={shipments} tags={tags} onPriority={(value) => onPriority(lead.id, value)} />
             </Fragment>
           ))}
 
@@ -193,7 +260,14 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, stages, shipments, openLeadDialog, moveLead, removeLeads, addStage } = useLeads();
+  const { leads, stages, shipments, tags, openLeadDialog, moveLead, removeLeads, addStage, updateLead } = useLeads();
+  const [params, setParams] = useSearchParams();
+  // Чужую доску открывает только администратор; у менеджера параметр игнорируется.
+  const boardParam = Number(params.get("board"));
+  const boardUser = ME.isAdmin && boardParam && boardParam !== ME.id ? TEAM.find((user) => user.id === boardParam) : null;
+  const boardOwnerId = boardUser?.id ?? ME.id;
+  const foreignBoard = boardOwnerId !== ME.id;
+  const [folded, setFolded] = useFoldedStages(ME.id, boardOwnerId);
   const [filter, setFilter] = useState("all");
   const [addingStage, setAddingStage] = useState(false);
   const [stageName, setStageName] = useState("");
@@ -220,8 +294,11 @@ export function FunnelPage() {
   );
 
   const myLeads = useMemo(
-    () => leads.filter((lead) => lead.ownerId === ME.id).sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
-    [leads],
+    () =>
+      leads
+        .filter((lead) => lead.ownerId === boardOwnerId && !lead.lost)
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
+    [leads, boardOwnerId],
   );
   const activeLead = activeId != null ? myLeads.find((lead) => lead.id === activeId) : null;
 
@@ -377,7 +454,7 @@ export function FunnelPage() {
         case "contact":
           return a.contact.localeCompare(b.contact, "ru") * dir;
         case "priority":
-          return ((PRIORITY_RANK[a.priority] ?? 0) - (PRIORITY_RANK[b.priority] ?? 0)) * dir;
+          return ((a.priority ?? 0) - (b.priority ?? 0)) * dir;
         case "due":
           return ((a.late ? 0 : 1) - (b.late ? 0 : 1) || a.due.localeCompare(b.due, "ru")) * dir;
         default:
@@ -406,6 +483,20 @@ export function FunnelPage() {
     setSelected([]);
   }
 
+  function openBoard(userId) {
+    const next = new URLSearchParams(params);
+    if (!userId || userId === ME.id) next.delete("board");
+    else next.set("board", String(userId));
+    setParams(next);
+    setSelected([]);
+  }
+
+  function toggleFold(stageId) {
+    setFolded((prev) => (prev.includes(stageId) ? prev.filter((id) => id !== stageId) : [...prev, stageId]));
+  }
+
+  const setPriority = (id, priority) => updateLead(id, { priority });
+
   function closeStageCreator({ save = false } = {}) {
     const name = stageName.trim();
     if (save && name) addStage(name);
@@ -416,6 +507,19 @@ export function FunnelPage() {
   return (
     <Shell>
       <div className="funnel">
+      {foreignBoard && (
+        <div className="board-banner" role="status">
+          <Avatar initials={boardUser.initials} color={boardUser.color} size="sm" />
+          <span>
+            Доска сотрудника: <b>{boardUser.name}</b>
+          </span>
+          <button type="button" className="board-banner__leave" onClick={() => openBoard(ME.id)}>
+            <X size={13} strokeWidth={2.2} />
+            Вернуться к своей
+          </button>
+        </div>
+      )}
+
       <div className="kpi-grid" style={{ marginBottom: 18 }}>
         {kpi.map((item) => {
           const Icon = ICONS[item.icon];
@@ -453,8 +557,26 @@ export function FunnelPage() {
         </Chip>
 
         <div className="toolbar__right">
+          {ME.isAdmin && (
+            <label className="board-picker">
+              <span className="board-picker__label">Доска</span>
+              <select
+                className="board-picker__select"
+                value={boardOwnerId}
+                onChange={(event) => openBoard(Number(event.target.value))}
+                aria-label="Чью доску показать"
+              >
+                {TEAM.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.id === ME.id ? "Моя доска" : user.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <span className="muted toolbar__sum">
-            Моя доска · маржа {shortMoney(sumMarginsOf(myLeads, shipments))}
+            {foreignBoard ? "Доска сотрудника" : "Моя доска"} · маржа {shortMoney(sumMarginsOf(myLeads, shipments))}
           </span>
 
           <div className="view-switch" role="group" aria-label="Вид списка лидов">
@@ -479,6 +601,7 @@ export function FunnelPage() {
         >
           <div
             className={activeId != null ? "board board--dragging" : "board"}
+            data-folded={stages.some((stage) => folded.includes(stage.id)) ? "" : undefined}
             onClickCapture={(event) => {
               if (!suppressClick.current) return;
               event.preventDefault();
@@ -488,6 +611,17 @@ export function FunnelPage() {
           >
             {stages.map((stage) => {
               const stageLeads = myLeads.filter((lead) => lead.stageId === stage.id && visible(lead));
+
+              if (folded.includes(stage.id)) {
+                return (
+                  <FoldedColumn
+                    key={stage.id}
+                    stage={stage}
+                    count={myLeads.filter((lead) => lead.stageId === stage.id).length}
+                    onUnfold={() => toggleFold(stage.id)}
+                  />
+                );
+              }
 
               let dropIndex = null;
               if (dropTarget && dropTarget.stageId === stage.id) {
@@ -501,13 +635,18 @@ export function FunnelPage() {
                   stage={stage}
                   shipments={shipments}
                   dragging={activeId != null}
+                  tags={tags}
                   stageLeads={stageLeads}
                   dropIndex={dropIndex}
-                  onAdd={() => openLeadDialog(stage.id)}
+                  onAdd={() => openLeadDialog(stage.id, boardOwnerId)}
+                  onFold={() => toggleFold(stage.id)}
+                  onPriority={setPriority}
+                  canEditStages={!foreignBoard}
                 />
               );
             })}
 
+            {!foreignBoard && (
             <div className="stage-creator">
               {addingStage ? (
                 <input
@@ -546,12 +685,13 @@ export function FunnelPage() {
                 </button>
               )}
             </div>
+            )}
           </div>
 
           <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.22, 0.8, 0.28, 1)" }}>
             {activeLead ? (
               <div className="drag-overlay" style={activeWidth ? { width: activeWidth } : undefined}>
-                <LeadCard lead={activeLead} shipments={shipments} />
+                <LeadCard lead={activeLead} shipments={shipments} tags={tags} />
               </div>
             ) : null}
           </DragOverlay>
@@ -600,7 +740,6 @@ export function FunnelPage() {
               <tbody>
                 {listRows.map((lead) => {
                   const stage = stages.find((item) => item.id === lead.stageId) ?? stages[0];
-                  const priority = PRIORITY[lead.priority];
                   const isSelected = selected.includes(lead.id);
                   return (
                     <tr
@@ -638,6 +777,7 @@ export function FunnelPage() {
                             <div className="cell-company__sub">
                               {lead.city} · ИНН {lead.inn}
                             </div>
+                            <TagList ids={lead.tagIds} tags={tags} />
                           </div>
                         </div>
                       </td>
@@ -658,7 +798,7 @@ export function FunnelPage() {
                         </div>
                       </td>
                       <td>
-                        <span className={`badge ${priority.cls}`}>{priority.label}</span>
+                        <StarRating value={lead.priority} onChange={(value) => setPriority(lead.id, value)} size="sm" />
                       </td>
                       <td className="cell-money">{shortMoney(marginOf(lead, shipments))}</td>
                       <td>

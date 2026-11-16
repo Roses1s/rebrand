@@ -67,7 +67,7 @@ export function AdminPage() {
     { label: "Сотрудников", value: String(TEAM.length), foot: "в отделе продаж", color: "var(--stage-1)" },
     {
       label: "Лидов в работе",
-      value: String(leads.length),
+      value: String(leads.filter((lead) => !lead.lost).length),
       foot: `маржа ${shortMoney(totalMargin)}`,
       color: "var(--stage-4)",
     },
@@ -111,7 +111,7 @@ export function AdminPage() {
             </thead>
             <tbody>
               {TEAM.map((person, index) => {
-                const personLeads = leads.filter((lead) => lead.ownerId === person.id);
+                const personLeads = leads.filter((lead) => lead.ownerId === person.id && !lead.lost);
                 return (
                   <tr key={person.id}>
                     <td>

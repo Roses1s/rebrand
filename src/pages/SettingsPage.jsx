@@ -64,7 +64,7 @@ export function SettingsPage() {
   }
 
   function countFor(stageId) {
-    return leads.filter((lead) => lead.ownerId === ME.id && lead.stageId === stageId).length;
+    return leads.filter((lead) => lead.ownerId === ME.id && !lead.lost && lead.stageId === stageId).length;
   }
 
   return (

@@ -1,20 +1,29 @@
 /**
  * Карточка лида: этапы воронки, клиент, заявки, файлы и история.
- * Лид коллеги открывается усечённо — только название, ИНН и продавец.
+ * Лид коллеги открывается менеджеру усечённо — только название, ИНН и продавец;
+ * администратор видит карточку целиком. Проигранный лид — только для чтения,
+ * с причиной, плашкой «Проигрыш» и кнопкой «Восстановить» / «Взять себе».
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRightLeft,
   Building2,
   Check,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Mail,
   MoreHorizontal,
   Package,
   Paperclip,
   Phone,
+  RotateCcw,
+  Trash2,
   Truck,
+  UserPlus,
+  XCircle,
 } from "lucide-react";
 
 import { Shell } from "../app/Shell";
@@ -25,8 +34,12 @@ import { Chatter } from "../ui/Chatter";
 import { StageBar } from "../ui/StageBar";
 import { Toast } from "../ui/Toast";
 import { QuickCreateShipmentDialog } from "../ui/QuickCreateShipmentDialog";
+import { Menu } from "../ui/Menu";
+import { StarRating } from "../ui/StarRating";
+import { TagsField } from "../ui/TagsField";
+import { DeleteLeadDialog, LoseLeadDialog, TransferLeadDialog } from "../ui/LeadDialogs";
 import { leadChatter } from "../mock/chatter";
-import { ALL_LEADS, EDO_OPERATORS, ME, OWNER, PRIORITY } from "../mock/data";
+import { EDO_OPERATORS, ME, OWNER } from "../mock/data";
 import { money } from "../lib/format";
 import { isEmail, openYandexCompose } from "../lib/mail";
 
@@ -49,16 +62,38 @@ function draftOf(lead) {
     email: lead?.email ?? "",
     edo: lead?.edo ?? "",
     accountant: lead?.accountant ?? ACCOUNTANTS[0],
-    priority: lead?.priority ?? "mid",
+    priority: lead?.priority ?? 0,
+    tagIds: lead?.tagIds ?? [],
   };
 }
 
+/** Поля черновика сравниваются по значению: теги — массив. */
+const sameValue = (a, b) => (Array.isArray(a) || Array.isArray(b) ? JSON.stringify(a) === JSON.stringify(b) : a === b);
+
 export function LeadPage() {
   const { id } = useParams();
-  const { leads, stages, shipments: allShipments, moveLead, updateLead, addShipment } = useLeads();
-  const lead = leads.find((item) => item.id === Number(id)) ?? ALL_LEADS.find((item) => item.id === Number(id));
+  const navigate = useNavigate();
+  const {
+    leads,
+    stages,
+    tags,
+    shipments: allShipments,
+    moveLead,
+    updateLead,
+    addShipment,
+    addTag,
+    removeTag,
+    loseLead,
+    restoreLead,
+    transferLead,
+    deleteLead,
+  } = useLeads();
+  // Только живой список: удалённый лид должен открываться как «Лид не найден».
+  const lead = leads.find((item) => item.id === Number(id));
   const [tab, setTab] = useState("shipments");
   const [shipmentCreateOpen, setShipmentCreateOpen] = useState(false);
+  // Открытый диалог действия: "lose" | "transfer" | "delete" | null.
+  const [dialog, setDialog] = useState(null);
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
   const chatter = useMemo(() => leadChatter(lead), [lead?.id, lead?.stageId]);
 
@@ -71,7 +106,13 @@ export function LeadPage() {
     setSaved(next);
   }, [lead?.id]);
 
-  const dirty = Object.keys(saved).some((key) => draft[key] !== saved[key]);
+  // Этап меняется и снаружи: передача ставит лид на первый этап.
+  useEffect(() => {
+    setStageId(lead?.stageId ?? 1);
+  }, [lead?.id, lead?.stageId]);
+
+  const dirty = Object.keys(saved).some((key) => !sameValue(draft[key], saved[key]));
+  const readOnly = Boolean(lead?.lost);
   const set = (key) => (event) => setDraft((prev) => ({ ...prev, [key]: event.target.value }));
 
   // Состояние «Сохранение…» живёт ровно столько, сколько нужно, чтобы его
@@ -111,7 +152,7 @@ export function LeadPage() {
 
   // Автосохранение через 3 секунды после последней правки — как в рабочей CRM.
   useEffect(() => {
-    if (!dirty || !draft.name.trim()) return undefined;
+    if (!dirty || !draft.name.trim() || readOnly) return undefined;
     const timer = window.setTimeout(() => persist(draft), 3000);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,7 +237,8 @@ export function LeadPage() {
     );
   }
 
-  if (lead.ownerId !== ME.id) {
+  // Администратор видит лид коллеги целиком; менеджер — только усечённо.
+  if (lead.ownerId !== ME.id && !ME.isAdmin) {
     const colleague = OWNER(lead.ownerId);
     return (
       <Shell title="Карточка лида" crumb={`Воронка · ${lead.name}`}>
@@ -221,17 +263,51 @@ export function LeadPage() {
           </div>
         </div>
 
-        <div className="stub">
-          <div>
-            <b>Лид коллеги.</b> Активный лид другого менеджера открыт только для просмотра: название, ИНН и продавец.
-            Заявки, контакты и деньги доступны владельцу лида и администратору.
+        {lead.lost ? (
+          <div className="record-alert record-alert--warn lead-lost-note">
+            <span>
+              <b>Лид проигран.</b> Причина: {lead.lossReason || "не указана"}. Проигранную карточку коллеги может забрать
+              любой сотрудник.
+            </span>
+            <Button size="sm" variant="primary" icon={UserPlus} onClick={() => restoreLead(lead.id, { takeOver: true })}>
+              Взять себе
+            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="stub">
+            <div>
+              <b>Лид коллеги.</b> Активный лид другого менеджера открыт только для просмотра: название, ИНН и продавец.
+              Заявки, контакты и деньги доступны владельцу лида и администратору.
+            </div>
+          </div>
+        )}
       </Shell>
     );
   }
 
   const shipments = allShipments.filter((item) => item.leadId === lead.id);
+  const owner = OWNER(lead.ownerId);
+  const isOwner = lead.ownerId === ME.id;
+
+  // Листалка соседних лидов: порядок доски владельца — этапы слева направо,
+  // внутри этапа сверху вниз. Проигранные лиды в неё не входят.
+  const stageOrder = new Map(stages.map((stage, index) => [stage.id, index]));
+  const siblings = leads
+    .filter((item) => item.ownerId === lead.ownerId && !item.lost)
+    .sort(
+      (a, b) =>
+        (stageOrder.get(a.stageId) ?? 0) - (stageOrder.get(b.stageId) ?? 0) || (a.position ?? 0) - (b.position ?? 0),
+    );
+  const pagerIndex = siblings.findIndex((item) => item.id === lead.id);
+  const prevLead = pagerIndex > 0 ? siblings[pagerIndex - 1] : null;
+  const nextLead = pagerIndex >= 0 && pagerIndex < siblings.length - 1 ? siblings[pagerIndex + 1] : null;
+
+  const actions = [
+    !lead.lost && { label: "Отметить проигрышем", icon: XCircle, onSelect: () => setDialog("lose") },
+    // Проигранный лид менеджер сначала восстанавливает, администратор передаёт сразу.
+    { label: "Передать коллеге", icon: ArrowRightLeft, disabled: readOnly && !ME.isAdmin, onSelect: () => setDialog("transfer") },
+    ME.isAdmin && { label: "Удалить лид", icon: Trash2, danger: true, onSelect: () => setDialog("delete") },
+  ];
 
   return (
     <Shell title="Карточка лида" crumb={`Воронка · ${lead.name}`}>
@@ -250,6 +326,7 @@ export function LeadPage() {
           <h1 className="lead-head__title">
             <input
               className="lead-title-input"
+              disabled={readOnly}
               value={draft.name}
               onChange={set("name")}
               onKeyDown={onFieldKeyDown}
@@ -264,7 +341,7 @@ export function LeadPage() {
         </div>
 
         <div className="lead-head__actions">
-          {saving ? (
+          {readOnly ? null : saving ? (
             <span className="lead-save__state lead-save__state--saving">Сохранение…</span>
           ) : dirty ? (
             <div className="lead-save">
@@ -296,7 +373,27 @@ export function LeadPage() {
           <Button variant="info" icon={Mail} onClick={writeEmail}>
             Письмо
           </Button>
-          <IconButton icon={MoreHorizontal} label="Ещё" />
+          <Menu label="Действия" icon={MoreHorizontal} items={actions} />
+
+          {pagerIndex >= 0 && (
+            <div className="pager" role="group" aria-label="Соседние лиды">
+              <IconButton
+                icon={ChevronLeft}
+                label={prevLead ? `Предыдущий лид: ${prevLead.name}` : "Это первый лид"}
+                disabled={!prevLead}
+                onClick={() => prevLead && navigate(`/crm/leads/${prevLead.id}`)}
+              />
+              <span className="pager__count">
+                {pagerIndex + 1} из {siblings.length}
+              </span>
+              <IconButton
+                icon={ChevronRight}
+                label={nextLead ? `Следующий лид: ${nextLead.name}` : "Это последний лид"}
+                disabled={!nextLead}
+                onClick={() => nextLead && navigate(`/crm/leads/${nextLead.id}`)}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -306,24 +403,52 @@ export function LeadPage() {
             <StageBar
               stages={stages}
               currentId={stageId}
+              disabled={readOnly}
               onSelect={(nextId) => {
                 setStageId(nextId);
                 moveLead(lead.id, nextId);
               }}
             />
-            <Button variant="primary" size="sm" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
-              Создать заявку
-            </Button>
+            {lead.lost ? (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={isOwner ? RotateCcw : UserPlus}
+                onClick={() => restoreLead(lead.id, { takeOver: !isOwner })}
+              >
+                {isOwner ? "Восстановить" : "Взять себе"}
+              </Button>
+            ) : (
+              <>
+                <Button variant="primary" size="sm" icon={Truck} onClick={() => setShipmentCreateOpen(true)}>
+                  Создать заявку
+                </Button>
+                <Button variant="ghost" size="sm" icon={XCircle} className="btn--lose" onClick={() => setDialog("lose")}>
+                  Проигрыш
+                </Button>
+              </>
+            )}
           </div>
 
-          <div className="card">
+          {lead.lost && (
+            <div className="record-alert record-alert--warn" role="status">
+              Лид проигран. Чтобы менять его данные, сначала восстановите карточку.
+            </div>
+          )}
+
+          <div className={`card${lead.lost ? " card--lost" : ""}`}>
+            {lead.lost && (
+              <div className="lost-ribbon" aria-label="Лид проигран">
+                Проигрыш
+              </div>
+            )}
             <div className="card__head">
               <div>
                 <div className="card__title">Клиент</div>
                 <div className="card__sub">Реквизиты и контакты</div>
               </div>
             </div>
-            <div className="card__body lead-form" style={{ paddingTop: 4 }} onKeyDown={onFieldKeyDown}>
+            <fieldset className="card__body lead-form" style={{ paddingTop: 4 }} onKeyDown={onFieldKeyDown} disabled={readOnly}>
               <label className="lead-field">
                 <span className="lead-field__label">Компания</span>
                 <input className="lead-input" value={draft.name} onChange={set("name")} placeholder="ООО «Ромашка»" />
@@ -378,21 +503,53 @@ export function LeadPage() {
                 />
               </label>
 
-              <label className="lead-field">
+              <div className="lead-field">
                 <span className="lead-field__label">Приоритет</span>
-                <select
-                  className="lead-input lead-input--select"
-                  value={draft.priority}
-                  onChange={set("priority")}
-                  aria-label="Приоритет лида"
-                >
-                  {Object.entries(PRIORITY).map(([value, priority]) => (
-                    <option key={value} value={value}>
-                      {priority.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <span className="lead-field__value" aria-label="Приоритет лида">
+                  <StarRating
+                    value={draft.priority}
+                    onChange={readOnly ? undefined : (priority) => setDraft((prev) => ({ ...prev, priority }))}
+                  />
+                </span>
+              </div>
+
+              <div className="lead-field lead-field--top">
+                <span className="lead-field__label">Теги</span>
+                <span className="lead-field__value">
+                  <TagsField
+                    tags={tags}
+                    value={draft.tagIds}
+                    disabled={readOnly}
+                    canDelete={ME.isAdmin}
+                    onChange={(tagIds) => setDraft((prev) => ({ ...prev, tagIds }))}
+                    onCreate={addTag}
+                    onDelete={removeTag}
+                  />
+                </span>
+              </div>
+
+              <div className="lead-field">
+                <span className="lead-field__label">Продавец</span>
+                <span className="lead-field__value">
+                  <button
+                    type="button"
+                    className="owner-btn"
+                    disabled={readOnly && !ME.isAdmin}
+                    title={readOnly && !ME.isAdmin ? "Сначала восстановите лид, чтобы передать его" : "Передать лид другому сотруднику"}
+                    onClick={() => setDialog("transfer")}
+                  >
+                    <Avatar initials={owner.initials} color={owner.color} size="sm" />
+                    <span className="truncate">{owner.name}</span>
+                  </button>
+                </span>
+              </div>
+
+              {lead.lost && (
+                <div className="lead-field">
+                  <span className="lead-field__label">Причина проигрыша</span>
+                  <span className="lead-field__value lead-field__text">{lead.lossReason || "—"}</span>
+                </div>
+              )}
 
               <label className="lead-field">
                 <span className="lead-field__label">Оператор ЭДО</span>
@@ -421,7 +578,7 @@ export function LeadPage() {
                   <option value="">Не назначен</option>
                 </select>
               </label>
-            </div>
+            </fieldset>
           </div>
 
           <div className="card">
@@ -500,6 +657,44 @@ export function LeadPage() {
         />
       </div>
 
+      {dialog === "lose" && (
+        <LoseLeadDialog
+          leadName={lead.name}
+          onCancel={() => setDialog(null)}
+          onConfirm={(reason) => {
+            // Несохранённые правки дописываем до блокировки карточки.
+            if (dirty && draft.name.trim()) persist(draft);
+            loseLead(lead.id, reason);
+            setDialog(null);
+          }}
+        />
+      )}
+      {dialog === "transfer" && (
+        <TransferLeadDialog
+          leadName={lead.name}
+          ownerId={lead.ownerId}
+          leadIsLost={lead.lost}
+          onCancel={() => setDialog(null)}
+          onConfirm={(userId) => {
+            if (dirty && draft.name.trim()) persist(draft);
+            transferLead(lead.id, userId);
+            setDialog(null);
+            // Карточка больше не наша — возвращаемся на доску.
+            if (!ME.isAdmin) navigate("/crm");
+          }}
+        />
+      )}
+      {dialog === "delete" && (
+        <DeleteLeadDialog
+          leadName={lead.name}
+          onCancel={() => setDialog(null)}
+          onConfirm={() => {
+            setDialog(null);
+            deleteLead(lead.id);
+            navigate("/crm");
+          }}
+        />
+      )}
       {shipmentCreateOpen && (
         <QuickCreateShipmentDialog
           lead={lead}

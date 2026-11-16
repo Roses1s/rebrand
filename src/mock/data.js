@@ -32,11 +32,26 @@ export const TEAM = [
 
 const U = Object.fromEntries(TEAM.map((user) => [user.id, user]));
 
-export const PRIORITY = {
-  high: { label: "Высокий", cls: "badge--high" },
-  mid: { label: "Средний", cls: "badge--mid" },
-  low: { label: "Низкий", cls: "badge--low" },
-};
+/**
+ * Приоритет — звёзды 0–3, как в рабочей CRM (`lead.priority`, CHECK 0..3).
+ * 0 — без приоритета, 3 — самый высокий.
+ */
+export const PRIORITY_MAX = 3;
+
+/**
+ * Теги общие для всей компании, как в рабочей CRM (`tags`, цвет — любой HEX).
+ * Создаёт любой сотрудник, удаляет только администратор.
+ */
+export const TAGS = [
+  { id: 1, name: "Постоянный", color: "#10b981" },
+  { id: 2, name: "Срочно", color: "#ef4444" },
+  { id: 3, name: "Тендер", color: "#f59e0b" },
+  { id: 4, name: "Рефрижератор", color: "#14b8a6" },
+  { id: 5, name: "Опт", color: "#3b82f6" },
+];
+
+/** Причины проигрыша — справочник рабочей CRM (`loss_reasons`). */
+export const LOSS_REASONS = ["Перестал возить", "Отказ СБ", "Отказался работать"];
 
 /**
  * Операторы ЭДО для выпадающего списка в карточке лида.
@@ -72,11 +87,13 @@ function lead(partial) {
     cargo: "Пиломатериалы",
     weight: "20 т",
     body: "Тент 92 м³",
-    priority: "mid",
+    priority: 0,
     hot: false,
     late: false,
+    lost: false,
+    lossReason: "",
     days: 1,
-    tags: [],
+    tagIds: [],
     created: "сегодня",
     ...partial,
   };
@@ -88,6 +105,7 @@ export const STAGES = [
     leads: [
       lead({
         id: 1,
+        tagIds: [1, 2],
         name: "ООО «СтройТрансСервис»",
         inn: "7743013902",
         edo: "kontur",
@@ -95,7 +113,7 @@ export const STAGES = [
         route: "Москва → Казань",
         cargo: "Пиломатериалы",
         weight: "20 т",
-        priority: "high",
+        priority: 3,
         hot: true,
         due: "завтра 00:02",
         ownerId: 1,
@@ -112,7 +130,7 @@ export const STAGES = [
         route: "Тула → Нижний Новгород",
         cargo: "Металлоконструкции",
         weight: "12 т",
-        priority: "mid",
+        priority: 2,
         due: "завтра 22:02",
         ownerId: 1,
         days: 2,
@@ -128,7 +146,7 @@ export const STAGES = [
         route: "Самара → Ростов-на-Дону",
         cargo: "Зерно в биг-бэгах",
         weight: "22 т",
-        priority: "low",
+        priority: 1,
         due: "4 нояб.",
         ownerId: 3,
         days: 3,
@@ -136,6 +154,7 @@ export const STAGES = [
       }),
       lead({
         id: 4,
+        tagIds: [5],
         name: "ООО «Северный Профиль»",
         inn: "7801234567",
         edo: "taxcom",
@@ -145,7 +164,7 @@ export const STAGES = [
         route: "Санкт-Петербург → Мурманск",
         cargo: "Профнастил",
         weight: "16 т",
-        priority: "mid",
+        priority: 2,
         due: "5 нояб.",
         ownerId: 3,
         days: 5,
@@ -158,6 +177,7 @@ export const STAGES = [
     leads: [
       lead({
         id: 5,
+        tagIds: [4],
         name: "ООО «ХимПром Логистика»",
         inn: "5903012345",
         edo: "kontur",
@@ -166,7 +186,7 @@ export const STAGES = [
         route: "Пермь → Екатеринбург",
         cargo: "Химия (не опас.)",
         weight: "18 т",
-        priority: "high",
+        priority: 3,
         hot: true,
         due: "завтра 03:02",
         ownerId: 1,
@@ -175,6 +195,7 @@ export const STAGES = [
       }),
       lead({
         id: 6,
+        tagIds: [1],
         name: "ООО «МебельГрад»",
         inn: "4345012345",
         contact: "Светлана Рогова",
@@ -182,7 +203,7 @@ export const STAGES = [
         route: "Киров → Москва",
         cargo: "Мебель в упаковке",
         weight: "8 т",
-        priority: "mid",
+        priority: 2,
         due: "04 нояб.",
         ownerId: 2,
         days: 4,
@@ -191,6 +212,7 @@ export const STAGES = [
       }),
       lead({
         id: 7,
+        tagIds: [3],
         name: "ООО «Балтика Трейд»",
         inn: "3906012345",
         contact: "Никита Юшков",
@@ -198,11 +220,31 @@ export const STAGES = [
         route: "Калининград → Москва",
         cargo: "Электроника",
         weight: "6 т",
-        priority: "mid",
+        priority: 2,
         due: "11 нояб.",
         ownerId: 1,
         days: 11,
         stageId: 2,
+      }),
+      lead({
+        id: 19,
+        name: "ООО «ВолгаАгро»",
+        inn: "6316123450",
+        contact: "Олег Данилов",
+        city: "Самара",
+        phone: "+7 927 118-40-21",
+        email: "logist@volga-agro.ru",
+        route: "Самара → Москва",
+        cargo: "Зерно",
+        weight: "20 т",
+        priority: 1,
+        due: "01 нояб.",
+        ownerId: 1,
+        days: 15,
+        stageId: 2,
+        lost: true,
+        lossReason: "Перестал возить",
+        created: "20 окт.",
       }),
     ],
   },
@@ -211,6 +253,7 @@ export const STAGES = [
     leads: [
       lead({
         id: 8,
+        tagIds: [1],
         name: "ГК «ФудЛайн»",
         inn: "7716045678",
         contact: "Ольга Степанова",
@@ -218,7 +261,7 @@ export const STAGES = [
         route: "Москва → Краснодар",
         cargo: "Продукты, +2 °C",
         weight: "20 т",
-        priority: "high",
+        priority: 3,
         hot: true,
         due: "07 нояб.",
         ownerId: 1,
@@ -227,6 +270,7 @@ export const STAGES = [
       }),
       lead({
         id: 9,
+        tagIds: [2],
         name: "ООО «ТехноИмпорт»",
         inn: "1660012345",
         edo: "sbis",
@@ -235,7 +279,7 @@ export const STAGES = [
         route: "Казань → Новосибирск",
         cargo: "Станки, оборудование",
         weight: "15 т",
-        priority: "high",
+        priority: 3,
         due: "08 нояб.",
         ownerId: 1,
         days: 9,
@@ -243,6 +287,7 @@ export const STAGES = [
       }),
       lead({
         id: 10,
+        tagIds: [5],
         name: "ООО «ПолимерПак»",
         inn: "5029012345",
         edo: "sberkorus",
@@ -251,7 +296,7 @@ export const STAGES = [
         route: "Мытищи → Воронеж",
         cargo: "Полимеры",
         weight: "19 т",
-        priority: "mid",
+        priority: 2,
         due: "09 нояб.",
         ownerId: 4,
         days: 4,
@@ -266,11 +311,29 @@ export const STAGES = [
         route: "Екатеринбург → Самара",
         cargo: "Натуральный камень",
         weight: "22 т",
-        priority: "low",
+        priority: 0,
         due: "12 нояб.",
         ownerId: 4,
         days: 12,
         stageId: 3,
+      }),
+      lead({
+        id: 20,
+        name: "ООО «Пермь-Кабель»",
+        inn: "5904123456",
+        contact: "Инна Лаптева",
+        city: "Пермь",
+        route: "Пермь → Екатеринбург",
+        cargo: "Кабельная продукция",
+        weight: "12 т",
+        priority: 2,
+        due: "28 окт.",
+        ownerId: 2,
+        days: 19,
+        stageId: 3,
+        lost: true,
+        lossReason: "Отказ СБ",
+        created: "14 окт.",
       }),
     ],
   },
@@ -279,6 +342,7 @@ export const STAGES = [
     leads: [
       lead({
         id: 12,
+        tagIds: [1, 5],
         name: "АО «УралМеталлСнаб»",
         inn: "7455012345",
         contact: "Павел Ерёмин",
@@ -286,7 +350,7 @@ export const STAGES = [
         route: "Челябинск → Санкт-Петербург",
         cargo: "Металлопрокат",
         weight: "24 т",
-        priority: "high",
+        priority: 3,
         due: "завтра 04:02",
         ownerId: 1,
         days: 6,
@@ -301,7 +365,7 @@ export const STAGES = [
         route: "Краснодар → Сочи",
         cargo: "Стройматериалы",
         weight: "20 т",
-        priority: "mid",
+        priority: 2,
         due: "08 нояб.",
         ownerId: 1,
         days: 8,
@@ -316,7 +380,7 @@ export const STAGES = [
         route: "Одинцово → Смоленск",
         cargo: "Удобрения",
         weight: "21 т",
-        priority: "low",
+        priority: 0,
         due: "10 нояб.",
         ownerId: 3,
         days: 3,
@@ -331,7 +395,7 @@ export const STAGES = [
         route: "Новосибирск → Тюмень",
         cargo: "Консервы",
         weight: "18 т",
-        priority: "low",
+        priority: 1,
         due: "14 нояб.",
         ownerId: 2,
         days: 14,
@@ -344,6 +408,7 @@ export const STAGES = [
     leads: [
       lead({
         id: 16,
+        tagIds: [3],
         name: "ООО «Логистика Плюс»",
         inn: "7715004321",
         contact: "Кирилл Соловьёв",
@@ -351,7 +416,7 @@ export const STAGES = [
         route: "Москва → Санкт-Петербург",
         cargo: "Бытовая техника",
         weight: "17 т",
-        priority: "high",
+        priority: 3,
         hot: true,
         due: "сегодня 18:00",
         ownerId: 1,
@@ -367,7 +432,7 @@ export const STAGES = [
         route: "Новосибирск → Кемерово",
         cargo: "Уголь",
         weight: "25 т",
-        priority: "mid",
+        priority: 2,
         due: "сегодня 20:00",
         ownerId: 1,
         days: 4,
@@ -382,7 +447,7 @@ export const STAGES = [
         route: "Владивосток → Хабаровск",
         cargo: "Контейнеры",
         weight: "20 т",
-        priority: "low",
+        priority: 1,
         due: "13 нояб.",
         ownerId: 4,
         days: 5,

@@ -74,7 +74,7 @@ function InflowChart({ data }) {
 export function AnalyticsPage() {
   const { leads, stages, shipments } = useLeads();
   const [period, setPeriod] = useState("month");
-  const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id), [leads]);
+  const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id && !lead.lost), [leads]);
   const myLeadIds = useMemo(() => new Set(myLeads.map((lead) => lead.id)), [myLeads]);
   const myShipments = useMemo(() => shipments.filter((shipment) => myLeadIds.has(shipment.leadId)), [myLeadIds, shipments]);
   const marginOf = (lead) => leadShipmentMargin(lead.id, shipments);

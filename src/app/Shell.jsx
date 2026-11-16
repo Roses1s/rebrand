@@ -123,7 +123,8 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
     setMenuOpen(false);
   }, [pathname]);
 
-  const myLeads = leads.filter((lead) => lead.ownerId === ME.id);
+  // Проигранные лиды с доски уходят, поэтому счётчик воронки их не считает.
+  const myLeads = leads.filter((lead) => lead.ownerId === ME.id && !lead.lost);
   const myShipments = shipments.filter((shipment) => shipment.ownerId === ME.id);
   const openTasks = myTasks.filter((task) => task.status !== "done").length;
   const overdue = myTasks.filter((task) => task.status === "overdue").length;
@@ -152,11 +153,13 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
       phone: draft.phone.trim(),
       email: draft.email.trim(),
       stageId: leadDialog?.stageId ?? undefined,
+      ownerId: leadDialog?.ownerId ?? ME.id,
       due: "сегодня",
     });
+    const ownerId = leadDialog?.ownerId ?? ME.id;
     setDraft(EMPTY_LEAD_DRAFT);
     closeLeadDialog();
-    navigate("/crm");
+    navigate(ownerId === ME.id ? "/crm" : `/crm?board=${ownerId}`);
   }
 
   return (
