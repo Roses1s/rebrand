@@ -28,7 +28,7 @@ export function EmployeeSuggestions({ query, excludeUserId, actionLabel, onPick 
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => onPick(user.id)}
         >
-          <Avatar initials={user.initials} color={user.color} />
+          <Avatar initials={user.initials} />
           <span className="search-suggest__name">{user.name}</span>
           <span className="search-suggest__action">
             {actionLabel}

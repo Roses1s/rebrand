@@ -93,7 +93,7 @@ export function ShipmentsPage() {
     >
       {employee && (
         <div className="board-banner" role="status">
-          <Avatar initials={employee.initials} color={employee.color} />
+          <Avatar initials={employee.initials} />
           <span>
             Заявки сотрудника: <b>{employee.name}</b>
           </span>
@@ -184,7 +184,7 @@ export function ShipmentsPage() {
                     <td className="cell-sub mono">{formatShipmentDate(item.createdAt)}</td>
                     <td>
                       <span className="seller-cell">
-                        <Avatar initials={seller.initials} color={seller.color} className="avatar--square" />
+                        <Avatar initials={seller.initials} className="avatar--square" />
                         {seller.name}
                       </span>
                     </td>

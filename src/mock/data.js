@@ -29,10 +29,10 @@ export const ME = {
 };
 
 export const TEAM = [
-  { id: 1, initials: "АГ", name: "Алексей Громов", role: "Менеджер по продажам", color: "", online: true },
-  { id: 2, initials: "МС", name: "Мария Соколова", role: "Менеджер по продажам", color: "avatar--pink", online: true },
-  { id: 3, initials: "ИЛ", name: "Игорь Левченко", role: "Логист-менеджер", color: "avatar--green", online: true },
-  { id: 4, initials: "ДК", name: "Дарья Ким", role: "Менеджер по продажам", color: "avatar--amber", online: false },
+  { id: 1, initials: "АГ", name: "Алексей Громов", role: "Менеджер по продажам", online: true },
+  { id: 2, initials: "МС", name: "Мария Соколова", role: "Менеджер по продажам", online: true },
+  { id: 3, initials: "ИЛ", name: "Игорь Левченко", role: "Логист-менеджер", online: true },
+  { id: 4, initials: "ДК", name: "Дарья Ким", role: "Менеджер по продажам", online: false },
 ];
 
 const U = Object.fromEntries(TEAM.map((user) => [user.id, user]));

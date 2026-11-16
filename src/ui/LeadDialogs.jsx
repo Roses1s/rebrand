@@ -111,7 +111,7 @@ export function TransferLeadDialog({ leadName, ownerId, leadIsLost = false, onCa
         ) : (
           colleagues.map((user) => (
             <button key={user.id} type="button" role="option" aria-selected="false" className="picker-list__item" onClick={() => setChosen(user)}>
-              <Avatar initials={user.initials} color={user.color} size="sm" />
+              <Avatar initials={user.initials} size="sm" />
               <span className="picker-list__name">{user.name}</span>
               <span className="picker-list__role">{user.role}</span>
             </button>

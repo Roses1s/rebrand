@@ -414,6 +414,8 @@
 
 /* --- Аватары ------------------------------------------------------------ */
 
+/* Как в основной CRM: у всех один круг с фиолетовым градиентом и белыми
+   жирными инициалами, без обводки. Цвета по сотрудникам убраны (16.11). */
 .avatar {
   display: inline-flex;
   align-items: center;
@@ -421,33 +423,17 @@
   width: 30px;
   height: 30px;
   border-radius: 99px;
-  background: linear-gradient(135deg, #6c5ce7, #a78bfa);
+  background: linear-gradient(135deg, #7563ea, #9e83f7);
   color: #fff;
   font-size: 10.5px;
-  font-weight: 650;
+  font-weight: 800;
   flex: none;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
-.avatar--teal {
-  background: linear-gradient(135deg, #14b8a6, #22d3ee);
-}
 
-.avatar--amber {
-  background: linear-gradient(135deg, #f59e0b, #f97316);
-}
 
-.avatar--pink {
-  background: linear-gradient(135deg, #ec4899, #a855f7);
-}
 
-.avatar--green {
-  background: linear-gradient(135deg, #10b981, #34d399);
-}
 
-.avatar--slate {
-  background: linear-gradient(135deg, #64748b, #475569);
-}
 
 .avatar--sm {
   width: 24px;

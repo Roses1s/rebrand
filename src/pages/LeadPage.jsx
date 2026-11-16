@@ -270,7 +270,7 @@ export function LeadPage() {
             </div>
           </div>
           <div className="lead-head__actions">
-            <Avatar initials={colleague.initials} color={colleague.color} size="lg" title={colleague.name} />
+            <Avatar initials={colleague.initials} size="lg" title={colleague.name} />
             <span style={{ fontSize: 12, color: "var(--ink-2)" }}>{colleague.name}</span>
           </div>
         </div>
@@ -548,7 +548,7 @@ export function LeadPage() {
                     title={readOnly && !ME.isAdmin ? "Сначала восстановите лид, чтобы передать его" : "Передать лид другому сотруднику"}
                     onClick={() => setDialog("transfer")}
                   >
-                    <Avatar initials={owner.initials} color={owner.color} size="sm" />
+                    <Avatar initials={owner.initials} size="sm" />
                     <span className="truncate">{owner.name}</span>
                   </button>
                 </span>

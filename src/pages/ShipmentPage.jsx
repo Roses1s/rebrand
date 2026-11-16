@@ -326,7 +326,7 @@ export function ShipmentPage() {
                 </Row>
                 <Row label="Продавец">
                   <span className="lead-field__value lead-field__text seller-cell">
-                    <Avatar initials={owner.initials} color={owner.color} className="avatar--square" />
+                    <Avatar initials={owner.initials} className="avatar--square" />
                     {owner.name}
                   </span>
                 </Row>

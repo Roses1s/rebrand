@@ -99,7 +99,6 @@ function LeadCard({ lead, shipments, tags, onPriority }) {
           <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
           <Avatar
             initials={owner.initials}
-            color={owner.color}
             size="sm"
             title={`Ответственный: ${owner.name}`}
             className="lead-card__owner"
@@ -516,7 +515,7 @@ export function FunnelPage() {
       <div className="funnel">
       {foreignBoard && (
         <div className="board-banner" role="status">
-          <Avatar initials={boardUser.initials} color={boardUser.color} size="sm" />
+          <Avatar initials={boardUser.initials} size="sm" />
           <span>
             Доска сотрудника: <b>{boardUser.name}</b>
           </span>

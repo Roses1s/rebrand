@@ -67,7 +67,7 @@ export function ClientTile({ client, tags, locked, onOpen }) {
       <div className="client-tile__owner">
         {owner ? (
           <>
-            <Avatar initials={owner.initials} color={owner.color} className="avatar--xs" />
+            <Avatar initials={owner.initials} className="avatar--xs" />
             {owner.name}
           </>
         ) : (
@@ -270,7 +270,7 @@ export function ClientsPage() {
                   </td>
                   <td>
                     <div className="row" style={{ gap: 8 }}>
-                      <Avatar initials={owner.initials} color={owner.color} size="sm" />
+                      <Avatar initials={owner.initials} size="sm" />
                       <span style={{ fontSize: 12.5 }}>{owner.name.split(" ")[0]}</span>
                     </div>
                   </td>

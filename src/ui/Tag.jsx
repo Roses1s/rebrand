@@ -30,10 +30,10 @@ export function Chip({ active, count, children, ...props }) {
  * Там, где размер задан стилями места (лента, «Продавец», плашка доски),
  * он важнее размера аватара.
  */
-export function Avatar({ initials, title, size = "md", color = "", className }) {
+export function Avatar({ initials, title, size = "md", className }) {
   return (
     <span
-      className={cn("avatar", size !== "md" && `avatar--${size}`, color, className)}
+      className={cn("avatar", size !== "md" && `avatar--${size}`, className)}
       title={title}
     >
       {initials}

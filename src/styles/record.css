@@ -164,12 +164,11 @@ fieldset:disabled .stars--editable .stars__star {
   margin-top: -2px;
 }
 
-/* Ответственный — квадрат 20px с инициалами, как на доске рабочей CRM. */
+/* Ответственный — кружок 20px с инициалами. */
 .avatar.lead-card__owner {
   flex: none;
   width: 20px;
   height: 20px;
-  border-radius: 5px;
   font-size: 8.5px;
   letter-spacing: 0;
 }
@@ -923,12 +922,11 @@ fieldset.lead-form:disabled .lead-input:hover {
   white-space: nowrap;
 }
 
-/* Квадрат с инициалами — как у продавца в таблицах рабочей CRM. */
+/* Продавец в таблицах заявок — кружок 22px (имя класса историческое). */
 .avatar.avatar--square {
   flex: none;
   width: 22px;
   height: 22px;
-  border-radius: 5px;
   font-size: 9px;
 }
 
@@ -1153,11 +1151,11 @@ fieldset.lead-form:disabled .lead-input:hover {
   display: none;
 }
 
+/* Ответственный на плитке клиента — кружок 20px. */
 .avatar.avatar--xs {
   flex: none;
   width: 20px;
   height: 20px;
-  border-radius: 5px;
   font-size: 8px;
 }
 
