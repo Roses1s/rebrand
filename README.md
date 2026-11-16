@@ -8,6 +8,7 @@
 - Матрица паритета «ничего не теряем»: [`PARITY.md`](PARITY.md)
 - Паспорт проекта для следующего агента: [`docs/HANDOVER.md`](docs/HANDOVER.md)
 - Текущий статус и журнал решений: [`docs/STATUS.md`](docs/STATUS.md)
+- План переноса визуала в рабочую CRM: [`docs/PORTING.md`](docs/PORTING.md)
 - Готовый промт для передачи: [`docs/MASTER_PROMPT.md`](docs/MASTER_PROMPT.md)
 
 ## Что это
