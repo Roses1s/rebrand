@@ -1,0 +1,886 @@
+/* ==========================================================================
+   Доработки доски и карточки лида под функции рабочей CRM:
+   звёзды приоритета, теги, меню «⋯», свёрнутые этапы, доска сотрудника,
+   проигрыш, листалка, диалоги и состояния ошибок.
+   Цвета — только существующие токены; подключается последним.
+   ========================================================================== */
+
+/* --- Звёзды приоритета -------------------------------------------------- */
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  line-height: 1;
+  font-size: 15px;
+  color: var(--ink-4);
+}
+
+.stars--sm {
+  font-size: 13px;
+}
+
+.stars__star {
+  display: inline-grid;
+  place-items: center;
+  min-width: 15px;
+  height: 18px;
+  padding: 0 1px;
+  border-radius: 5px;
+  color: var(--ink-4);
+  transition: color 120ms var(--ease), transform 120ms var(--ease);
+}
+
+.stars__star.is-on {
+  color: var(--warn);
+}
+
+.stars--editable .stars__star {
+  cursor: pointer;
+}
+
+/* Подсветка «до наведённой звезды» — как предпросмотр в рабочей CRM. */
+.stars--editable:hover .stars__star {
+  color: var(--warn);
+}
+
+.stars--editable .stars__star:hover ~ .stars__star {
+  color: var(--ink-4);
+}
+
+.stars--editable .stars__star:hover {
+  transform: scale(1.15);
+}
+
+.stars--editable .stars__star:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+fieldset:disabled .stars--editable .stars__star {
+  cursor: default;
+  transform: none;
+}
+
+/* --- Теги --------------------------------------------------------------- */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tag-chip {
+  --tag: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--tag) 15%, var(--surface));
+  color: color-mix(in srgb, var(--tag) 72%, var(--ink));
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.tag-chip--sm {
+  padding: 1px 7px;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tag-chip--md {
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.tag-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.tag-chip__remove {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  margin-right: -3px;
+  border-radius: 99px;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.tag-chip__remove:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--tag) 22%, transparent);
+}
+
+.cell-company .tag-list {
+  margin-top: 4px;
+}
+
+/* --- Карточка лида: ссылка на всю площадь, меню, ответственный ------------ */
+
+.lead-card {
+  position: relative;
+}
+
+.lead-card__title {
+  padding-right: 22px;
+}
+
+.lead-card__link {
+  color: inherit;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Растянутая ссылка: клик по любому месту карточки открывает лид. */
+.lead-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.lead-card__link:focus-visible {
+  outline: none;
+}
+
+.lead-card__link:focus-visible::after {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Интерактивное поверх растянутой ссылки. */
+.lead-card .stars,
+.lead-card__menu {
+  position: relative;
+  z-index: 1;
+}
+
+.lead-card .stars {
+  align-self: flex-start;
+}
+
+.lead-card .tag-list {
+  margin-top: -2px;
+}
+
+.lead-card__menu {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+}
+
+.lead-card__menu-btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  color: var(--ink-3);
+  opacity: 0;
+  transition: opacity 120ms var(--ease), background-color 120ms var(--ease);
+}
+
+.lead-card:hover .lead-card__menu-btn,
+.lead-card__menu-btn:focus-visible,
+.lead-card__menu-btn[aria-expanded="true"] {
+  opacity: 1;
+}
+
+.lead-card__menu-btn:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+/* На сенсорных экранах наведения нет — меню видно всегда. */
+@media (hover: none) {
+  .lead-card__menu-btn {
+    opacity: 1;
+  }
+}
+
+/* Ответственный — квадрат 20px с инициалами, как на доске рабочей CRM. */
+.avatar.lead-card__owner {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  font-size: 8.5px;
+  letter-spacing: 0;
+}
+
+/* Аватары в плашке доски, поле «Продавец» и выборе коллеги — мельче обычных. */
+.board-banner .avatar,
+.owner-btn .avatar,
+.picker-list__item .avatar {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  font-size: 9.5px;
+}
+
+.drag-overlay .lead-card__menu {
+  display: none;
+}
+
+/* Ошибка сохранения приоритета под карточкой (витрина состояний). */
+.lead-card__error {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--danger);
+}
+
+/* --- Меню «⋯» ------------------------------------------------------------ */
+
+.menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 190px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.menu__list--right {
+  right: 0;
+}
+
+.menu__list--left {
+  left: 0;
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.menu__item svg {
+  color: var(--ink-3);
+  flex: none;
+}
+
+.menu__item:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+
+.menu__item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.menu__item--danger,
+.menu__item--danger svg {
+  color: var(--danger);
+}
+
+.menu__item--danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+/* --- Свёрнутые этапы ------------------------------------------------------ */
+
+/* Когда есть свёрнутая колонка, ленту ведёт flex: у свёрнутой колонки своя
+   узкая ширина, остальные — обычные 258px (как в compact.css). */
+@media (min-width: 681px) {
+  .board[data-folded] {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .board[data-folded] > * {
+    flex: 0 0 258px;
+  }
+
+  .board[data-folded] > .col--folded {
+    flex: 0 0 44px;
+  }
+}
+
+.col--folded {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 44px;
+  min-height: 200px;
+  padding: 14px 0;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--col-color, var(--ink-3));
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 140ms var(--ease), border-color 140ms var(--ease);
+}
+
+.col--folded:hover {
+  background: var(--surface-hover);
+}
+
+.col--folded.is-over {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.col--folded__name {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* На телефоне доска вертикальная: свёрнутый этап — тонкая строка. */
+@media (max-width: 680px) {
+  .col--folded {
+    flex-direction: row;
+    justify-content: space-between;
+    width: auto;
+    min-height: 0;
+    padding: 10px 14px;
+    border-top-width: 1px;
+    border-left: 3px solid var(--col-color, var(--ink-3));
+  }
+
+  .col--folded__name {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}
+
+/* --- Доска сотрудника (администратор) ------------------------------------ */
+
+.board-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 12px;
+  background: var(--accent-soft);
+  font-size: 12.5px;
+  color: var(--accent-ink);
+}
+
+.board-banner b {
+  font-weight: 650;
+}
+
+.board-banner__leave {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.board-banner__leave:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.board-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.board-picker__label {
+  color: var(--ink-3);
+}
+
+.board-picker__select {
+  height: 26px;
+  max-width: 180px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.board-picker__select:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+/* --- Карточка лида: листалка, проигрыш, поля ------------------------------ */
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pager .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.pager .icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pager__count {
+  min-width: 52px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn--lose:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.stage-strip--disabled button {
+  cursor: default;
+}
+
+.stage-strip--disabled button:not([aria-pressed="true"]) {
+  opacity: 0.55;
+}
+
+.stage-strip--disabled button:hover {
+  background: transparent;
+}
+
+.record-alert {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.record-alert--warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.record-alert--danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.record-alert .btn {
+  margin-left: auto;
+}
+
+.record-alert__action {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.record-alert__action:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.lead-lost-note {
+  margin-top: 4px;
+}
+
+.card--lost {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Диагональная плашка в углу, как у проигранной сделки в рабочей CRM. */
+.lost-ribbon {
+  position: absolute;
+  top: 18px;
+  right: -44px;
+  z-index: 2;
+  width: 170px;
+  padding: 4px 0;
+  transform: rotate(45deg);
+  background: var(--danger);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+fieldset.lead-form {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+}
+
+fieldset.lead-form:disabled .lead-input {
+  color: var(--ink-2);
+  cursor: default;
+}
+
+fieldset.lead-form:disabled .lead-input:hover {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.lead-field__value {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: 28px;
+  padding: 0 8px;
+}
+
+.lead-field--top {
+  align-items: flex-start;
+}
+
+.lead-field--top .lead-field__label {
+  padding-top: 7px;
+}
+
+.lead-field__text {
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.owner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  margin-left: -6px;
+  padding: 3px 8px 3px 4px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.owner-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.owner-btn:disabled {
+  cursor: default;
+}
+
+/* Ошибка конкретного поля (витрина состояний: ответ сервера по полю). */
+.lead-input--error,
+.lead-input--error:hover {
+  border-color: var(--danger);
+  background-color: var(--danger-soft);
+}
+
+.field-error {
+  margin: 2px 0 4px 120px;
+  font-size: 11px;
+  color: var(--danger);
+}
+
+/* --- Поле тегов ------------------------------------------------------------ */
+
+.tags-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+}
+
+.tags-field__value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.tags-field__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.tags-field__add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tags-field__empty {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.tags-field__pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 40;
+  width: min(280px, 100%);
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.tags-field__search {
+  width: 100%;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.tags-field__search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.tags-field__list {
+  max-height: 200px;
+  margin-top: 4px;
+  overflow-y: auto;
+}
+
+.tags-field__row {
+  display: flex;
+  align-items: center;
+}
+
+.tags-field__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 6px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.tags-field__option:hover {
+  background: var(--surface-3);
+}
+
+.tags-field__check {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  color: var(--accent);
+}
+
+.tags-field__option[aria-selected="true"] .tags-field__check {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tags-field__delete {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 8px;
+  color: var(--ink-3);
+}
+
+.tags-field__delete:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.tags-field__hint {
+  padding: 8px 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.tags-field__create {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px 6px 4px;
+  border-top: 1px solid var(--line);
+}
+
+.tags-field__create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}
+
+.tags-field__create-btn:hover {
+  filter: brightness(0.97);
+}
+
+/* --- Диалоги: причины проигрыша и выбор коллеги --------------------------- */
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice-list__legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.choice:hover {
+  background: var(--surface-2);
+}
+
+.choice.is-checked {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.choice input {
+  accent-color: var(--accent);
+}
+
+.picker-search {
+  margin-top: 8px;
+}
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  margin-top: 8px;
+  overflow-y: auto;
+}
+
+.picker-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 8px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.picker-list__item:hover {
+  background: var(--surface-3);
+}
+
+.picker-list__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.picker-list__role {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.picker-list__empty {
+  padding: 10px 4px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* Открытое меню карточки — над соседними карточками колонки. */
+.drag-wrap:has(.menu__list) {
+  position: relative;
+  z-index: 5;
+}

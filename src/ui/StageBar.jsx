@@ -15,7 +15,8 @@ import { useEffect, useRef, useState } from "react";
 /** Сколько этапов держим видимыми; остальные уходят под «…». */
 const VISIBLE_COUNT = 6;
 
-export function StageBar({ stages = [], currentId, onSelect }) {
+/** disabled — карточка только для чтения (например, проигранный лид). */
+export function StageBar({ stages = [], currentId, onSelect, disabled = false }) {
   const [open, setOpen] = useState(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
@@ -78,6 +79,7 @@ export function StageBar({ stages = [], currentId, onSelect }) {
       <button
         type="button"
         className="stage-strip__more"
+        disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open === side}
         aria-label={`${side === "before" ? "Предыдущие этапы" : "Следующие этапы"}: ${items.length}`}
@@ -92,7 +94,7 @@ export function StageBar({ stages = [], currentId, onSelect }) {
 
   return (
     <>
-      <div className="stage-strip" role="group" aria-label="Этапы лида">
+      <div className={`stage-strip${disabled ? " stage-strip--disabled" : ""}`} role="group" aria-label="Этапы лида">
         {before.length > 0 && more("before", before)}
 
         {visible.map((stage) => (
@@ -100,6 +102,7 @@ export function StageBar({ stages = [], currentId, onSelect }) {
             key={stage.id}
             type="button"
             aria-pressed={stage.id === currentId}
+            disabled={disabled}
             onClick={() => pick(stage.id)}
           >
             <span className="stage-strip__dot" style={{ background: stage.color }} />
