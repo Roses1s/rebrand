@@ -1,6 +1,8 @@
 /**
  * Клиенты компании: поиск и сегменты «Все / Мои / Проигранные».
- * Свои лиды открываются по клику, активные лиды коллег закрыты замком.
+ * Свои лиды открываются по клику, активные лиды коллег закрыты замком
+ * (администратору открыты все). «Все» и «Мои» — активные лиды; проигранные
+ * живут в своём сегменте, их может открыть и забрать себе любой сотрудник.
  */
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,10 +27,11 @@ export function ClientsPage() {
       })),
     [leads, stages],
   );
+  const active = clients.filter((client) => !client.lost);
   const segments = [
-    { value: "all", label: "Все", count: clients.length },
-    { value: "mine", label: "Мои", count: clients.filter((client) => client.ownerId === ME.id).length },
-    { value: "lost", label: "Проигранные", count: 0 },
+    { value: "all", label: "Все", count: active.length },
+    { value: "mine", label: "Мои", count: active.filter((client) => client.ownerId === ME.id).length },
+    { value: "lost", label: "Проигранные", count: clients.length - active.length },
   ];
   const [segment, setSegment] = useState("all");
   const [search, setSearch] = useState("");
@@ -42,7 +45,7 @@ export function ClientsPage() {
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
     return clients.filter((client) => {
-      if (segment === "lost") return false;
+      if ((segment === "lost") !== Boolean(client.lost)) return false;
       if (segment === "mine" && client.ownerId !== ME.id) return false;
       if (!query) return true;
       return [client.name, client.contact, client.city, client.route, client.cargo]
@@ -105,7 +108,7 @@ export function ClientsPage() {
             {!loading &&
               rows.map((client) => {
               const owner = OWNER(client.ownerId);
-              const locked = client.ownerId !== ME.id;
+              const locked = client.ownerId !== ME.id && !client.lost && !ME.isAdmin;
               return (
                 <tr
                   key={client.id}
@@ -122,7 +125,7 @@ export function ClientsPage() {
                         <div className="cell-company__name">{client.name}</div>
                         <div className="cell-company__sub">
                           {client.city}
-                          {locked ? " · лид коллеги" : ""}
+                          {locked ? " · лид коллеги" : client.lost && client.ownerId !== ME.id ? " · можно взять себе" : ""}
                         </div>
                       </div>
                     </div>
@@ -138,9 +141,15 @@ export function ClientsPage() {
                     </div>
                   </td>
                   <td>
-                    <span className="status status--progress" style={{ background: "var(--surface-3)", color: "var(--ink-2)" }}>
-                      {client.stageName}
-                    </span>
+                    {client.lost ? (
+                      <span className="status" style={{ background: "var(--danger-soft)", color: "var(--danger)" }} title="Причина проигрыша">
+                        Проигрыш · {client.lossReason || "без причины"}
+                      </span>
+                    ) : (
+                      <span className="status status--progress" style={{ background: "var(--surface-3)", color: "var(--ink-2)" }}>
+                        {client.stageName}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <div className="row" style={{ gap: 8 }}>
