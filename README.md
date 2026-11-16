@@ -286,7 +286,7 @@ React 19 · React Router 7 · Vite 8 · lucide-react · @dnd-kit/core, sortable,
 
 ## Git
 
-Ветка этой сессии: `arena/4c2e5e44-rebrand`. Перед работой проверяйте текущую
+Ветка этой сессии: `arena/c31ae4ca-rebrand`. Перед работой проверяйте текущую
 ветку командой `git rev-parse --abbrev-ref HEAD`; не переключайте её по старым
 записям документации. Ключевые точки истории:
 
