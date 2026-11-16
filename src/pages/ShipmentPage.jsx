@@ -179,9 +179,13 @@ export function ShipmentPage() {
     setDraft((prev) => ({ ...prev, [key]: raw === "" ? null : Number(raw) }));
   };
 
-  /** Enter — сохранить, Esc — вернуть сохранённое (в многострочном поле Enter — перенос). */
+  /**
+   * Enter — сохранить, Esc — вернуть сохранённое. Только в однострочных полях:
+   * в комментарии Enter — перенос строки, на кнопках и галочках — их действие.
+   */
   function onFieldKeyDown(event) {
-    if (event.target.tagName === "TEXTAREA") return;
+    const { tagName, type } = event.target;
+    if (tagName !== "INPUT" || type === "checkbox") return;
     if (event.key === "Enter") {
       event.preventDefault();
       if (dirty) persist(draft);
@@ -195,7 +199,7 @@ export function ShipmentPage() {
 
   function copy() {
     if (dirty) persist(draft);
-    const created = copyShipment(shipment.id);
+    const created = copyShipment(shipment.id, dirty ? draft : null);
     if (created) navigate(`/shipments/${created.id}`);
   }
 

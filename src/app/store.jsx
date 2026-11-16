@@ -211,12 +211,16 @@ export function LeadsProvider({ children }) {
       return shipment;
     };
 
-    /** Копия заявки: новая запись с новым номером, статус «Новая», дата — сейчас. */
-    const copyShipment = (sourceId) => {
+    /**
+     * Копия заявки: новая запись с новым номером, статус «Новая», дата — сейчас.
+     * `pending` — несохранённые правки формы: копия делается с того, что видит
+     * пользователь, а не с последней сохранённой версии.
+     */
+    const copyShipment = (sourceId, pending = null) => {
       const source = shipments.find((item) => item.id === sourceId);
       if (!source) return null;
       const id = nextShipmentId(shipments);
-      const shipment = normalizeShipment({ ...copyOf(source), id, number: shipmentNumber(id) });
+      const shipment = normalizeShipment({ ...copyOf({ ...source, ...pending }), id, number: shipmentNumber(id) });
       setShipments((prev) => [...prev, shipment]);
       return shipment;
     };
@@ -394,6 +398,9 @@ export function LeadsProvider({ children }) {
       setStages(DEFAULT_STAGES);
       setLeads(DEFAULT_LEADS);
       setTags(DEFAULT_TAGS);
+      // Заявки связаны с лидами по leadId: без них вернувшиеся лиды остались
+      // бы без своих демо-заявок, а новые демо-заявки не появились бы вовсе.
+      setShipments(DEFAULT_SHIPMENTS);
     };
 
     return {

@@ -169,7 +169,7 @@ export function SettingsPage() {
             <div className="card__head">
               <div>
                 <div className="card__title">Демо-данные</div>
-                <div className="card__sub">Вернуть стандартные этапы и лиды моей доски</div>
+                <div className="card__sub">Вернуть стандартные этапы, лиды и заявки</div>
               </div>
             </div>
             <div className="card__body">
