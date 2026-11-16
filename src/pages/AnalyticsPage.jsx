@@ -1,5 +1,5 @@
 /** Личная аналитика: период, своя воронка, поступление лидов, лиды с заявками, источники. */
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 import { Shell } from "../app/Shell";
@@ -77,7 +77,7 @@ export function AnalyticsPage() {
   const myLeads = useMemo(() => leads.filter((lead) => lead.ownerId === ME.id && !lead.lost), [leads]);
   const myLeadIds = useMemo(() => new Set(myLeads.map((lead) => lead.id)), [myLeads]);
   const myShipments = useMemo(() => shipments.filter((shipment) => myLeadIds.has(shipment.leadId)), [myLeadIds, shipments]);
-  const marginOf = (lead) => leadShipmentMargin(lead.id, shipments);
+  const marginOf = useCallback((lead) => leadShipmentMargin(lead.id, shipments), [shipments]);
 
   const stats = useMemo(() => {
     const margin = myLeads.reduce((total, lead) => total + marginOf(lead), 0);
@@ -85,7 +85,7 @@ export function AnalyticsPage() {
     const marginLeads = myLeads.filter((lead) => marginOf(lead) !== 0).length;
     const avg = myLeads.length ? Math.round(margin / myLeads.length) : 0;
     return { margin, potential, marginLeads, avg };
-  }, [myLeads, shipments, stages]);
+  }, [myLeads, marginOf, stages]);
 
   const funnel = useMemo(() => {
     const max = Math.max(...stages.map((stage) => myLeads.filter((lead) => lead.stageId === stage.id).length)) || 1;
@@ -99,11 +99,11 @@ export function AnalyticsPage() {
         width: Math.round((stageLeads.length / max) * 92) + 8,
       };
     });
-  }, [myLeads, shipments, stages]);
+  }, [myLeads, marginOf, stages]);
 
   const topDeals = useMemo(
     () => [...myLeads].filter((lead) => marginOf(lead) !== 0).sort((a, b) => marginOf(b) - marginOf(a)).slice(0, 4),
-    [myLeads, shipments],
+    [myLeads, marginOf],
   );
   const maxDeal = topDeals.length ? marginOf(topDeals[0]) || 1 : 1;
 

@@ -97,15 +97,19 @@ export function LeadPage() {
   // Открытый диалог действия: "lose" | "transfer" | "delete" | null.
   const [dialog, setDialog] = useState(null);
   const [stageId, setStageId] = useState(lead?.stageId ?? 1);
+  // Демо-лента пересобирается только при смене лида или этапа, а не от каждой правки.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const chatter = useMemo(() => leadChatter(lead), [lead?.id, lead?.stageId]);
 
   // Правки живут в черновике: пока их не сохранили, лид и доска не меняются.
   const [draft, setDraft] = useState(() => draftOf(lead));
   const [saved, setSaved] = useState(() => draftOf(lead));
+  // Черновик сбрасывается только при переходе на другой лид (листалка).
   useEffect(() => {
     const next = draftOf(lead);
     setDraft(next);
     setSaved(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?.id]);
 
   // Этап меняется и снаружи: передача ставит лид на первый этап.
@@ -160,16 +164,22 @@ export function LeadPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft, dirty, lead?.id]);
 
-  // Уходим со страницы с несохранёнными правками — дописываем их сразу,
-  // чтобы переход на доску не «съел» ввод.
+  // Уходим с лида с несохранёнными правками — на другой экран или листалкой
+  // на соседний лид — дописываем их сразу, чтобы переход не «съел» ввод.
+  // Снимок обновляется после отрисовки, поэтому при смене лида в нём ещё
+  // прежний лид и его черновик, а не новый лид со старым черновиком.
   const latest = useRef({ id: null, dirty: false, draft: null, update: updateLead });
-  latest.current = { id: lead?.id, dirty, draft, update: updateLead };
+  useEffect(() => {
+    latest.current = { id: lead?.id, dirty, draft, update: updateLead };
+  });
   useEffect(
     () => () => {
       const state = latest.current;
-      if (state.dirty && state.draft?.name?.trim()) state.update(state.id, state.draft);
+      if (state.id != null && state.dirty && state.draft?.name?.trim()) {
+        state.update(state.id, { ...state.draft, name: state.draft.name.trim() });
+      }
     },
-    [],
+    [lead?.id],
   );
 
   // Уведомление внизу экрана: сейчас это только «почта не указана».

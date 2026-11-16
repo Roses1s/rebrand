@@ -428,22 +428,27 @@ export function FunnelPage() {
     ];
   }, [myLeads, shipments, stages]);
 
-  const visible = (lead) => {
-    if (filter === "hot" && !lead.hot) return false;
-    if (filter === "late" && !lead.late) return false;
-    if (query && ![lead.name, lead.inn, lead.contact, lead.phone].join(" ").toLowerCase().includes(query)) return false;
-    return true;
-  };
+  const visible = useCallback(
+    (lead) => {
+      if (filter === "hot" && !lead.hot) return false;
+      if (filter === "late" && !lead.late) return false;
+      if (query && ![lead.name, lead.inn, lead.contact, lead.phone].join(" ").toLowerCase().includes(query)) return false;
+      return true;
+    },
+    [filter, query],
+  );
 
   const listRows = useMemo(() => {
     const rows = myLeads.filter(visible);
     const dir = sort.dir === "asc" ? 1 : -1;
+    // Этапы сортируются в порядке доски, а не по номеру: порядок можно менять в настройках.
+    const stageOrder = new Map(stages.map((stage, index) => [stage.id, index]));
     return [...rows].sort((a, b) => {
       switch (sort.key) {
         case "margin":
           return (marginOf(a, shipments) - marginOf(b, shipments)) * dir;
         case "stage":
-          return (a.stageId - b.stageId) * dir;
+          return ((stageOrder.get(a.stageId) ?? 0) - (stageOrder.get(b.stageId) ?? 0)) * dir;
         case "contact":
           return a.contact.localeCompare(b.contact, "ru") * dir;
         case "priority":
@@ -454,7 +459,7 @@ export function FunnelPage() {
           return a.name.localeCompare(b.name, "ru") * dir;
       }
     });
-  }, [myLeads, shipments, filter, sort, query]);
+  }, [myLeads, shipments, stages, sort, visible]);
 
   const allSelected = listRows.length > 0 && listRows.every((lead) => selected.includes(lead.id));
   const someSelected = selected.length > 0 && !allSelected;

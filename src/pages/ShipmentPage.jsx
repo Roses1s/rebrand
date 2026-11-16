@@ -106,6 +106,8 @@ export function ShipmentPage() {
   const [tab, setTab] = useState("lines");
   const [moreCarrier, setMoreCarrier] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // Демо-лента собирается один раз на заявку, а не от каждой правки.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const chatter = useMemo(() => shipmentChatter(shipment), [shipment?.id]);
 
   useEffect(() => {
@@ -113,6 +115,7 @@ export function ShipmentPage() {
     setDraft(next);
     setSaved(next);
     setError("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shipment?.id]);
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(saved);
