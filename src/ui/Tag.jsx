@@ -25,11 +25,15 @@ export function Chip({ active, count, children, ...props }) {
   );
 }
 
-/** Круглый аватар с инициалами. */
+/**
+ * Круглый аватар с инициалами. Размеры: sm, md (по умолчанию), lg, xl.
+ * Там, где размер задан стилями места (лента, «Продавец», плашка доски),
+ * он важнее размера аватара.
+ */
 export function Avatar({ initials, title, size = "md", color = "", className }) {
   return (
     <span
-      className={cn("avatar", size === "lg" && "avatar--lg", size === "xl" && "avatar--xl", color, className)}
+      className={cn("avatar", size !== "md" && `avatar--${size}`, color, className)}
       title={title}
     >
       {initials}

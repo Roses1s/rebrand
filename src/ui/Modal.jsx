@@ -1,7 +1,12 @@
 import { X } from "lucide-react";
 import { useEffect } from "react";
 
-/** Модалка: затемнение, Esc, клик по фону, кнопки внизу. */
+/**
+ * Модалка: затемнение, Esc, кнопки внизу.
+ * Клик по фону окно не закрывает — как в рабочей CRM (решение владельца
+ * 16.11): у подтверждений это случайный клик, у форм — потеря введённого.
+ * Закрытие — кнопкой «Закрыть», «Отмена» или Esc.
+ */
 export function Modal({ open, title, onClose, children, footer }) {
   useEffect(() => {
     if (!open) return undefined;
@@ -15,15 +20,7 @@ export function Modal({ open, title, onClose, children, footer }) {
   if (!open) return null;
 
   return (
-    // Клик по затемнению закрывает окно; нажатие внутри окна сюда не считается.
-    // Фон — role="presentation": для клавиатуры есть Esc и кнопка «Закрыть».
-    <div
-      className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose?.();
-      }}
-    >
+    <div className="modal-backdrop">
       <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal__head">
           <span className="modal__title">{title}</span>

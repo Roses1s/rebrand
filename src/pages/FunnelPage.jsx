@@ -2,7 +2,7 @@
  * Воронка лидов — стартовый экран менеджера.
  * KPI считаются по лидам доски; поиск и чипы-фильтры; переключатель «канбан / список»:
  * канбан с перетаскиванием на @dnd-kit, звёздами приоритета и сворачиванием этапов,
- * список с сортировкой и массовыми действиями.
+ * список с сортировкой и выделением строк (массового удаления нет — как в CRM).
  * Администратор может открыть доску сотрудника (`?board=<id>`), как в рабочей CRM.
  * Проигранные лиды на доске и в списке не показываются.
  */
@@ -22,7 +22,6 @@ import {
   Phone,
   Plus,
   Target,
-  Trash2,
   Users,
   Wallet,
   X,
@@ -249,7 +248,7 @@ function SortHead({ label, sortKey, sort, onSort, align = "left", width }) {
 
 export function FunnelPage() {
   const navigate = useNavigate();
-  const { leads, stages, shipments, tags, openLeadDialog, moveLead, removeLeads, addStage, updateLead } = useLeads();
+  const { leads, stages, shipments, tags, openLeadDialog, moveLead, addStage, updateLead } = useLeads();
   const [params, setParams] = useSearchParams();
   // Чужую доску открывает только администратор; у менеджера параметр игнорируется.
   const boardParam = Number(params.get("board"));
@@ -474,11 +473,6 @@ export function FunnelPage() {
 
   function toggleAll() {
     setSelected(allSelected ? [] : listRows.map((lead) => lead.id));
-  }
-
-  function removeSelected() {
-    removeLeads(selected);
-    setSelected([]);
   }
 
   function openBoard(userId) {
@@ -719,10 +713,6 @@ export function FunnelPage() {
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => setSelected([])}>
                 <X size={14} strokeWidth={2} />
                 Снять выделение
-              </button>
-              <button type="button" className="btn btn--danger btn--sm" style={{ marginLeft: "auto" }} onClick={removeSelected}>
-                <Trash2 size={14} strokeWidth={2} />
-                Удалить
               </button>
             </div>
           )}
