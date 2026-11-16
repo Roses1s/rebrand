@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  *
  * `items`: { label, onSelect?, to?, danger?, disabled?, icon? } — пункт с `to`
  * рендерится ссылкой через `renderLink`, чтобы меню не зависело от роутера.
- * События не уходят наверх, чтобы клик по меню не срабатывал у родителя.
+ * Клик по кнопке и пунктам не уходит наверх, чтобы не срабатывать у родителя.
  */
 export function Menu({ label, icon: Icon, items, align = "right", className = "", buttonClassName = "icon-btn", renderLink }) {
   const [open, setOpen] = useState(false);
@@ -31,17 +31,12 @@ export function Menu({ label, icon: Icon, items, align = "right", className = ""
     };
   }, [open]);
 
-  const stop = (event) => event.stopPropagation();
   const visible = items.filter(Boolean);
 
   return (
     <span
       ref={rootRef}
       className={`menu ${className}`}
-      onMouseDown={stop}
-      onTouchStart={stop}
-      onPointerDown={stop}
-      onKeyDown={stop}
     >
       <button
         type="button"

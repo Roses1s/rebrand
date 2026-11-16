@@ -10,9 +10,10 @@ export const priorityLabel = (value) => LABELS[value] ?? LABELS[0];
  * Клик по звезде ставит приоритет, повторный клик по той же — снимает (0).
  * Без `onChange` звёзды только показывают значение.
  *
- * События мыши, пальца и клавиатуры не уходят наверх: на доске карточка
- * перетаскивается, и клик по звезде не должен начинать перенос или
- * открывать лид.
+ * События мыши, пальца и клавиатуры с самих звёзд не уходят наверх: на доске
+ * карточка перетаскивается, и клик по звезде не должен начинать перенос или
+ * открывать лид. Обработчики висят на кнопках, а не на обёртке — так требует
+ * проверка доступности (jsx-a11y) рабочей CRM.
  */
 export function StarRating({ value = 0, onChange, size = "md", className = "" }) {
   const label = `${priorityLabel(value)}: ${value} из ${PRIORITY_MAX}`;
@@ -36,10 +37,6 @@ export function StarRating({ value = 0, onChange, size = "md", className = "" })
       className={`stars stars--${size} stars--editable ${className}`}
       role="group"
       aria-label={label}
-      onMouseDown={stop}
-      onTouchStart={stop}
-      onPointerDown={stop}
-      onKeyDown={stop}
     >
       {LEVELS.map((level) => (
         <button
@@ -49,6 +46,10 @@ export function StarRating({ value = 0, onChange, size = "md", className = "" })
           aria-label={value === level ? `Снять приоритет ${level}` : `Приоритет ${level} из ${PRIORITY_MAX}`}
           aria-pressed={value >= level}
           title={value === level ? "Снять приоритет" : priorityLabel(level)}
+          onMouseDown={stop}
+          onTouchStart={stop}
+          onPointerDown={stop}
+          onKeyDown={stop}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
