@@ -63,14 +63,14 @@ git pull origin arena/c31ae4ca-rebrand; npm install; npm run dev
 | `/` | редирект на `/crm` |
 | `/crm` | Воронка лидов: KPI, фильтры, канбан и список |
 | `/crm/leads/:id` | Карточка лида |
-| `/customers` | Клиенты |
-| `/shipments` | Заявки |
-| `/shipments/:id` | Карточка заявки |
+| `/customers` | Клиенты: плитки или таблица |
+| `/shipments` | Заявки; у админа `?employee=N` — заявки сотрудника |
+| `/shipments/:id` | Карточка заявки — полная форма |
 | `/tasks` | Задачи |
 | `/analytics` | Аналитика |
 | `/accounting` | Бухгалтерия (заглушка) |
 | `/settings` | Настройки, роль, редактор этапов |
-| `/admin` | Администрирование (только роль admin) |
+| `/admin` | Панель управления (только роль admin); `?section=accountants` / `security` |
 | `/kit` | Витрина дизайн-системы |
 | `*` | редирект на `/crm` |
 
@@ -86,13 +86,20 @@ src/
                        Tasks, Analytics, Accounting, Settings, Admin, Kit)
   ui/                  Button, Field, Tag (Status/Chip/Avatar), Modal,
                        Segmented, States (Empty/Skeleton/TableSkeleton),
-                       Chatter (лента карточки лида), StageBar (полоса
-                       этапов с «…»), Toast (уведомление), cn
+                       Chatter (лента карточки лида и заявки), StageBar
+                       (полоса этапов с «…»), Toast (уведомление), Menu,
+                       StarRating, TagChip, TagsField, LeadDialogs,
+                       TokenField (поле чипами), ShowMore («Показать ещё»),
+                       EmployeeSuggestions (подсказки сотрудников под
+                       поиском, только админ), QuickCreateShipmentDialog, cn
   lib/format.js        money, shortMoney, initials, fileSize,
                        relativeTime, absoluteTime, dayLabel
   lib/margin.js        маржа заявки и сумма маржи связанных с лидом заявок
+  lib/shipment.js      этапы и справочники заявки, нормализация старых
+                       сохранений, маршрут из городов, копия, даты
+  lib/folded.js        свёрнутые этапы доски
   mock/data.js         демо-данные в форме API рабочей CRM
-  mock/chatter.js      лента лида в форме TimelineEntry рабочей CRM
+  mock/chatter.js      ленты лида и заявки в форме TimelineEntry рабочей CRM
   styles/              tokens, base, ui, shell, board, pages, kit, compact,
                        lead-form, stage-bar, chatter, toast
 ```
@@ -110,7 +117,11 @@ src/
 `SHIPMENTS`, `TASKS`, `TASK_TYPES`, `EDO_OPERATORS`, `ANALYTICS` (по периодам:
 `inflow`, `sources`). В исходном наборе 20 лидов/клиентов, из них 11 своих;
 два проигранных — 19 «ВолгаАгро» (свой) и 20 «Пермь-Кабель» (коллеги), так что
-на доске 10 активных своих. Своих заявок — 3, задач — 7. У лида `priority` —
+на доске 10 активных своих. Заявок — 8 (своих 3, у коллег 5, чтобы админу было
+что отбирать), задач — 7. Поля заявки плоские, как у сервера в camelCase
+(`loadingCities`, `carrierInn`, `customerTax`, `hasTrailer`…); `route` не
+хранится, его собирает `routeOf` из городов; старые вложенные сохранения
+переводит `normalizeShipment` при загрузке. У лида `priority` —
 число 0–3 (старые сохранения со словами high/mid/low переводятся при загрузке),
 а также `tagIds`, `lost`, `lossReason`.
 
@@ -126,11 +137,12 @@ src/
 - `stages` — этапы текущего менеджера: `id`, `name`, `hint`, `color`;
 - `shipments` — первоначально демо-набор `SHIPMENTS`, затем локальная копия под
   ключом менеджера; все экраны берут заявки только отсюда;
-- `addShipment(draft)` — быстро создаёт заявку с новым id и номером, привязывает
-  её к `leadId`, переносит из лида контакт и ответственного, оставляет деньги,
-  груз и адрес пустыми; `updateShipment(id, patch)` меняет локальную заявку.
-  Сейчас в карточке заявки редактируются цены клиента и перевозчика, поэтому
-  маржа сразу отражается во всех связанных витринах;
+- `addShipment({ lead, … })` — быстро создаёт заявку с новым id и номером,
+  привязывает её к лиду, переносит из лида контакт и ответственного, оставляет
+  деньги, груз и адрес пустыми; `updateShipment(id, patch)` — единственная точка
+  сохранения формы заявки (пересчитывает маршрут); `copyShipment(id)` — копия с
+  новым номером, статусом «Новая» и датой «сейчас», возвращает новую заявку;
+  `deleteShipment(id)` — удаление (в интерфейсе только у админа);
 - `tags`, `addTag(name, color)` (без дублей по имени), `removeTag(id)` (снимает
   тег со всех лидов); `loseLead(id, reason)`, `restoreLead(id, { takeOver })`
   («Восстановить» / «Взять себе»), `transferLead(id, ownerId)` (лид встаёт
@@ -281,7 +293,9 @@ npm run build
 Серверный рендер всех 11 экранов в обеих ролях. Рецепт для Bash в песочнице:
 он создаёт отдельную временную папку, удаляет её при выходе и не добавляет
 постоянных тестов или зависимостей. Вместе со списком и отсутствующими/чужими
-записями, проигранными лидами и доской сотрудника выполняются 40 рендеров.
+записями, проигранными лидами, доской сотрудника, формой заявки, заявками
+сотрудника и разделами админки выполняются 52 рендера (по 26 на роль); плитки
+клиентов и диалоги админки и удаления заявки проверяются отдельным рендером.
 
 ```bash
 (
@@ -297,14 +311,15 @@ import { LeadsProvider } from "../../src/app/store";
 import { ME } from "../../src/mock/data";
 import { FunnelPage } from "../../src/pages/FunnelPage";
 import { LeadPage } from "../../src/pages/LeadPage";
-import { ClientsPage } from "../../src/pages/ClientsPage";
+import { ClientsPage, ClientTile } from "../../src/pages/ClientsPage";
+import { ALL_LEADS, TAGS } from "../../src/mock/data";
 import { ShipmentsPage } from "../../src/pages/ShipmentsPage";
-import { ShipmentPage } from "../../src/pages/ShipmentPage";
+import { ShipmentPage, DeleteShipmentDialog } from "../../src/pages/ShipmentPage";
 import { TasksPage } from "../../src/pages/TasksPage";
 import { AnalyticsPage } from "../../src/pages/AnalyticsPage";
 import { AccountingPage } from "../../src/pages/AccountingPage";
 import { SettingsPage } from "../../src/pages/SettingsPage";
-import { AdminPage } from "../../src/pages/AdminPage";
+import { AdminPage, UserDialog, AccountantDialog } from "../../src/pages/AdminPage";
 import { KitPage } from "../../src/pages/KitPage";
 const screens = [
   ["/crm", FunnelPage, "/crm"], ["/crm/leads/:id", LeadPage, "/crm/leads/1"],
@@ -336,7 +351,7 @@ export function run() {
       assert.ok(html.includes("Добавить этап"));
       assert.ok(!html.includes("Сумма воронки"));
     }
-    if (path === "/admin") assert.ok(html.includes(ME.isAdmin ? "Доступ бухгалтеров" : "Доступ только у администратора"));
+    if (path === "/admin") assert.ok(html.includes(ME.isAdmin ? "Разделы панели управления" : "Доступ только у администратора"));
   }
   const leadHtml = render("/crm/leads/1");
   assert.ok(leadHtml.includes('aria-label="Приоритет лида"'));
@@ -361,6 +376,29 @@ export function run() {
   assert.ok(lostColleague.includes("Взять себе"), "take over");
   assert.ok(render("/crm/leads/999999").includes("Лид не найден"));
   assert.ok(render("/shipments/999999").includes("Заявка не найдена"));
+  const ship = render("/shipments/148");
+  assert.ok(ship.includes("Позиции заказа") && ship.includes("Транспортно-экспедиционное обслуживание"), "ship form");
+  assert.ok(ship.includes("Копировать") && ship.includes("Открыть лид"), "ship actions");
+  assert.equal(ship.includes("Безвозвратно удалить заявку"), ME.isAdmin, "delete admin only");
+  assert.ok(render("/shipments/142").includes("Тип транспорта"), "ship without carrier");
+  assert.ok(render("/customers").includes("Вид списка клиентов"), "customers view switch");
+  for (const lead of ALL_LEADS.slice(0, 20)) {
+    const locked = lead.ownerId !== ME.id && !lead.lost && !ME.isAdmin;
+    const tile = renderToString(<ClientTile client={{ ...lead, stageName: "Этап" }} tags={TAGS ?? []} locked={locked} onOpen={() => {}} />);
+    assert.ok(tile.includes("ИНН"), "tile inn");
+    assert.equal(tile.includes("Лид коллеги"), locked, "tile lock");
+    if (lead.lost) assert.ok(tile.includes("Проигрыш"), "tile lost");
+  }
+  for (const section of ["accountants", "security"]) {
+    const admin = render(`/admin?section=${section}`);
+    if (ME.isAdmin) assert.ok(admin.includes(section === "security" ? "Неудачные попытки входа" : "Доступ бухгалтеров"), section);
+  }
+  assert.ok(renderToString(<UserDialog users={[]} onCancel={() => {}} onSave={() => {}} />).includes("Новый пользователь"), "user dialog");
+  assert.ok(renderToString(<UserDialog user={{ id: 1, email: "a@b.ru", firstName: "", lastName: "", role: "admin", isActive: true }} users={[]} onCancel={() => {}} onSave={() => {}} />).includes("пусто = не менять"), "user edit");
+  assert.ok(renderToString(<AccountantDialog onCancel={() => {}} onSave={() => {}} />).includes("Новый бухгалтер"), "acc dialog");
+  assert.ok(renderToString(<DeleteShipmentDialog number="ЗВ-1" onCancel={() => {}} onConfirm={() => {}} />).includes("Удалить навсегда"), "delete dialog");
+  const byEmployee = render("/shipments?employee=2");
+  assert.equal(byEmployee.includes("Заявки сотрудника:"), ME.isAdmin, "employee banner");
   window.localStorage.setItem("crm.funnel.view", "list");
   assert.ok(render("/crm").includes('class="table leads-table"'));
 }
@@ -419,11 +457,10 @@ done
 
 Не реализовано (осознанно, поведение — не вёрстка):
 
-- глобальный поиск `⌘K` и хранение поиска в адресе страницы;
-- открытие доски сотрудника из админки и подсказки сотрудников в поиске
-  (сейчас доска выбирается списком «Доска: …» на воронке);
-- диалоги редактирования пользователей и бухгалтеров, удаление с подтверждением;
-- ошибки API с «Повторить», догрузка списков, скелетоны воронки и задач;
+- глобальный поиск `⌘K` и хранение поиска в адресе страницы (поиск работает
+  внутри экрана; подсказки сотрудников под поиском — у админа на воронке и в заявках);
+- диалог «Есть несохранённые изменения» (макет дописывает правки при уходе);
+- ошибки API с «Повторить», скелетоны воронки и задач;
 - перетаскивание самих колонок (порядок этапов меняется стрелками).
 
 Перенос в рабочую CRM — по [`PORTING.md`](PORTING.md): там решения владельца,

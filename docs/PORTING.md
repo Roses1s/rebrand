@@ -46,11 +46,11 @@
 | `src/app/Shell.jsx`, `shell.css` | `app/layout/AppShell.tsx`, `Navbar.tsx`; прототип `features/crm2` | панель 228/68 px, верхняя строка 64 px, бренд, мобильное меню |
 | `src/pages/FunnelPage.jsx`, `board.css` | `features/crm/KanbanPage.tsx`, `board/*`, `list/LeadListView.tsx` | канбан, карточка, колонки, линия вставки, список |
 | `src/pages/LeadPage.jsx`, `lead-form.css`, `chatter.css`, `stage-bar.css` | `features/crm/LeadFormPage.tsx`, `lead-form/*`, `shared/ui/chatter.tsx` | шапка, полоса этапов, блок «Клиент», вкладки, лента |
-| `src/pages/ClientsPage.jsx` | `features/customers/*` | таблица и сегменты |
-| `src/pages/ShipmentsPage.jsx` | `features/shipments/ShipmentsPage.tsx` | таблица, чипы статусов |
-| `src/pages/ShipmentPage.jsx` | `features/shipments/ShipmentFormPage.tsx`, `shipment-form/*` | шапка, степпер, блоки (доделывается) |
+| `src/pages/ClientsPage.jsx` | `features/customers/CustomersPage.tsx`, `CustomerTile.tsx` | плитка клиента, сегменты, переключатель вида |
+| `src/pages/ShipmentsPage.jsx` | `features/shipments/ShipmentsPage.tsx`, `employee-banner` | таблица, строка «Итого», чипы статусов, плашка сотрудника |
+| `src/pages/ShipmentPage.jsx`, `src/ui/TokenField.jsx` | `features/shipments/ShipmentFormPage.tsx`, `shipment-form/*`, `TokenField.tsx`, `DeleteShipmentDialog.tsx` | шапка, этапы, пять блоков формы, вкладки, лента |
 | `src/ui/QuickCreateShipmentDialog.jsx` | `features/shipments/QuickCreateShipmentDialog.tsx` | оформление диалога |
-| `src/pages/AdminPage.jsx` | `features/admin/*` | таблицы и карточки (доделывается) |
+| `src/pages/AdminPage.jsx` | `features/admin/*` | меню разделов, таблицы, диалоги, блоки «Безопасности» |
 | `src/pages/AccountingPage.jsx` | `features/accounting/AccountingPage.tsx` | заглушка |
 | `src/pages/SettingsPage.jsx` | нет | тема и редактор этапов; акцент и плотность — вопрос к владельцу при переносе |
 | `src/pages/TasksPage.jsx`, `AnalyticsPage.jsx` | нет | не переносятся до отдельного проекта (раздел 1) |
@@ -67,9 +67,9 @@
    сотрудника для админа; проигрыш с причиной, лента «Проигрыш»,
    «Восстановить / Взять себе», передача, удаление, «предыдущий / следующий»,
    образцы ошибок и конфликта версий на витрине `/kit`.
-2. **Заявки, клиенты, админка** — полная карточка заявки, поиск и
-   «Показать ещё» в списках, ошибки с «Повторить», диалоги админки,
-   «Безопасность».
+2. **Заявки, клиенты, админка** — ✅ сделано 16.11.2026 (подробно — раздел 4.2).
+   Полная редактируемая карточка заявки, список заявок как в CRM с «Итого»,
+   клиенты плитками, админка из трёх разделов с диалогами CRM.
 3. **Вход, лаунчер и меню профиля** — позже, по отдельному решению владельца.
 
 ### 4.1. Доска и карточка лида — что появилось в макете (16.11.2026)
@@ -91,6 +91,37 @@
 
 Проигранные лиды на доске, в списке, в счётчиках, аналитике и админке не
 считаются — как в рабочей CRM.
+
+### 4.2. Заявки, клиенты, админка — что появилось в макете (16.11.2026)
+
+| Что | Где в макете | Образец в рабочей CRM |
+|---|---|---|
+| Поля заявки — плоские, имена как у сервера в camelCase (`loadingCities`, `carrierInn`, `customerTax`…); маршрут собирается из городов | `src/lib/shipment.js`, `SHIPMENTS` в `src/mock/data.js` | `shipments/types`, `shipment-form/*` |
+| Список заявок: Номер-ссылка, Дата создания, Продавец (квадрат + имя), Клиент с маршрутом, Перевозчик, Статус, Маржа, Всего; строка «Итого» по всему отбору | `src/pages/ShipmentsPage.jsx`, `.table-link`, `.seller-cell`, `.table-total` в `record.css` | `ShipmentsPage.tsx`, `money.ts` |
+| Админ: заявки сотрудника — список «Сотрудник», подсказка «показать заявки» под поиском, `?employee=N`, плашка «Заявки сотрудника» | `ShipmentsPage.jsx`, `src/ui/EmployeeSuggestions.jsx`, `.search-suggest*`, `.board-banner` | `employee-banner`, `BoardSuggestions.tsx` |
+| «Показать ещё N из M» | `src/ui/ShowMore.jsx`, `.show-more` | кнопка в `ShipmentsPage.tsx`, `CustomersPage.tsx` |
+| Карточка заявки: номер крупным полем, этапы, блоки «Заявка», «Погрузка», «Выгрузка», «Перевозчик» (раскрытие «Водитель и подписант»), «Груз» | `src/pages/ShipmentPage.jsx`, `.ship-grid`, `.ship-group`, `.ship-more`, `.ship-check` | `ShipmentFormPage.tsx`, `shipment-form/*` |
+| Поля чипами: города, тип кузова, способ погрузки | `src/ui/TokenField.jsx`, `.token-field`, `.token` | `TokenField.tsx` |
+| Вкладки «Позиции заказа» (цены, налоги, «Налог исключён.», маржа) и «Прочая информация» | `ShipmentPage.jsx`, `.order-lines*`, `.ship-comment` | `shipment-form/*` |
+| Автосохранение 3 с, «Изменено / Сохранение… / Сохранено», Enter / Esc | `ShipmentPage.jsx` (тот же приём, что в карточке лида) | `ShipmentFormPage.tsx` |
+| «Копировать», «Удалить» (только админ, диалог «Удалить заявку безвозвратно?»), «Открыть лид» | `ShipmentPage.jsx`, `DeleteShipmentDialog`; `copyShipment`, `deleteShipment` в `store.jsx` | `ShipmentFormPage.tsx`, `DeleteShipmentDialog.tsx` |
+| Лента заявки (история статусов, заметка, вложение) | `src/ui/Chatter.jsx`, демо `shipmentChatter` в `src/mock/chatter.js` | `shared/ui/chatter.tsx` |
+| Клиенты плитками: монограмма 40 px (серая у проигранных), название, «ИНН X», замок у чужого активного лида, «Проигрыш + причина», теги и звёзды у открываемых, продавец или «Не назначен»; переключатель «плитки / таблица» | `src/pages/ClientsPage.jsx` (`ClientTile`), `.client-tile*` | `CustomerTile.tsx`, `CustomersPage.tsx` |
+| Админка: меню разделов слева, `?section=`; «Пользователи» (таблица, диалоги «Новый / Изменить пользователя», удаление), «Бухгалтеры» (статус, «Изменить ФИО», «Удалить / Восстановить»), «Безопасность» (вложения, неудачные входы, бэкапы с удалением) | `src/pages/AdminPage.jsx`, `.admin-layout`, `.admin-nav*`, `.admin-stats`, `.admin-meter`, `.backup-list`, `.row-actions` | `features/admin/*` |
+
+Отличия макета от CRM, которые при переносе **не повторять** (берётся поведение CRM):
+
+- у копии заявки в макете сразу новый номер; в CRM номер пустой до сохранения;
+- при уходе со страницы макет дописывает правки сам; в CRM — диалог
+  «Есть несохранённые изменения» (`shared/ui/unsaved-changes-dialog.tsx`),
+  его оставить, взяв только оформление кнопок;
+- маржа в макете — разница цен; в CRM — серверная;
+- нет поля «Лид» у новой заявки: в макете заявка создаётся только из карточки лида;
+- нет состояний загрузки с сервера и ошибок сети — их тексты остаются из CRM.
+
+Помечено «сверх CRM» и **не переносится** без отдельной просьбы: сводка KPI
+над админкой, «Счета / Банк» у бухгалтеров, двухфакторный вход и «одна
+сессия» (PARITY, раздел J).
 
 ## 5. Данные, которых в рабочей CRM нет
 
