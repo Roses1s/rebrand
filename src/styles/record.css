@@ -884,3 +884,311 @@ fieldset.lead-form:disabled .lead-input:hover {
   position: relative;
   z-index: 5;
 }
+
+/* --- Подсказки сотрудников под поиском (администратор) -------------------- */
+
+.topbar__search {
+  position: relative;
+}
+
+.search-suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.search-suggest__title {
+  padding: 4px 8px 6px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.search-suggest__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.search-suggest__item:hover,
+.search-suggest__item:focus-visible {
+  background: var(--surface-3);
+}
+
+.search-suggest__item .avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 9.5px;
+}
+
+.search-suggest__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.search-suggest__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* --- Таблицы: ссылка, продавец, итоги, догрузка ---------------------------- */
+
+.table-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.table-link:hover {
+  text-decoration: underline;
+}
+
+.seller-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* Квадрат с инициалами — как у продавца в таблицах рабочей CRM. */
+.avatar.avatar--square {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  font-size: 9px;
+}
+
+.table tfoot .table-total td {
+  border-top: 1px solid var(--line);
+  border-bottom: 0;
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+
+.show-more {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+/* --- Карточка заявки ------------------------------------------------------ */
+
+.money-plus {
+  color: var(--money);
+  font-weight: 600;
+}
+
+.money-minus {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Блоки формы парами, как группы бланка рабочей CRM; на узком экране — столбиком. */
+.ship-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1240px) {
+  .ship-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ship-group .card__body {
+  padding-top: 4px;
+}
+
+.ship-group .lead-field__label {
+  width: 128px;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.ship-group .field-error {
+  margin-left: 138px;
+}
+
+.ship-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.ship-more:hover {
+  color: var(--accent);
+}
+
+.ship-more svg {
+  transition: transform 140ms var(--ease);
+}
+
+.ship-more svg.is-open {
+  transform: rotate(180deg);
+}
+
+.ship-check {
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.ship-check input {
+  accent-color: var(--accent);
+}
+
+.ship-comment {
+  width: 100%;
+  height: auto;
+  min-height: 96px;
+  padding: 8px 10px;
+  border-color: var(--line);
+  line-height: 1.45;
+  resize: vertical;
+}
+
+/* Поле-список чипами: города, тип кузова, способ погрузки. */
+.token-field {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 30px;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 140ms var(--ease), background-color 140ms var(--ease);
+}
+
+.token-field:hover {
+  background: var(--surface-2);
+}
+
+.token-field:focus-within {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.token {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 4px 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 11.5px;
+  font-weight: 550;
+}
+
+.token__remove {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 99px;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.token__remove:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.token-field__input {
+  flex: 1;
+  min-width: 90px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  outline: none;
+}
+
+/* Позиции заказа: одна строка услуги, у заказчика и перевозчика свои налоги. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.order-lines {
+  min-width: 760px;
+}
+
+.order-lines th {
+  white-space: nowrap;
+}
+
+.order-lines__group {
+  text-align: center;
+  border-left: 1px solid var(--line);
+}
+
+.order-lines__split {
+  border-left: 1px solid var(--line);
+}
+
+.order-lines td .lead-input {
+  width: 100%;
+  border-color: var(--line);
+}
+
+.order-lines td .lead-input--select {
+  min-width: 96px;
+}
+
+.order-lines__total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.order-lines__total b {
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+
+.order-lines__note {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--ink-3);
+  text-align: right;
+}

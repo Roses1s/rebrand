@@ -104,3 +104,44 @@ export function leadChatter(lead) {
     }),
   ];
 }
+
+/**
+ * Лента заявки: создание из лида, смены статуса, заметка логиста и
+ * вложение — как таймлайн заявки в рабочей CRM.
+ */
+export function shipmentChatter(shipment) {
+  if (!shipment) return [];
+  const steps = ["Новая", "Проверена и подписана заявка", "Машина загрузилась", "Машина выгрузилась"];
+  const index = Math.max(0, ["new", "checked", "loaded", "unloaded"].indexOf(shipment.status));
+  const list = [
+    entry({
+      type: "history",
+      body: `Заявка ${shipment.number} создана из карточки лида «${shipment.client}»`,
+      who: shipment.ownerId,
+      at: ago({ days: 5, hours: 4 }),
+    }),
+  ];
+  for (let step = 1; step <= index; step += 1) {
+    list.push(
+      entry({
+        type: "history",
+        fieldLabel: "Статус",
+        oldValue: steps[step - 1],
+        newValue: steps[step],
+        who: shipment.ownerId,
+        at: ago({ days: 5 - step, hours: 2 }),
+      }),
+    );
+  }
+  list.push(
+    entry({
+      body: shipment.carrierName
+        ? `Перевозчик ${shipment.carrierName} подтвердил машину. Скан заявки подписан с двух сторон.`
+        : "Ищем перевозчика: две ставки на рассмотрении, решим до вечера.",
+      attachments: shipment.carrierName ? [{ id: 1, name: `Заявка-${shipment.number}.pdf`, size: 482_133 }] : [],
+      who: shipment.ownerId,
+      at: ago({ hours: 6 }),
+    }),
+  );
+  return list;
+}
