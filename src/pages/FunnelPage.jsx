@@ -53,6 +53,7 @@ import { Avatar, Chip } from "../ui/Tag";
 import { StarRating } from "../ui/StarRating";
 import { TagList } from "../ui/TagChip";
 import { Menu } from "../ui/Menu";
+import { EmployeeSuggestions } from "../ui/EmployeeSuggestions";
 import { ME, OWNER, TASKS, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
@@ -269,6 +270,9 @@ export function FunnelPage() {
   const foreignBoard = boardOwnerId !== ME.id;
   const [folded, setFolded] = useFoldedStages(ME.id, boardOwnerId);
   const [filter, setFilter] = useState("all");
+  // Поиск по доске и списку: название, ИНН, контакт — как поиск рабочей CRM.
+  const [search, setSearch] = useState("");
+  const query = search.trim().toLowerCase();
   const [addingStage, setAddingStage] = useState(false);
   const [stageName, setStageName] = useState("");
   const [view, setView] = useState(() => {
@@ -439,6 +443,7 @@ export function FunnelPage() {
   const visible = (lead) => {
     if (filter === "hot" && !lead.hot) return false;
     if (filter === "late" && !lead.late) return false;
+    if (query && ![lead.name, lead.inn, lead.contact, lead.phone].join(" ").toLowerCase().includes(query)) return false;
     return true;
   };
 
@@ -461,7 +466,7 @@ export function FunnelPage() {
           return a.name.localeCompare(b.name, "ru") * dir;
       }
     });
-  }, [myLeads, shipments, filter, sort]);
+  }, [myLeads, shipments, filter, sort, query]);
 
   const allSelected = listRows.length > 0 && listRows.every((lead) => selected.includes(lead.id));
   const someSelected = selected.length > 0 && !allSelected;
@@ -505,7 +510,22 @@ export function FunnelPage() {
   }
 
   return (
-    <Shell>
+    <Shell
+      search={search}
+      onSearch={setSearch}
+      searchSuggestions={
+        <EmployeeSuggestions
+          query={search}
+          excludeUserId={boardOwnerId}
+          actionLabel="открыть доску"
+          onPick={(userId) => {
+            // Фамилия нужна была только для выбора сотрудника — строку очищаем.
+            setSearch("");
+            openBoard(userId);
+          }}
+        />
+      }
+    >
       <div className="funnel">
       {foreignBoard && (
         <div className="board-banner" role="status">

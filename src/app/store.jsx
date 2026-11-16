@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { ME, PRIORITY_MAX, SHIPMENTS, STAGES, TAGS } from "../mock/data";
+import { copyOf, normalizeShipment, nowLocal, routeOf } from "../lib/shipment";
 
 const LeadsContext = createContext(null);
 
@@ -25,7 +26,7 @@ const DEFAULT_STAGES = STAGES.map(({ id, name, color, hint }) => ({ id, name, co
 const DEFAULT_LEADS = STAGES.flatMap((stage) =>
   stage.leads.map((lead, index) => ({ ...lead, position: index })),
 );
-const DEFAULT_SHIPMENTS = SHIPMENTS.map((shipment) => ({ ...shipment }));
+const DEFAULT_SHIPMENTS = SHIPMENTS.map(normalizeShipment);
 const DEFAULT_TAGS = TAGS.map((tag) => ({ ...tag }));
 
 /** Старые сохранения хранили приоритет словом — переводим в звёзды 0–3. */
@@ -89,7 +90,8 @@ function loadState() {
       });
   });
 
-  const shipments = load(SHIPMENTS_KEY, DEFAULT_SHIPMENTS);
+  // Старые сохранения заявок (вложенные погрузка/перевозчик/груз) переводятся в плоскую форму.
+  const shipments = load(SHIPMENTS_KEY, DEFAULT_SHIPMENTS).map(normalizeShipment);
   const tags = load(TAGS_KEY, DEFAULT_TAGS);
   return { stages, leads, shipments, tags };
 }
@@ -185,56 +187,52 @@ export function LeadsProvider({ children }) {
      * Быстрое создание заявки из сохранённой карточки лида. В макете цены
      * дозаполняют в карточке, а остальные полные реквизиты остаются заглушками.
      */
+    /** Быстрая заявка из карточки лида: клиент и ответственный берутся из лида. */
     const addShipment = ({ lead, loadingCity, unloadingCity, loadingDate, unloadingDate, carrierName, carrierInn, carrierContact }) => {
       const id = nextShipmentId(shipments);
-      const shipment = {
+      const shipment = normalizeShipment({
         id,
         number: shipmentNumber(id),
         leadId: lead.id,
         client: lead.name,
-        route: `${loadingCity} → ${unloadingCity}`,
-        status: "new",
-        customerPrice: null,
-        carrierPrice: null,
-        tax: "Без НДС",
         ownerId: lead.ownerId,
-        created: "только что",
-        loading: {
-          city: loadingCity,
-          address: "—",
-          date: loadingDate,
-          time: "—",
-          contact: lead.contact || "—",
-          phone: lead.phone || "—",
-        },
-        unloading: {
-          city: unloadingCity,
-          address: "—",
-          date: unloadingDate,
-          time: "—",
-          contact: lead.contact || "—",
-          phone: lead.phone || "—",
-        },
-        carrier: {
-          name: carrierName,
-          inn: carrierInn,
-          contact: carrierContact,
-          phone: "",
-          vehicle: "— не указан —",
-          plate: "",
-          trailer: "",
-          driver: "",
-          driverPhone: "",
-        },
-        cargo: { type: "—", weight: "—", volume: "—", body: "—", packaging: "—" },
-        comment: "",
-      };
+        status: "new",
+        createdAt: nowLocal(),
+        customerContact: lead.contact && lead.contact !== "—" ? lead.contact : "",
+        loadingCities: loadingCity ? [loadingCity] : [],
+        loadingDateFrom: loadingDate ?? "",
+        unloadingCities: unloadingCity ? [unloadingCity] : [],
+        unloadingDateFrom: unloadingDate ?? "",
+        carrierName: carrierName ?? "",
+        carrierInn: carrierInn ?? "",
+        carrierContact: carrierContact ?? "",
+      });
       setShipments((prev) => [...prev, shipment]);
       return shipment;
     };
 
+    /** Копия заявки: новая запись с новым номером, статус «Новая», дата — сейчас. */
+    const copyShipment = (sourceId) => {
+      const source = shipments.find((item) => item.id === sourceId);
+      if (!source) return null;
+      const id = nextShipmentId(shipments);
+      const shipment = normalizeShipment({ ...copyOf(source), id, number: shipmentNumber(id) });
+      setShipments((prev) => [...prev, shipment]);
+      return shipment;
+    };
+
+    /** Удаление заявки без возврата (в рабочей CRM — только администратор). */
+    const deleteShipment = (id) => setShipments((prev) => prev.filter((shipment) => shipment.id !== id));
+
+    // Маршрут — производное от городов, поэтому пересобирается при каждой правке.
     const updateShipment = (id, patch) =>
-      setShipments((prev) => prev.map((shipment) => (shipment.id === id ? { ...shipment, ...patch } : shipment)));
+      setShipments((prev) =>
+        prev.map((shipment) => {
+          if (shipment.id !== id) return shipment;
+          const next = { ...shipment, ...patch };
+          return { ...next, route: routeOf(next) };
+        }),
+      );
 
     /**
      * Перенос лида на этап с конкретной позицией.
@@ -406,6 +404,8 @@ export function LeadsProvider({ children }) {
       leadDialog,
       addLead,
       addShipment,
+      copyShipment,
+      deleteShipment,
       updateShipment,
       openLeadDialog,
       closeLeadDialog,

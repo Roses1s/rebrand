@@ -103,7 +103,11 @@ function NavGroup({ items, collapsed }) {
   );
 }
 
-export function Shell({ title, crumb, actions, search, onSearch, children }) {
+/**
+ * `searchSuggestions` — необязательный выпадающий блок под поиском (например,
+ * подсказки сотрудников у администратора, как `BoardSuggestions` в рабочей CRM).
+ */
+export function Shell({ title, crumb, actions, search, onSearch, searchSuggestions, children }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { leads, shipments, leadDialog, addLead, openLeadDialog, closeLeadDialog } = useLeads();
@@ -267,6 +271,7 @@ export function Shell({ title, crumb, actions, search, onSearch, children }) {
               placeholder="Поиск"
               kbd={null}
             />
+            {searchSuggestions}
           </div>
 
           <div className="topbar__actions">
