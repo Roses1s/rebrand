@@ -164,7 +164,7 @@ fieldset:disabled .stars--editable .stars__star {
   margin-top: -2px;
 }
 
-/* Ответственный — кружок 20px с инициалами. */
+/* Ответственный — квадрат 20px с инициалами. */
 .avatar.lead-card__owner {
   flex: none;
   width: 20px;
@@ -922,7 +922,7 @@ fieldset.lead-form:disabled .lead-input:hover {
   white-space: nowrap;
 }
 
-/* Продавец в таблицах заявок — кружок 22px (имя класса историческое). */
+/* Продавец в таблицах заявок — квадрат 22px. */
 .avatar.avatar--square {
   flex: none;
   width: 22px;
@@ -1151,7 +1151,7 @@ fieldset.lead-form:disabled .lead-input:hover {
   display: none;
 }
 
-/* Ответственный на плитке клиента — кружок 20px. */
+/* Ответственный на плитке клиента — квадрат 20px. */
 .avatar.avatar--xs {
   flex: none;
   width: 20px;
