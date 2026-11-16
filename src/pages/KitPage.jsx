@@ -9,6 +9,9 @@ import { Avatar, Chip, Status, Tag } from "../ui/Tag";
 import { Segmented } from "../ui/Segmented";
 import { Empty, Skeleton } from "../ui/States";
 import { Modal } from "../ui/Modal";
+import { StarRating } from "../ui/StarRating";
+import { TagChip } from "../ui/TagChip";
+import { TAGS } from "../mock/data";
 
 const PALETTE = [
   ["Бумага", "--paper"],
@@ -74,6 +77,7 @@ export function KitPage() {
   const [view, setView] = useState("kanban");
   const [density, setDensity] = useState("comfort");
   const [modal, setModal] = useState(false);
+  const [stars, setStars] = useState(2);
   const [search, setSearch] = useState("");
 
   return (
@@ -262,6 +266,58 @@ export function KitPage() {
               <Skeleton width="74%" />
               <Skeleton width="40%" />
             </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Лид: приоритет, теги, ошибки" note="образцы состояний для переноса в рабочую CRM">
+        <div className="kit-grid" style={{ alignItems: "flex-start", gap: 24 }}>
+          <div className="kit-col">
+            <span className="kit-section__note">Приоритет 0–3: клик ставит, повторный клик снимает</span>
+            <StarRating value={stars} onChange={setStars} />
+            <div className="kit-grid">
+              {[0, 1, 2, 3].map((value) => (
+                <StarRating key={value} value={value} size="sm" />
+              ))}
+            </div>
+            <span className="lead-card__error">Карточка уже изменена. Доска обновлена — выберите приоритет ещё раз.</span>
+            <span className="lead-card__error">Не удалось сохранить приоритет.</span>
+          </div>
+          <div className="kit-col">
+            <span className="kit-section__note">Теги: цвет задаёт фон и текст, в тёмной теме — свои оттенки</span>
+            <div className="tag-list">
+              {TAGS.map((tag) => (
+                <TagChip key={tag.id} name={tag.name} color={tag.color} size="md" />
+              ))}
+            </div>
+            <div className="tag-list">
+              {TAGS.map((tag) => (
+                <TagChip key={tag.id} name={tag.name} color={tag.color} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="kit-col" style={{ marginTop: 18, maxWidth: 620 }}>
+          <div className="record-alert record-alert--danger" role="alert">
+            <span>Карточку изменил другой сотрудник, пока вы её редактировали. Ваши правки не сохранены.</span>
+            <button type="button" className="record-alert__action">
+              Загрузить актуальную карточку
+            </button>
+          </div>
+          <div className="record-alert record-alert--warn">
+            Лид проигран. Чтобы менять его данные, сначала восстановите карточку.
+          </div>
+          <div className="lead-form">
+            <label className="lead-field">
+              <span className="lead-field__label">ИНН</span>
+              <input className="lead-input lead-input--error" defaultValue="77010" aria-invalid="true" />
+            </label>
+            <p className="field-error">ИНН должен содержать 10 или 12 цифр.</p>
+          </div>
+          <div className="card card--lost" style={{ padding: "16px 20px", minHeight: 80 }}>
+            <div className="lost-ribbon">Проигрыш</div>
+            <div className="card__title">Клиент</div>
+            <p className="modal-copy">Проигранная карточка: лента в углу, поля только для чтения.</p>
           </div>
         </div>
       </Section>
