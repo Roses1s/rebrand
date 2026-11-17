@@ -692,6 +692,34 @@
   white-space: nowrap;
 }
 
+/* Строка группы по этапу: «● Этап (N)» на фоне шапки таблицы, как в CRM. */
+.leads-table .list-group td {
+  height: auto;
+  padding: 7px 18px;
+  background: var(--surface-2);
+}
+
+.leads-table .list-group td > * {
+  vertical-align: middle;
+}
+
+.leads-table .list-group .bar-row__dot {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.list-group__name {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.list-group__count {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
 .leads-table .cell-company__name {
   display: block;
   max-width: 240px;

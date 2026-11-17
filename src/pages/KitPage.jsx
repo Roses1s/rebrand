@@ -11,6 +11,7 @@ import { Empty, Skeleton } from "../ui/States";
 import { Modal } from "../ui/Modal";
 import { StarRating } from "../ui/StarRating";
 import { TagChip } from "../ui/TagChip";
+import { ShowMore } from "../ui/ShowMore";
 import { TAGS } from "../mock/data";
 
 const PALETTE = [
@@ -318,6 +319,21 @@ export function KitPage() {
             <div className="lost-ribbon">Проигрыш</div>
             <div className="card__title">Клиент</div>
             <p className="modal-copy">Проигранная карточка: лента в углу, поля только для чтения.</p>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Догрузка" note="«Показать ещё» появляется, когда записей больше порции: 20 в колонке, 80 в списке">
+        <div className="kit-grid" style={{ alignItems: "flex-start", gap: 24 }}>
+          <div className="kit-col" style={{ width: 260 }}>
+            <span className="kit-section__note">Внизу колонки доски</span>
+            <button type="button" className="col__more">
+              Показать ещё 20 из 47
+            </button>
+          </div>
+          <div className="kit-col">
+            <span className="kit-section__note">Под списком лидов и заявок</span>
+            <ShowMore shown={80} total={95} step={80} onMore={() => {}} />
           </div>
         </div>
       </Section>

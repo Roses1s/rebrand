@@ -3,6 +3,9 @@
  * KPI считаются по лидам доски; поиск и чипы-фильтры; переключатель «канбан / список»:
  * канбан с перетаскиванием на @dnd-kit, звёздами приоритета и сворачиванием этапов,
  * список с сортировкой и выделением строк (массового удаления нет — как в CRM).
+ * Список, как в CRM, всегда разбит на группы по этапам; группы идут в порядке
+ * строк после сортировки. Длинные колонки и список догружаются кнопкой
+ * «Показать ещё N из M» порциями CRM: 20 карточек в колонке, 80 строк в списке.
  * Администратор может открыть доску сотрудника (`?board=<id>`), как в рабочей CRM.
  * Проигранные лиды на доске и в списке не показываются.
  */
@@ -51,6 +54,7 @@ import { Avatar, Chip } from "../ui/Tag";
 import { StarRating } from "../ui/StarRating";
 import { TagList } from "../ui/TagChip";
 import { EmployeeSuggestions } from "../ui/EmployeeSuggestions";
+import { ShowMore } from "../ui/ShowMore";
 import { ME, OWNER, TASKS, TEAM } from "../mock/data";
 import { shortMoney } from "../lib/format";
 import { leadShipmentMargin } from "../lib/margin";
@@ -150,9 +154,28 @@ function FoldedColumn({ stage, count, onUnfold }) {
   );
 }
 
-function StageColumn({ stage, stageLeads, shipments, tags, dragging, dropIndex, onAdd, onFold, onPriority, canEditStages }) {
+/** Порции догрузки, как в рабочей CRM (KANBAN_PAGE_SIZE и LEAD_PAGE_SIZE). */
+export const COLUMN_PAGE = 20;
+export const LIST_PAGE = 80;
+
+function StageColumn({
+  stage,
+  stageLeads,
+  limit,
+  onMore,
+  shipments,
+  tags,
+  dragging,
+  dropIndex,
+  onAdd,
+  onFold,
+  onPriority,
+  canEditStages,
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: `stage-${stage.id}`, data: { stageId: stage.id } });
+  // Счётчик и маржа в шапке — по всему этапу, карточки — первые `limit`.
   const sum = sumMarginsOf(stageLeads, shipments);
+  const shown = stageLeads.slice(0, limit);
   // В пустой колонке подсказкой служит слот, линия там лишняя.
   const showLine = dragging && dropIndex != null && stageLeads.length > 0;
 
@@ -200,16 +223,22 @@ function StageColumn({ stage, stageLeads, shipments, tags, dragging, dropIndex, 
       <div className="col__rule" style={{ "--col-color": stage.color }} />
 
       <div className={`col__cards${isOver ? " is-over" : ""}`}>
-        <SortableContext items={stageLeads.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
-          {stageLeads.map((lead, index) => (
+        <SortableContext items={shown.map((lead) => lead.id)} strategy={verticalListSortingStrategy}>
+          {shown.map((lead, index) => (
             <Fragment key={lead.id}>
               {showLine && dropIndex === index && <div className="drop-line" aria-hidden="true" />}
               <SortableLead lead={lead} shipments={shipments} tags={tags} onPriority={(value) => onPriority(lead.id, value)} />
             </Fragment>
           ))}
 
-          {showLine && dropIndex >= stageLeads.length && <div className="drop-line" aria-hidden="true" />}
+          {showLine && dropIndex >= shown.length && <div className="drop-line" aria-hidden="true" />}
         </SortableContext>
+
+        {stageLeads.length > shown.length && (
+          <button type="button" className="col__more" onClick={onMore}>
+            Показать ещё {Math.min(COLUMN_PAGE, stageLeads.length - shown.length)} из {stageLeads.length}
+          </button>
+        )}
 
         {stageLeads.length === 0 &&
           (dragging && dropIndex != null ? (
@@ -270,6 +299,9 @@ export function FunnelPage() {
   });
   const [sort, setSort] = useState({ key: "stage", dir: "asc" });
   const [selected, setSelected] = useState([]);
+  // Сколько карточек показано в колонке (по id этапа) и строк в списке.
+  const [colLimits, setColLimits] = useState({});
+  const [listLimit, setListLimit] = useState(LIST_PAGE);
   const [activeId, setActiveId] = useState(null);
   const [activeWidth, setActiveWidth] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
@@ -436,6 +468,12 @@ export function FunnelPage() {
     [filter, query],
   );
 
+  // Новый отбор — догрузка начинается заново, как новый запрос в CRM.
+  useEffect(() => {
+    setColLimits({});
+    setListLimit(LIST_PAGE);
+  }, [filter, query, boardOwnerId]);
+
   const listRows = useMemo(() => {
     const rows = myLeads.filter(visible);
     const dir = sort.dir === "asc" ? 1 : -1;
@@ -459,7 +497,20 @@ export function FunnelPage() {
     });
   }, [myLeads, shipments, stages, sort, visible]);
 
-  const allSelected = listRows.length > 0 && listRows.every((lead) => selected.includes(lead.id));
+  const listShown = useMemo(() => listRows.slice(0, listLimit), [listRows, listLimit]);
+
+  // Группы по этапу в порядке первых строк после сортировки — как LeadListView в CRM.
+  const listGroups = useMemo(() => {
+    const groups = new Map();
+    for (const lead of listShown) {
+      const group = groups.get(lead.stageId);
+      if (group) group.items.push(lead);
+      else groups.set(lead.stageId, { stage: stages.find((item) => item.id === lead.stageId), items: [lead] });
+    }
+    return [...groups.entries()].map(([key, group]) => ({ key, ...group }));
+  }, [listShown, stages]);
+
+  const allSelected = listShown.length > 0 && listShown.every((lead) => selected.includes(lead.id));
   const someSelected = selected.length > 0 && !allSelected;
 
   useEffect(() => {
@@ -471,7 +522,7 @@ export function FunnelPage() {
   }
 
   function toggleAll() {
-    setSelected(allSelected ? [] : listRows.map((lead) => lead.id));
+    setSelected(allSelected ? [] : listShown.map((lead) => lead.id));
   }
 
   function openBoard(userId) {
@@ -643,6 +694,10 @@ export function FunnelPage() {
                   dragging={activeId != null}
                   tags={tags}
                   stageLeads={stageLeads}
+                  limit={colLimits[stage.id] ?? COLUMN_PAGE}
+                  onMore={() =>
+                    setColLimits((prev) => ({ ...prev, [stage.id]: (prev[stage.id] ?? COLUMN_PAGE) + COLUMN_PAGE }))
+                  }
                   dropIndex={dropIndex}
                   onAdd={() => openLeadDialog(stage.id, boardOwnerId)}
                   onFold={() => toggleFold(stage.id)}
@@ -740,77 +795,95 @@ export function FunnelPage() {
                 </tr>
               </thead>
               <tbody>
-                {listRows.map((lead) => {
-                  const stage = stages.find((item) => item.id === lead.stageId) ?? stages[0];
-                  const isSelected = selected.includes(lead.id);
-                  return (
-                    <tr
-                      key={lead.id}
-                      className={isSelected ? "is-selected" : undefined}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => navigate(`/crm/leads/${lead.id}`)}
-                    >
-                      <td style={{ paddingRight: 0 }} onClick={(event) => event.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          className="row-check"
-                          checked={isSelected}
-                          onChange={() => toggleSelect(lead.id)}
-                          aria-label={`Выбрать ${lead.name}`}
-                        />
-                      </td>
-                      <td>
-                        <div className="cell-company">
-                          <span className="cell-logo">
-                            {lead.hot ? (
-                              <Flame size={16} strokeWidth={2} style={{ color: "var(--warn)" }} />
-                            ) : (
-                              <Package size={16} strokeWidth={1.8} />
-                            )}
-                          </span>
-                          <div style={{ minWidth: 0 }}>
-                            <Link
-                              to={`/crm/leads/${lead.id}`}
-                              className="cell-company__name"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              {lead.name}
-                            </Link>
-                            <div className="cell-company__sub">
-                              {lead.city} · ИНН {lead.inn}
-                            </div>
-                            <TagList ids={lead.tagIds} tags={tags} />
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="cell-main">{lead.contact}</div>
-                        <div className="cell-sub">{lead.phone}</div>
-                      </td>
-                      <td>
-                        <span className="stage-cell">
-                          <span className="bar-row__dot" style={{ background: stage?.color ?? "var(--ink-3)" }} />
-                          {stage?.name ?? "Без этапа"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="cell-main">{lead.route}</div>
-                        <div className="cell-sub">
-                          {lead.cargo} · {lead.weight}
-                        </div>
-                      </td>
-                      <td>
-                        <StarRating value={lead.priority} onChange={(value) => setPriority(lead.id, value)} size="sm" />
-                      </td>
-                      <td className="cell-money">{shortMoney(marginOf(lead, shipments))}</td>
-                      <td>
-                        <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
+                {listGroups.map((group) => (
+                  <Fragment key={group.key}>
+                    <tr className="list-group">
+                      <td colSpan={8}>
+                        <span className="bar-row__dot" style={{ background: group.stage?.color ?? "var(--ink-3)" }} />
+                        <span className="list-group__name">{group.stage?.name ?? "Без этапа"}</span>
+                        <span className="list-group__count">({group.items.length})</span>
                       </td>
                     </tr>
-                  );
-                })}
+                    {group.items.map((lead) => {
+                      const stage = group.stage;
+                      const isSelected = selected.includes(lead.id);
+                      return (
+                        <tr
+                          key={lead.id}
+                          className={isSelected ? "is-selected" : undefined}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => navigate(`/crm/leads/${lead.id}`)}
+                        >
+                          <td style={{ paddingRight: 0 }} onClick={(event) => event.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="row-check"
+                              checked={isSelected}
+                              onChange={() => toggleSelect(lead.id)}
+                              aria-label={`Выбрать ${lead.name}`}
+                            />
+                          </td>
+                          <td>
+                            <div className="cell-company">
+                              <span className="cell-logo">
+                                {lead.hot ? (
+                                  <Flame size={16} strokeWidth={2} style={{ color: "var(--warn)" }} />
+                                ) : (
+                                  <Package size={16} strokeWidth={1.8} />
+                                )}
+                              </span>
+                              <div style={{ minWidth: 0 }}>
+                                <Link
+                                  to={`/crm/leads/${lead.id}`}
+                                  className="cell-company__name"
+                                  onClick={(event) => event.stopPropagation()}
+                                >
+                                  {lead.name}
+                                </Link>
+                                <div className="cell-company__sub">
+                                  {lead.city} · ИНН {lead.inn}
+                                </div>
+                                <TagList ids={lead.tagIds} tags={tags} />
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="cell-main">{lead.contact}</div>
+                            <div className="cell-sub">{lead.phone}</div>
+                          </td>
+                          <td>
+                            <span className="stage-cell">
+                              <span className="bar-row__dot" style={{ background: stage?.color ?? "var(--ink-3)" }} />
+                              {stage?.name ?? "Без этапа"}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="cell-main">{lead.route}</div>
+                            <div className="cell-sub">
+                              {lead.cargo} · {lead.weight}
+                            </div>
+                          </td>
+                          <td>
+                            <StarRating value={lead.priority} onChange={(value) => setPriority(lead.id, value)} size="sm" />
+                          </td>
+                          <td className="cell-money">{shortMoney(marginOf(lead, shipments))}</td>
+                          <td>
+                            <span className={`due${lead.late ? " due--late" : ""}`}>{lead.due}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
+                ))}
               </tbody>
             </table>
+
+            <ShowMore
+              shown={listShown.length}
+              total={listRows.length}
+              step={LIST_PAGE}
+              onMore={() => setListLimit((n) => n + LIST_PAGE)}
+            />
 
             {listRows.length === 0 && (
               <div className="empty">
@@ -825,7 +898,7 @@ export function FunnelPage() {
 
           <div className="table-foot">
             <span>
-              Показано {listRows.length} из {myLeads.length}
+              Показано {listShown.length} из {myLeads.length}
             </span>
             {listRows.length !== myLeads.length && (
               <span className="muted">Скрыто фильтром: {myLeads.length - listRows.length}</span>

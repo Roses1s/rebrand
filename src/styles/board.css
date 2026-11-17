@@ -412,6 +412,28 @@
   color: var(--accent);
 }
 
+/* Догрузка карточек внизу колонки — «Показать ещё N из M», как в рабочей
+   CRM: пунктирная рамка, приглушённый текст. */
+.col__more {
+  flex: none;
+  padding: 7px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition:
+    background-color 140ms var(--ease),
+    color 140ms var(--ease);
+}
+
+.col__more:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
 /* --- Воронка во всю высоту экрана ---------------------------------------
    Доска растягивается до низа окна: горизонтальная прокрутка стоит внизу
    страницы, а не сразу под карточками. Колонки при этом тоже тянутся —
